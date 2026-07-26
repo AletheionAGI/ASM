@@ -8,6 +8,15 @@ Objetivo: validar a correcao causal do Anderson blockwise e comparar contra GPT-
 
 A auditoria identificou que o `anderson_solve` global anterior calculava coeficientes a partir do residual da trajetoria inteira. Isso permitia que estados de prefixo dependessem de tokens futuros, quebrando a propriedade autoregressiva esperada para language modeling.
 
+O protocolo de comparacao foi posteriormente ampliado para "time-to-quality", seguindo o precedente metodologico de DAWNBench/MLPerf Training: medir tempo de relogio ate uma qualidade alvo, em vez de avaliar CE e throughput como numeros isolados. Este repositorio nao reivindica conformidade com DAWNBench ou MLPerf; a referencia e apenas ao criterio experimental.
+
+Referencias:
+
+```text
+DAWNBench: https://dawn.cs.stanford.edu/dawnbench
+MLPerf Training: https://mlperf.pw/benchmarks/training/index.html
+```
+
 A correcao implementada separou dois solvers:
 
 ```text

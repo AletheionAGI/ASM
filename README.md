@@ -194,7 +194,7 @@ Latest local seed-1 result:
 | DRM causal Anderson b8 | 20,004,864 | 1.8295 | yes | 2,947.9s |
 | GPT-2 36M | 22,005,760 | 2.0715 | no | >701.1s |
 
-The target was `best_val_ce_DRM + 0.01 = 1.8395`. GPT-2 was required to train beyond the DRM token floor before plateau stopping was accepted. This is a single-seed diagnostic result, not a final general claim; multi-seed and larger-scale confirmation are still required.
+This protocol follows the same general idea as DAWNBench/MLPerf Training-style time-to-accuracy measurement: compare wall-clock time to a target quality, not quality and throughput as disconnected numbers. This is not a DAWNBench or MLPerf submission. The target here was `best_val_ce_DRM + 0.01 = 1.8395`. GPT-2 was required to train beyond the DRM token floor before plateau stopping was accepted. This is a single-seed diagnostic result, not a final general claim; multi-seed and larger-scale confirmation are still required.
 
 Run the controller:
 

@@ -4,6 +4,19 @@ Data: 2026-07-26
 Origem dos artefatos: `runs\compare_10m_seed1`  
 Escopo: seed 1, DRM causal Anderson b8 vs GPT-2 36M.
 
+## Precedente Metodologico
+
+Este benchmark usa a mesma ideia geral de "time-to-accuracy" popularizada por DAWNBench e depois consolidada em benchmarks de treinamento como MLPerf Training: medir tempo de relogio ate uma qualidade alvo, em vez de comparar apenas acuracia/CE ou apenas throughput.
+
+Referencias:
+
+```text
+DAWNBench: https://dawn.cs.stanford.edu/dawnbench
+MLPerf Training: https://mlperf.pw/benchmarks/training/index.html
+```
+
+Este nao e um resultado DAWNBench ou MLPerf, nem segue as regras oficiais dessas suites. O uso aqui e metodologico: adaptar a pergunta "tempo ate qualidade alvo" para comparar DRM e GPT-2 neste repositorio.
+
 ## Protocolo
 
 ```text
@@ -70,4 +83,3 @@ seconds_to_target_by_seed.svg
 ```
 
 Observacao: este diretorio contem apenas artefatos leves de analise. Checkpoints e pesos permanecem em `runs\compare_10m_seed1` e nao foram copiados.
-
