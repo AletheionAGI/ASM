@@ -187,19 +187,19 @@ Versioned dashboard:
 docs/benchmarks/tta/dashboard.html
 ```
 
-Latest local seed-1 result:
+Latest versioned 3-seed result:
 
-| Model | Tokens Seen | Best Val CE | Target Reached | Time To Target |
-|---|---:|---:|---:|---:|
-| DRM causal Anderson b8 | 20,004,864 | 1.8295 | yes | 2,947.9s |
-| GPT-2 36M | 22,005,760 | 2.0715 | no | >701.1s |
+| Model | Seeds | Best Val CE Mean | Best Val CE Std | Target Reached | Tokens To Target Median | Time To Target Median |
+|---|---:|---:|---:|---:|---:|---:|
+| DRM causal Anderson b8 | 3 | 1.8349 | 0.0039 | 3/3 | 17,000,448 | 2,947.9s |
+| GPT-2 36M | 3 | 2.0664 | 0.0142 | 0/3 | n/a | >807.9s mean censored |
 
-This protocol follows the same general idea as DAWNBench/MLPerf Training-style time-to-accuracy measurement: compare wall-clock time to a target quality, not quality and throughput as disconnected numbers. This is not a DAWNBench or MLPerf submission. The target here was `best_val_ce_DRM + 0.01 = 1.8395`. GPT-2 was required to train beyond the DRM token floor before plateau stopping was accepted. This is a single-seed diagnostic result, not a final general claim; multi-seed and larger-scale confirmation are still required.
+This protocol follows the same general idea as DAWNBench/MLPerf Training-style time-to-accuracy measurement: compare wall-clock time to a target quality, not quality and throughput as disconnected numbers. This is not a DAWNBench or MLPerf submission. The target here was `best_val_ce_DRM + 0.01 = 1.8449`, computed from the 3-seed DRM result. GPT-2 was required to train beyond the DRM token floor before plateau stopping was accepted. This is a 37M-parameter, 20M-24M-token diagnostic result, not a general claim that DRM outperforms Transformers.
 
 Run the controller:
 
 ```powershell
-.\scripts\run_time_to_quality.ps1 -Seeds 1
+.\scripts\run_tta_multiseed_confirmation.ps1 -OutputRoot "runs\compare_10m_seed1" -Seeds 1,2,3
 ```
 
 ### DRM vs Transformer
@@ -312,13 +312,13 @@ Allowed claims:
 - Its geometry is explicit, measurable, and trainable in small experiments.
 - The repository includes controlled tiny comparisons against Transformer and a tiny symbolic world model.
 - The repository includes an experimental causal blockwise trajectory solver using prefix cumsum and causal Anderson refinement.
-- In one seed-1 time-to-quality run, DRM causal Anderson b8 reached a CE target that GPT-2 36M did not reach before plateau under the tested token floor.
+- In a 3-seed time-to-quality run at ~37M parameters, DRM causal Anderson b8 reached the target CE in 3/3 seeds, while GPT-2 36M reached it in 0/3 seeds before plateau under the tested token floor.
 
 Not allowed:
 
 - DRM is better than Transformers in general.
 - DRM is better than world models in general.
-- The seed-1 time-to-quality result is definitive across seeds, scales, or datasets.
+- The 3-seed time-to-quality result is definitive across larger scales, datasets, tokenizer regimes, or production workloads.
 - The model has proven emergent geodesics.
 - The model has proven toroidal topology.
 - The model is production-ready or safety-evaluated.
@@ -328,7 +328,7 @@ Not allowed:
 - The default recurrent path is slow compared with optimized Transformer kernels.
 - The experimental blockwise causal Anderson path removes the strict token-by-token Python loop inside blocks, but its solver is still much slower than GPT-2 kernels in current benchmarks.
 - Benchmarks are tiny and diagnostic.
-- The strongest time-to-quality result currently versioned is single-seed and needs multi-seed confirmation.
+- The strongest time-to-quality result currently versioned is 3-seed at ~37M parameters and still needs larger-token and larger-parameter confirmation.
 - Low-action path evaluation is not a formal geodesic solver.
 - Symbolic world-modeling exact match is still low.
 - No large-scale benchmark, RLHF, alignment evaluation, or safety validation is included.
@@ -339,7 +339,7 @@ Not allowed:
 - Add stronger trajectory integrators and variational path objectives.
 - Improve constrained symbolic decoding for the world benchmark.
 - Add time-matched CUDA comparisons.
-- Add multi-seed time-to-quality comparisons and larger-token continuations.
+- Add larger-token and larger-parameter time-to-quality continuations.
 - Broaden ablations around metric, gates, and active dimension.
 - Study pullback/Fisher-style metrics as future work.
 

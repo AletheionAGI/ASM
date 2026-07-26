@@ -2,7 +2,7 @@
 
 Data: 2026-07-26  
 Origem dos artefatos: `runs\compare_10m_seed1`  
-Escopo: seed 1, DRM causal Anderson b8 vs GPT-2 36M.
+Escopo: 3 seeds, DRM causal Anderson b8 vs GPT-2 36M.
 
 ## Precedente Metodologico
 
@@ -28,7 +28,7 @@ precision: bf16
 device: cuda
 eval_tokens_interval: 1,000,000
 eval_batches: 8
-seed: 1
+seeds: 1, 2, 3
 ```
 
 DRM:
@@ -55,17 +55,30 @@ model_size: gpt2_125m
 O alvo time-to-quality foi definido como:
 
 ```text
-TargetCe = best_val_ce_DRM + 0.01 = 1.83948632538319
+TargetCe = best_val_ce_DRM + 0.01 = 1.84488347133001
 ```
 
 Resumo:
 
-| Modelo | Tokens vistos | Best val CE | Atingiu alvo | Tempo ate alvo |
-|---|---:|---:|---:|---:|
-| DRM causal Anderson b8 | 20,004,864 | 1.8295 | sim | 2,947.9s |
-| GPT-2 36M | 22,005,760 | 2.0715 | nao | >701.1s |
+| Modelo | Seeds | Best val CE medio | Std | Atingiu alvo | Tokens ate alvo mediano | Tempo ate alvo mediano |
+|---|---:|---:|---:|---:|---:|---:|
+| DRM causal Anderson b8 | 3 | 1.8349 | 0.0039 | 3/3 | 17,000,448 | 2,947.9s |
+| GPT-2 36M | 3 | 2.0664 | 0.0142 | 0/3 | n/a | >807.9s medio censurado |
 
-GPT-2 rodou alem do piso de tokens do DRM antes de parar por plateau, conforme o criterio do benchmark.
+GPT-2 rodou ate pelo menos o piso de tokens do DRM antes de parar por plateau, conforme o criterio do benchmark. Em seed 3, rodou alem do piso ate 24,006,656 tokens. Nenhuma seed GPT-2 atingiu o alvo `1.84488347133001`.
+
+Detalhe por seed:
+
+| Modelo | Seed | Tokens vistos | Best val CE | Atingiu alvo | Tempo ate alvo |
+|---|---:|---:|---:|---:|---:|
+| DRM causal Anderson b8 | 1 | 20,004,864 | 1.8295 | sim | 2,947.9s |
+| DRM causal Anderson b8 | 2 | 20,004,864 | 1.8368 | sim | 5,273.9s |
+| DRM causal Anderson b8 | 3 | 20,004,864 | 1.8383 | sim | 2,896.1s |
+| GPT-2 36M | 1 | 22,005,760 | 2.0715 | nao | censurado |
+| GPT-2 36M | 2 | 20,004,864 | 2.0807 | nao | censurado |
+| GPT-2 36M | 3 | 24,006,656 | 2.0471 | nao | censurado |
+
+Interpretacao curta: este e um sinal multi-seed de qualidade ate alvo em escala pequena. Ele nao demonstra superioridade geral sobre Transformers; demonstra que, neste protocolo controlado, DRM atingiu o alvo em 3/3 seeds e GPT-2 em 0/3.
 
 ## Artefatos
 
