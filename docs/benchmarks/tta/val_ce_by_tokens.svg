@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620">
+<rect width="100%" height="100%" fill="white"/>
+<text x="74" y="34" font-size="22" font-family="Arial" font-weight="700" fill="#111827">Validation CE By Tokens</text>
+<text x="74" y="56" font-size="13" font-family="Arial" fill="#4b5563">x-axis: million tokens. Lower CE is better.</text>
+<line x1="74" y1="546" x2="1026" y2="546" stroke="#111827"/>
+<line x1="74" y1="74" x2="74" y2="546" stroke="#111827"/>
+<polyline points='117.3,287.8 160.6,360.4 203.8,380.0 247.1,382.4 290.4,417.8 333.7,431.3 376.9,430.2 420.2,420.4 463.5,427.8 506.7,452.3 550.0,465.1 593.3,464.7 636.6,471.0 679.8,488.5 723.1,460.6 766.3,459.1 809.6,500.3 852.9,490.5 896.2,491.7 939.5,499.2' fill='none' stroke='#0f766e' stroke-width='3'/><line x1='800' y1='90' x2='840' y2='90' stroke='#0f766e' stroke-width='3'/><text x='850' y='94' font-size='12'>drm_seed_1</text><polyline points='117.3,119.7 160.6,179.3 203.8,227.1 247.1,254.3 290.4,288.3 333.7,307.9 376.9,326.1 420.2,341.2 463.5,350.5 506.7,360.4 550.0,366.3 593.3,375.2 636.6,377.8 679.8,383.2 723.1,385.8 766.3,390.5 809.6,393.6 852.9,399.6 896.2,399.7 939.5,402.2 982.7,408.7 1026.0,408.9' fill='none' stroke='#14b8a6' stroke-width='3'/><line x1='800' y1='111' x2='840' y2='111' stroke='#14b8a6' stroke-width='3'/><text x='850' y='115' font-size='12'>gpt2_seed_1</text><line x1='74' y1='496.5' x2='1026' y2='496.5' stroke='#111827' stroke-width='2' stroke-dasharray='8 6'/><text x='82' y='488.5' font-size='12'>target CE 1.8395</text>
+</svg>

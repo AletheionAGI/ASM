@@ -88,7 +88,11 @@ def load_checkpoint(
     optimizer.load_state_dict(payload["optimizer"])
     torch.set_rng_state(payload["torch_rng_state"].cpu())
     if device.type == "cuda" and payload.get("cuda_rng_state_all") is not None:
-        torch.cuda.set_rng_state_all(payload["cuda_rng_state_all"])
+        cuda_rng_state_all = [
+            state.detach().cpu().to(dtype=torch.uint8)
+            for state in payload["cuda_rng_state_all"]
+        ]
+        torch.cuda.set_rng_state_all(cuda_rng_state_all)
     return int(payload["step"]), int(payload["tokens_seen"]), float(payload.get("best_val_ce", math.inf))
 
 
@@ -152,6 +156,30 @@ def main() -> None:
     parser.add_argument("--resume", default="", help="Path to checkpoint, or 'latest'.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--dry-run-forward", action="store_true")
+    parser.add_argument(
+        "--sequence-mode",
+        choices=["local_step", "geodesic_step", "directional_candidates", "directional_cumsum", "directional_block_cumsum"],
+        default=None,
+    )
+    parser.add_argument("--geodesic-solver-steps", type=int, default=None)
+    parser.add_argument("--geodesic-lr", type=float, default=None)
+    parser.add_argument("--geodesic-anchor-weight", type=float, default=None)
+    parser.add_argument("--geodesic-metric-weight", type=float, default=None)
+    parser.add_argument("--geodesic-risk-weight", type=float, default=None)
+    parser.add_argument("--directional-candidate-temperature", type=float, default=None)
+    parser.add_argument("--directional-candidate-scale", type=float, default=None)
+    parser.add_argument("--directional-cumsum-block-size", type=int, default=None)
+    parser.add_argument("--directional-endpoint-correction-weight", type=float, default=None)
+    parser.add_argument("--directional-endpoint-correction-power", type=float, default=None)
+    parser.add_argument("--directional-cumsum-inner-block-size", type=int, default=None)
+    parser.add_argument("--directional-anderson-iterations", type=int, default=None)
+    parser.add_argument("--directional-anderson-history-size", type=int, default=None)
+    parser.add_argument("--directional-anderson-ridge", type=float, default=None)
+    parser.add_argument("--directional-anderson-relaxation", type=float, default=None)
+    parser.add_argument("--directional-fixed-point-iterations", type=int, default=None)
+    parser.add_argument("--directional-fixed-point-relaxation", type=float, default=None)
+    parser.add_argument("--lambda-block-consistency", type=float, default=None)
+    parser.add_argument("--block-consistency-weight", type=float, default=None)
     args = parser.parse_args()
 
     ddp, rank, local_rank, world_size = distributed_state()
@@ -164,6 +192,47 @@ def main() -> None:
     config = DRMConfig.from_dict(load_yaml_or_json(args.config))
     config.max_seq_len = args.seq_len
     config.vocab_size = 256
+    if args.sequence_mode is not None:
+        config.sequence_mode = args.sequence_mode
+    if args.geodesic_solver_steps is not None:
+        config.geodesic_solver_steps = args.geodesic_solver_steps
+    if args.geodesic_lr is not None:
+        config.geodesic_lr = args.geodesic_lr
+    if args.geodesic_anchor_weight is not None:
+        config.geodesic_anchor_weight = args.geodesic_anchor_weight
+    if args.geodesic_metric_weight is not None:
+        config.geodesic_metric_weight = args.geodesic_metric_weight
+    if args.geodesic_risk_weight is not None:
+        config.geodesic_risk_weight = args.geodesic_risk_weight
+    if args.directional_candidate_temperature is not None:
+        config.directional_candidate_temperature = args.directional_candidate_temperature
+    if args.directional_candidate_scale is not None:
+        config.directional_candidate_scale = args.directional_candidate_scale
+    if args.directional_cumsum_block_size is not None:
+        config.directional_cumsum_block_size = args.directional_cumsum_block_size
+    if args.directional_endpoint_correction_weight is not None:
+        config.directional_endpoint_correction_weight = args.directional_endpoint_correction_weight
+    if args.directional_endpoint_correction_power is not None:
+        config.directional_endpoint_correction_power = args.directional_endpoint_correction_power
+    if args.directional_cumsum_inner_block_size is not None:
+        config.directional_cumsum_inner_block_size = args.directional_cumsum_inner_block_size
+    if args.directional_anderson_iterations is not None:
+        config.directional_anderson_iterations = args.directional_anderson_iterations
+    if args.directional_anderson_history_size is not None:
+        config.directional_anderson_history_size = args.directional_anderson_history_size
+    if args.directional_anderson_ridge is not None:
+        config.directional_anderson_ridge = args.directional_anderson_ridge
+    if args.directional_anderson_relaxation is not None:
+        config.directional_anderson_relaxation = args.directional_anderson_relaxation
+    if args.directional_fixed_point_iterations is not None:
+        config.directional_fixed_point_iterations = args.directional_fixed_point_iterations
+    if args.directional_fixed_point_relaxation is not None:
+        config.directional_fixed_point_relaxation = args.directional_fixed_point_relaxation
+    if args.lambda_block_consistency is not None:
+        config.lambda_block_consistency = args.lambda_block_consistency
+    if args.block_consistency_weight is not None:
+        config.block_consistency_weight = args.block_consistency_weight
+    config._validate()
     model = DRMEmitterModel(config).to(device)
     parameter_count = count_parameters(model)
 
@@ -226,6 +295,7 @@ def main() -> None:
     history: list[dict[str, Any]] = []
     started = time.perf_counter()
     optimizer.zero_grad(set_to_none=True)
+    step = start_step
 
     for step in range(start_step + 1, final_step + 1):
         step_loss = 0.0
