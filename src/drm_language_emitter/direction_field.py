@@ -14,7 +14,7 @@ class DirectionField(nn.Module):
         super().__init__()
         self.config = config
         h = config.hidden_size
-        self.trunk = nn.Sequential(
+        self.trunk = None if config.use_shared_geometry_trunk else nn.Sequential(
             nn.Linear(config.d_state, h),
             nn.GELU(),
             nn.Dropout(config.dropout),
@@ -31,18 +31,21 @@ class DirectionField(nn.Module):
             self.direction_head = nn.Linear(h, config.n_directions * config.d_state)
         self.gate_head = nn.Linear(h, config.n_directions)
 
-    def forward(self, z: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        h = self.trunk(z)
+    def forward(self, z: torch.Tensor, hidden: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
+        if hidden is None:
+            if self.trunk is None:
+                raise ValueError("DirectionField requires shared geometry hidden when use_shared_geometry_trunk=True")
+            hidden = self.trunk(z)
         if self.direction_basis is not None:
-            coefficients = self.direction_head(h).view(z.shape[0], self.config.n_directions, self.direction_basis_size)
+            coefficients = self.direction_head(hidden).view(z.shape[0], self.config.n_directions, self.direction_basis_size)
             directions = torch.matmul(coefficients, self.direction_basis)
         else:
-            directions = self.direction_head(h).view(
+            directions = self.direction_head(hidden).view(
                 z.shape[0], self.config.n_directions, self.config.d_state
             )
         if self.config.direction_norm:
             directions = F.normalize(directions, dim=-1)
-        logits = self.gate_head(h) + self.config.gate_logit_bias
+        logits = self.gate_head(hidden) + self.config.gate_logit_bias
         gates = torch.sigmoid(logits / max(self.config.gate_temperature, 1e-6))
         if self.config.gate_top_k and 0 < self.config.gate_top_k < gates.shape[-1]:
             values, indices = torch.topk(gates, self.config.gate_top_k, dim=-1)

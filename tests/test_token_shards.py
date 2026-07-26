@@ -55,3 +55,21 @@ def test_memmap_token_dataset_reads_windows_across_shards(tmp_path: Path) -> Non
 
     assert x.tolist() == list(b"ghijk")
     assert y.tolist() == list(b"hijkl")
+
+
+def test_memmap_token_dataset_make_batch_cpu_can_move_to_device(tmp_path: Path) -> None:
+    source = tmp_path / "corpus.txt"
+    source.write_text("abcdefghijklmnopqrstuvwxyz", encoding="utf-8")
+    tokenize_corpus_to_uint8(inputs=[source], output_dir=tmp_path / "tokens", shard_bytes=8, val_bytes=2)
+
+    with MemmapTokenDataset(tmp_path / "tokens" / "manifest.json", split="train") as dataset:
+        x_cpu, y_cpu = dataset.make_batch_cpu(
+            batch_size=2,
+            seq_len=5,
+            generator=torch.Generator().manual_seed(11),
+        )
+        x, y = MemmapTokenDataset.move_batch_to_device(x_cpu, y_cpu, torch.device("cpu"))
+
+    assert x.shape == (2, 5)
+    assert y.shape == (2, 5)
+    assert torch.equal(x[:, 1:], y[:, :-1])

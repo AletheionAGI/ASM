@@ -84,3 +84,64 @@ def test_bptt_truncate_interval_keeps_backward_finite():
     grads = [p.grad for p in model.parameters() if p.grad is not None]
     assert grads
     assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_aux_loss_interval_keeps_backward_finite():
+    config = tiny_config()
+    config.aux_loss_interval = 3
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, collect_diagnostics=False)
+    out["loss"].backward()
+    assert out["logits"].shape == (2, 6, 17)
+    assert torch.isfinite(out["loss"])
+
+
+def test_naturalization_interval_keeps_forward_finite():
+    config = tiny_config()
+    config.naturalization_interval = 2
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, collect_diagnostics=False)
+    assert out["logits"].shape == (2, 6, 17)
+    assert torch.isfinite(out["loss"])
+
+
+def test_forward_chunk_size_keeps_forward_finite():
+    config = tiny_config()
+    config.forward_chunk_size = 2
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, collect_diagnostics=False)
+    assert out["logits"].shape == (2, 6, 17)
+    assert torch.isfinite(out["loss"])
+
+
+def test_shared_geometry_trunk_keeps_forward_finite():
+    config = tiny_config()
+    config.use_shared_geometry_trunk = True
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, collect_diagnostics=False)
+    assert out["logits"].shape == (2, 6, 17)
+    assert torch.isfinite(out["loss"])
+
+
+def test_compiled_step_failure_falls_back_to_eager():
+    config = tiny_config()
+    config.compile_drm_step = True
+    model = DRMEmitterModel(config)
+
+    def broken_step(*args, **kwargs):
+        raise RuntimeError("compile backend unavailable")
+
+    model._compiled_step = broken_step
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, collect_diagnostics=False)
+    assert out["logits"].shape == (2, 6, 17)
+    assert model._compiled_step is None

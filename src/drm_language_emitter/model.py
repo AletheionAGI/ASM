@@ -32,24 +32,114 @@ class DRMStateInitializer(nn.Module):
         return self.z0.unsqueeze(0).expand(batch_size, -1).to(device)
 
 
+class GeometryEncoder(nn.Module):
+    def __init__(self, config: DRMConfig):
+        super().__init__()
+        h = config.hidden_size
+        self.net = nn.Sequential(
+            nn.Linear(config.d_state, h),
+            nn.GELU(),
+            nn.Dropout(config.dropout),
+            nn.Linear(h, h),
+            nn.GELU(),
+        )
+
+    def forward(self, z: torch.Tensor) -> torch.Tensor:
+        return self.net(z)
+
+
 class DRMEmitterModel(nn.Module):
     def __init__(self, config: DRMConfig):
         super().__init__()
         self.config = config
         self.token_embedding = TokenEmbedding(config)
         self.initializer = DRMStateInitializer(config)
+        self.geometry_encoder = GeometryEncoder(config) if config.use_shared_geometry_trunk else None
         self.direction_field = DirectionField(config)
         self.metric = RelationalMetric(config)
         self.flow = DRMFlow(config)
         self.updater = StateUpdater(config)
         self.risk = RiskField(config)
         self.emitter = LanguageEmitter(config)
+        self._compiled_step = None
+        if config.compile_drm_step and hasattr(torch, "compile"):
+            try:
+                self._compiled_step = torch.compile(self._drm_step)
+            except Exception:
+                self._compiled_step = None
         self._compiled_forward = None
         if config.use_torch_compile and hasattr(torch, "compile"):
             try:
                 self._compiled_forward = torch.compile(self._forward_impl)
             except Exception:
                 self._compiled_forward = None
+
+    def _geometry(self, z: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, dict[str, torch.Tensor]]:
+        hidden = self.geometry_encoder(z) if self.geometry_encoder is not None else None
+        directions, gates = self.direction_field(z, hidden)
+        metric_diag, metric_u = self.metric(z, hidden)
+        risk = self.risk(z)
+        return directions, gates, metric_diag, metric_u, risk
+
+    def _drm_step(
+        self,
+        z: torch.Tensor,
+        e_t: torch.Tensor,
+        directions: torch.Tensor,
+        gates: torch.Tensor,
+        metric_diag: torch.Tensor,
+        metric_u: torch.Tensor,
+        naturalization_strength: float,
+        apply_naturalization: bool,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        dz_raw, coefficients = self.flow(z, e_t, directions, gates)
+        if apply_naturalization:
+            dz = self.metric.naturalize(
+                dz_raw,
+                metric_diag,
+                metric_u,
+                strength=naturalization_strength,
+                damping=self.config.metric_damping,
+            )
+        else:
+            dz = dz_raw
+        return self.updater(z, dz), dz, coefficients
+
+    def _run_step(
+        self,
+        z: torch.Tensor,
+        e_t: torch.Tensor,
+        directions: torch.Tensor,
+        gates: torch.Tensor,
+        metric_diag: torch.Tensor,
+        metric_u: torch.Tensor,
+        naturalization_strength: float,
+        apply_naturalization: bool,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        if self._compiled_step is not None:
+            try:
+                return self._compiled_step(
+                    z,
+                    e_t,
+                    directions,
+                    gates,
+                    metric_diag,
+                    metric_u,
+                    naturalization_strength,
+                    apply_naturalization,
+                )
+            except Exception:
+                self._compiled_step = None
+        return self._drm_step(
+            z,
+            e_t,
+            directions,
+            gates,
+            metric_diag,
+            metric_u,
+            naturalization_strength,
+            apply_naturalization,
+        )
 
     def _forward_impl(
         self,
@@ -67,23 +157,31 @@ class DRMEmitterModel(nn.Module):
         need_metric_diversity = collect_diagnostics or self.config.lambda_metric_diversity != 0
         emission_states = []
         states = []
-        action_values = []
-        dim_values = []
-        entropy_values = []
-        metric_regs = []
         metric_diag_steps = []
-        condition_values = []
         active_025_values = []
-        active_050_values = []
         active_075_values = []
         active_090_values = []
         gate_min_values = []
         gate_max_values = []
         gate_flat_values = []
-        u_norm_values = []
         risk_values = []
+        action_sum: torch.Tensor | None = None
+        dim_sum: torch.Tensor | None = None
+        dim_square_sum: torch.Tensor | None = None
+        entropy_sum: torch.Tensor | None = None
+        metric_reg_sum: torch.Tensor | None = None
+        condition_sum: torch.Tensor | None = None
+        active_050_sum: torch.Tensor | None = None
+        u_norm_sum: torch.Tensor | None = None
+        u_norm_square_sum: torch.Tensor | None = None
+        u_floor_sum: torch.Tensor | None = None
+        sampled_value_count = 0
+        sampled_step_count = 0
         naturalization_strength = self._naturalization_strength(global_step)
         geometry_interval = max(int(self.config.geometry_update_interval), 1)
+        aux_loss_interval = max(int(self.config.aux_loss_interval), 1)
+        naturalization_interval = max(int(self.config.naturalization_interval), 1)
+        forward_chunk_size = int(self.config.forward_chunk_size)
         geometry_tick = 0
         cached_directions: torch.Tensor | None = None
         cached_gates: torch.Tensor | None = None
@@ -92,65 +190,91 @@ class DRMEmitterModel(nn.Module):
         cached_risk: dict[str, torch.Tensor] | None = None
         truncate_interval = int(self.config.bptt_truncate_interval)
 
-        for t in range(seq_len):
-            e_t = token_embeddings[:, t]
-            for _ in range(self.config.n_flow_steps):
-                if geometry_tick % geometry_interval == 0 or cached_directions is None:
-                    cached_directions, cached_gates = self.direction_field(z)
-                    cached_metric_diag, cached_metric_u = self.metric(z)
-                    cached_risk = self.risk(z)
-                directions = cached_directions
-                gates = cached_gates
-                metric_diag = cached_metric_diag
-                metric_u = cached_metric_u
-                risk = cached_risk
-                assert gates is not None
-                assert metric_diag is not None
-                assert metric_u is not None
-                assert risk is not None
-                dz_raw, _coefficients = self.flow(z, e_t, directions, gates)
-                dz = self.metric.naturalize(
-                    dz_raw,
-                    metric_diag,
-                    metric_u,
-                    strength=naturalization_strength,
-                    damping=self.config.metric_damping,
+        chunk_size = seq_len if forward_chunk_size <= 0 else max(forward_chunk_size, 1)
+        for chunk_start in range(0, seq_len, chunk_size):
+            chunk_end = min(chunk_start + chunk_size, seq_len)
+            for t in range(chunk_start, chunk_end):
+                e_t = token_embeddings[:, t]
+                for _ in range(self.config.n_flow_steps):
+                    if geometry_tick % geometry_interval == 0 or cached_directions is None:
+                        cached_directions, cached_gates, cached_metric_diag, cached_metric_u, cached_risk = self._geometry(z)
+                    directions = cached_directions
+                    gates = cached_gates
+                    metric_diag = cached_metric_diag
+                    metric_u = cached_metric_u
+                    risk = cached_risk
+                    assert directions is not None
+                    assert gates is not None
+                    assert metric_diag is not None
+                    assert metric_u is not None
+                    assert risk is not None
+                    apply_naturalization = naturalization_strength > 0 and geometry_tick % naturalization_interval == 0
+                    z_before = z
+                    z, dz, _coefficients = self._run_step(
+                        z,
+                        e_t,
+                        directions,
+                        gates,
+                        metric_diag,
+                        metric_u,
+                        naturalization_strength,
+                        apply_naturalization,
+                    )
+                    sample_aux = geometry_tick % aux_loss_interval == 0
+                    if sample_aux:
+                        energy = self.metric.metric_energy(
+                            z_before, dz, metric_diag, metric_u, risk_mass=risk["risk_mass"]
+                        )
+                        dim_values = gates.sum(dim=-1)
+                        entropy_value = dimension_entropy(gates)
+                        u_norm = metric_u.norm(dim=(1, 2)) if metric_u.numel() else metric_diag.new_zeros(batch)
+                        metric_reg_value = metric_diag.pow(2).mean() + metric_u.pow(2).mean()
+                        condition_values = self.metric.condition_proxy(metric_diag, metric_u)
+                        active_050_values = (gates > 0.50).float().mean(dim=-1)
+
+                        action_sum = energy.sum() if action_sum is None else action_sum + energy.sum()
+                        dim_sum = dim_values.sum() if dim_sum is None else dim_sum + dim_values.sum()
+                        dim_square_sum = dim_values.pow(2).sum() if dim_square_sum is None else dim_square_sum + dim_values.pow(2).sum()
+                        entropy_sum = entropy_value if entropy_sum is None else entropy_sum + entropy_value
+                        metric_reg_sum = metric_reg_value if metric_reg_sum is None else metric_reg_sum + metric_reg_value
+                        condition_sum = condition_values.sum() if condition_sum is None else condition_sum + condition_values.sum()
+                        active_050_sum = active_050_values.sum() if active_050_sum is None else active_050_sum + active_050_values.sum()
+                        u_norm_sum = u_norm.sum() if u_norm_sum is None else u_norm_sum + u_norm.sum()
+                        u_norm_square_sum = u_norm.pow(2).sum() if u_norm_square_sum is None else u_norm_square_sum + u_norm.pow(2).sum()
+                        if self.config.metric_rank > 0:
+                            floor_values = (self.config.metric_u_min_norm - u_norm).clamp_min(0.0).pow(2)
+                            u_floor_sum = floor_values.sum() if u_floor_sum is None else u_floor_sum + floor_values.sum()
+                        if need_metric_diversity:
+                            metric_diag_steps.append(metric_diag)
+                        sampled_value_count += batch
+                        sampled_step_count += 1
+                    if collect_diagnostics:
+                        active_025_values.append((gates > 0.25).float().mean(dim=-1))
+                        active_075_values.append((gates > 0.75).float().mean(dim=-1))
+                        active_090_values.append((gates > 0.90).float().mean(dim=-1))
+                        gate_min_values.append(gates.min(dim=-1).values)
+                        gate_max_values.append(gates.max(dim=-1).values)
+                        gate_flat_values.append(gates.reshape(-1))
+                    if collect_diagnostics or self.config.lambda_blindspot != 0:
+                        risk_values.append(risk["risk_mass"])
+                    geometry_tick += 1
+                emission_states.append(z)
+                if need_states:
+                    states.append(z)
+                should_truncate = (
+                    self.training
+                    and truncate_interval > 0
+                    and (t + 1) % truncate_interval == 0
+                    and (t + 1) < seq_len
                 )
-                energy = self.metric.metric_energy(
-                    z, dz, metric_diag, metric_u, risk_mass=risk["risk_mass"]
-                )
-                action_values.append(energy)
-                dim_values.append(gates.sum(dim=-1))
-                entropy_values.append(dimension_entropy(gates))
-                u_norm = metric_u.norm(dim=(1, 2)) if metric_u.numel() else metric_diag.new_zeros(batch)
-                metric_regs.append(metric_diag.pow(2).mean() + metric_u.pow(2).mean())
-                if need_metric_diversity:
-                    metric_diag_steps.append(metric_diag)
-                condition_values.append(self.metric.condition_proxy(metric_diag, metric_u))
-                active_050_values.append((gates > 0.50).float().mean(dim=-1))
-                if collect_diagnostics:
-                    active_025_values.append((gates > 0.25).float().mean(dim=-1))
-                    active_075_values.append((gates > 0.75).float().mean(dim=-1))
-                    active_090_values.append((gates > 0.90).float().mean(dim=-1))
-                    gate_min_values.append(gates.min(dim=-1).values)
-                    gate_max_values.append(gates.max(dim=-1).values)
-                    gate_flat_values.append(gates.reshape(-1))
-                u_norm_values.append(u_norm)
-                if collect_diagnostics or self.config.lambda_blindspot != 0:
-                    risk_values.append(risk["risk_mass"])
-                z = self.updater(z, dz)
-                geometry_tick += 1
-            emission_states.append(z)
-            if need_states:
-                states.append(z)
-            should_truncate = (
-                self.training
-                and truncate_interval > 0
-                and (t + 1) % truncate_interval == 0
-                and (t + 1) < seq_len
-            )
-            if should_truncate:
-                z = z.detach()
+                if should_truncate:
+                    z = z.detach()
+                    cached_directions = None
+                    cached_gates = None
+                    cached_metric_diag = None
+                    cached_metric_u = None
+                    cached_risk = None
+            if forward_chunk_size > 0:
                 cached_directions = None
                 cached_gates = None
                 cached_metric_diag = None
@@ -161,30 +285,28 @@ class DRMEmitterModel(nn.Module):
         logits = self.emitter(emission_state_tensor)
         state_tensor = torch.stack(states, dim=1) if need_states else None
         metric_diag_tensor = torch.stack(metric_diag_steps, dim=1) if need_metric_diversity else None
-        action_loss = torch.stack(action_values, dim=1).mean()
-        dim_tensor = torch.stack(dim_values, dim=1)
-        dim_sparsity = dim_tensor.mean()
-        dim_std_value = dim_tensor.std(unbiased=False)
-        dim_entropy_value = torch.stack(entropy_values).mean()
-        metric_reg = torch.stack(metric_regs).mean()
-        metric_u_norm_steps = torch.stack(u_norm_values, dim=1)
+        if sampled_value_count == 0 or action_sum is None:
+            raise RuntimeError("DRM forward did not sample any auxiliary loss steps")
+        action_loss = action_sum / sampled_value_count
+        dim_sparsity = dim_sum / sampled_value_count
+        dim_variance = (dim_square_sum / sampled_value_count - dim_sparsity.pow(2)).clamp_min(0.0)
+        dim_std_value = dim_variance.sqrt()
+        dim_entropy_value = entropy_sum / sampled_step_count
+        metric_reg = metric_reg_sum / sampled_step_count
+        u_norm_mean_for_variance = u_norm_sum / sampled_value_count
+        metric_u_norm_variance = (u_norm_square_sum / sampled_value_count - u_norm_mean_for_variance.pow(2)).clamp_min(0.0)
         if self.config.metric_rank > 0:
-            metric_u_floor_loss = (
-                (self.config.metric_u_min_norm - metric_u_norm_steps)
-                .clamp_min(0.0)
-                .pow(2)
-                .mean()
-            )
+            metric_u_floor_loss = u_floor_sum / sampled_value_count if u_floor_sum is not None else action_loss.new_tensor(0.0)
         else:
             metric_u_floor_loss = action_loss.new_tensor(0.0)
         metric_div_value = metric_diversity(metric_diag_tensor) if metric_diag_tensor is not None else action_loss.new_tensor(0.0)
         recurrence_value = recurrence_proxy(state_tensor) if state_tensor is not None else action_loss.new_tensor(0.0)
         stability_value = stability_proxy(logits) if need_stability else action_loss.new_tensor(0.0)
         blindspot_value = torch.stack(risk_values, dim=1).mean() if risk_values else action_loss.new_tensor(0.0)
-        hard_active_050_value = torch.stack(active_050_values, dim=1).mean()
+        hard_active_050_value = active_050_sum / sampled_value_count
         soft_active_value = dim_sparsity / self.config.n_directions
-        condition_value = torch.stack(condition_values, dim=1).mean()
-        metric_u_norm_value = metric_u_norm_steps.mean()
+        condition_value = condition_sum / sampled_value_count
+        metric_u_norm_value = u_norm_mean_for_variance
         ce_loss = next_token_cross_entropy(logits, targets) if targets is not None else None
         total_loss, aux_losses = combine_losses(
             self.config,
@@ -215,7 +337,7 @@ class DRMEmitterModel(nn.Module):
             "gate_entropy": dim_entropy_value,
             "action_mean": action_loss,
             "metric_U_norm_mean": metric_u_norm_value,
-            "metric_U_variance": torch.stack(u_norm_values, dim=1).var(unbiased=False),
+            "metric_U_variance": metric_u_norm_variance,
             "condition_proxy": condition_value,
             "recurrence_proxy": recurrence_value,
             "stability_proxy": stability_value,

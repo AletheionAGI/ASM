@@ -61,7 +61,12 @@ class DRMConfig:
     emitter_swiglu: bool = False
     emitter_residual: bool = False
     use_torch_compile: bool = False
+    compile_drm_step: bool = False
+    use_shared_geometry_trunk: bool = False
     geometry_update_interval: int = 1
+    aux_loss_interval: int = 1
+    naturalization_interval: int = 1
+    forward_chunk_size: int = 0
     direction_basis_size: int = 0
     metric_u_basis_size: int = 0
     bptt_truncate_interval: int = 0
@@ -87,6 +92,9 @@ class DRMConfig:
             ("max_seq_len", 1, None),
             ("gate_top_k", 0, None),
             ("geometry_update_interval", 1, None),
+            ("aux_loss_interval", 1, None),
+            ("naturalization_interval", 1, None),
+            ("forward_chunk_size", 0, None),
             ("direction_basis_size", 0, None),
             ("metric_u_basis_size", 0, None),
             ("bptt_truncate_interval", 0, None),
@@ -160,6 +168,8 @@ class DRMConfig:
             "emitter_swiglu",
             "emitter_residual",
             "use_torch_compile",
+            "compile_drm_step",
+            "use_shared_geometry_trunk",
         ]
         for name in bool_fields:
             val = getattr(self, name)

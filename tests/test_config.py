@@ -31,3 +31,22 @@ def test_config_validates_bptt_truncate_interval():
     assert DRMConfig(bptt_truncate_interval=8).bptt_truncate_interval == 8
     with pytest.raises(ValueError, match="bptt_truncate_interval"):
         DRMConfig(bptt_truncate_interval=-1)
+
+
+def test_config_validates_throughput_intervals():
+    config = DRMConfig(aux_loss_interval=4, naturalization_interval=8, forward_chunk_size=16)
+    assert config.aux_loss_interval == 4
+    assert config.naturalization_interval == 8
+    assert config.forward_chunk_size == 16
+    with pytest.raises(ValueError, match="aux_loss_interval"):
+        DRMConfig(aux_loss_interval=0)
+    with pytest.raises(ValueError, match="naturalization_interval"):
+        DRMConfig(naturalization_interval=0)
+    with pytest.raises(ValueError, match="forward_chunk_size"):
+        DRMConfig(forward_chunk_size=-1)
+
+
+def test_config_accepts_compile_and_shared_geometry_flags():
+    config = DRMConfig(compile_drm_step=True, use_shared_geometry_trunk=True)
+    assert config.compile_drm_step is True
+    assert config.use_shared_geometry_trunk is True

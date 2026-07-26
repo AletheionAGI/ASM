@@ -99,7 +99,7 @@ class MemmapTokenDataset(AbstractContextManager["MemmapTokenDataset"]):
 
     def window(self, start: int, seq_len: int) -> tuple[torch.Tensor, torch.Tensor]:
         raw = self._read_range(start, seq_len + 1)
-        values = torch.tensor(list(raw), dtype=torch.long)
+        values = torch.frombuffer(bytearray(raw), dtype=torch.uint8).to(torch.long)
         return values[:-1], values[1:]
 
     def make_batch(
@@ -110,6 +110,20 @@ class MemmapTokenDataset(AbstractContextManager["MemmapTokenDataset"]):
         generator: torch.Generator | None = None,
         rank: int = 0,
         world_size: int = 1,
+        pin_memory: bool = False,
+        non_blocking: bool = True,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        x_cpu, y_cpu = self.make_batch_cpu(batch_size, seq_len, generator, rank, world_size, pin_memory and device.type == "cuda")
+        return self.move_batch_to_device(x_cpu, y_cpu, device, non_blocking=non_blocking)
+
+    def make_batch_cpu(
+        self,
+        batch_size: int,
+        seq_len: int,
+        generator: torch.Generator | None = None,
+        rank: int = 0,
+        world_size: int = 1,
+        pin_memory: bool = False,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         if self.total_tokens < seq_len + 2:
             raise ValueError("token dataset is too small for requested seq_len")
@@ -117,9 +131,26 @@ class MemmapTokenDataset(AbstractContextManager["MemmapTokenDataset"]):
         starts = torch.randint(0, max_start, (batch_size,), generator=generator)
         if world_size > 1:
             starts = (starts * max(world_size, 1) + rank) % max_start
-        rows = [self.window(int(start), seq_len) for start in starts.tolist()]
-        x = torch.stack([row[0] for row in rows]).to(device)
-        y = torch.stack([row[1] for row in rows]).to(device)
+        x_cpu = torch.empty((batch_size, seq_len), dtype=torch.long)
+        y_cpu = torch.empty((batch_size, seq_len), dtype=torch.long)
+        for row_index, start in enumerate(starts.tolist()):
+            x_row, y_row = self.window(int(start), seq_len)
+            x_cpu[row_index].copy_(x_row)
+            y_cpu[row_index].copy_(y_row)
+        if pin_memory:
+            x_cpu = x_cpu.pin_memory()
+            y_cpu = y_cpu.pin_memory()
+        return x_cpu, y_cpu
+
+    @staticmethod
+    def move_batch_to_device(
+        x_cpu: torch.Tensor,
+        y_cpu: torch.Tensor,
+        device: torch.device,
+        non_blocking: bool = True,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        x = x_cpu.to(device, non_blocking=non_blocking and x_cpu.is_pinned())
+        y = y_cpu.to(device, non_blocking=non_blocking and y_cpu.is_pinned())
         return x, y
 
 

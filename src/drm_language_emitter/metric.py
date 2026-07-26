@@ -14,7 +14,7 @@ class RelationalMetric(nn.Module):
         super().__init__()
         self.config = config
         h = config.hidden_size
-        self.trunk = nn.Sequential(
+        self.trunk = None if config.use_shared_geometry_trunk else nn.Sequential(
             nn.Linear(config.d_state, h),
             nn.GELU(),
             nn.Dropout(config.dropout),
@@ -31,17 +31,20 @@ class RelationalMetric(nn.Module):
             self.u_basis = None
             self.u_head = nn.Linear(h, config.d_state * config.metric_rank)
 
-    def forward(self, z: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        h = self.trunk(z)
-        diag = F.softplus(self.diag_head(h)) + self.config.metric_eps
+    def forward(self, z: torch.Tensor, hidden: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
+        if hidden is None:
+            if self.trunk is None:
+                raise ValueError("RelationalMetric requires shared geometry hidden when use_shared_geometry_trunk=True")
+            hidden = self.trunk(z)
+        diag = F.softplus(self.diag_head(hidden)) + self.config.metric_eps
         if self.config.metric_rank == 0:
             u = z.new_zeros(z.shape[0], self.config.d_state, 0)
         elif self.u_basis is not None:
-            coefficients = self.u_head(h).view(z.shape[0], self.config.metric_rank, self.u_basis_size)
+            coefficients = self.u_head(hidden).view(z.shape[0], self.config.metric_rank, self.u_basis_size)
             u = torch.matmul(coefficients, self.u_basis).transpose(1, 2)
             u = u / max(self.config.metric_rank, 1) ** 0.5
         else:
-            u = self.u_head(h).view(z.shape[0], self.config.d_state, self.config.metric_rank)
+            u = self.u_head(hidden).view(z.shape[0], self.config.d_state, self.config.metric_rank)
             u = u / max(self.config.metric_rank, 1) ** 0.5
         return diag, u
 
