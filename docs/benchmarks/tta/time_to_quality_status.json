@@ -1,0 +1,78 @@
+{
+  "aggregate": [
+    {
+      "best_val_ce_mean": 1.8294863253831863,
+      "best_val_ce_median": 1.8294863253831863,
+      "best_val_ce_std": 0.0,
+      "elapsed_sec_cumulative_mean": 3475.5989155001002,
+      "elapsed_sec_cumulative_median": 3475.5989155001002,
+      "elapsed_sec_cumulative_std": 0.0,
+      "family": "drm",
+      "n": 1,
+      "plateau_detected_count": 1,
+      "seconds_to_target_mean": 2947.9353918000706,
+      "seconds_to_target_median": 2947.9353918000706,
+      "seconds_to_target_std": 0.0,
+      "target_reached_count": 1,
+      "tokens_per_sec_mean": 5652.477355778028,
+      "tokens_per_sec_median": 5652.477355778028,
+      "tokens_per_sec_std": 0.0,
+      "tokens_to_target_mean": 17000448.0,
+      "tokens_to_target_median": 17000448.0,
+      "tokens_to_target_std": 0.0
+    },
+    {
+      "best_val_ce_mean": 2.0714585930109024,
+      "best_val_ce_median": 2.0714585930109024,
+      "best_val_ce_std": 0.0,
+      "elapsed_sec_cumulative_mean": 701.0594416000531,
+      "elapsed_sec_cumulative_median": 701.0594416000531,
+      "elapsed_sec_cumulative_std": 0.0,
+      "family": "gpt2",
+      "n": 1,
+      "plateau_detected_count": 1,
+      "target_reached_count": 0,
+      "tokens_per_sec_mean": 29891.477887481185,
+      "tokens_per_sec_median": 29891.477887481185,
+      "tokens_per_sec_std": 0.0
+    }
+  ],
+  "min_improvement_per_million": 0.003,
+  "plateau_window": 3,
+  "runs": [
+    {
+      "best_val_ce": 1.8294863253831863,
+      "elapsed_sec_cumulative": 3475.5989155001002,
+      "family": "drm",
+      "last_improvement_per_million": 0.0,
+      "parameter_count": 37253702,
+      "plateau_detected": true,
+      "run": "drm_37m_causal_anderson_b8_seed_1",
+      "seconds_to_target": 2947.9353918000706,
+      "seed": 1,
+      "target_ce": 1.83948632538319,
+      "target_reached": true,
+      "tokens_per_sec": 5652.477355778028,
+      "tokens_seen": 20004864,
+      "tokens_to_target": 17000448
+    },
+    {
+      "best_val_ce": 2.0714585930109024,
+      "elapsed_sec_cumulative": 701.0594416000531,
+      "family": "gpt2",
+      "last_improvement_per_million": 0.0008271229421707238,
+      "parameter_count": 36819216,
+      "plateau_detected": true,
+      "run": "gpt2_36m_seed_1",
+      "seconds_to_target": null,
+      "seed": 1,
+      "target_ce": 1.83948632538319,
+      "target_reached": false,
+      "tokens_per_sec": 29891.477887481185,
+      "tokens_seen": 22005760,
+      "tokens_to_target": null
+    }
+  ],
+  "target_ce": 1.83948632538319,
+  "target_margin_ce": 0.01
+}

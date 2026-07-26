@@ -61,6 +61,26 @@ class DRMConfig:
     emitter_swiglu: bool = False
     emitter_residual: bool = False
     use_torch_compile: bool = False
+    sequence_mode: str = "local_step"
+    geodesic_solver_steps: int = 0
+    geodesic_lr: float = 0.05
+    geodesic_anchor_weight: float = 1.0
+    geodesic_metric_weight: float = 0.1
+    geodesic_risk_weight: float = 0.01
+    directional_candidate_temperature: float = 1.0
+    directional_candidate_scale: float = 1.0
+    directional_cumsum_block_size: int = 0
+    directional_endpoint_correction_weight: float = 0.0
+    directional_endpoint_correction_power: float = 1.0
+    directional_cumsum_inner_block_size: int = 0
+    directional_anderson_iterations: int = 0
+    directional_anderson_history_size: int = 4
+    directional_anderson_ridge: float = 1e-4
+    directional_anderson_relaxation: float = 1.0
+    directional_fixed_point_iterations: int = 0
+    directional_fixed_point_relaxation: float = 1.0
+    lambda_block_consistency: float = 0.0
+    block_consistency_weight: float = 1.0
     geometry_update_interval: int = 1
     direction_basis_size: int = 0
     metric_u_basis_size: int = 0
@@ -86,6 +106,12 @@ class DRMConfig:
             ("n_flow_steps", 1, None),
             ("max_seq_len", 1, None),
             ("gate_top_k", 0, None),
+            ("geodesic_solver_steps", 0, None),
+            ("directional_cumsum_block_size", 0, None),
+            ("directional_cumsum_inner_block_size", 0, None),
+            ("directional_anderson_iterations", 0, None),
+            ("directional_anderson_history_size", 1, None),
+            ("directional_fixed_point_iterations", 0, None),
             ("geometry_update_interval", 1, None),
             ("direction_basis_size", 0, None),
             ("metric_u_basis_size", 0, None),
@@ -136,6 +162,19 @@ class DRMConfig:
             ("lambda_metric_u_target", 0.0, None),
             ("target_condition", 1.0, None),
             ("lambda_condition", 0.0, None),
+            ("geodesic_lr", 0.0, None),
+            ("geodesic_anchor_weight", 0.0, None),
+            ("geodesic_metric_weight", 0.0, None),
+            ("geodesic_risk_weight", 0.0, None),
+            ("directional_candidate_temperature", 0.01, None),
+            ("directional_candidate_scale", 0.0, None),
+            ("directional_endpoint_correction_weight", 0.0, None),
+            ("directional_endpoint_correction_power", 0.0, None),
+            ("directional_anderson_ridge", 0.0, None),
+            ("directional_anderson_relaxation", 0.0, None),
+            ("directional_fixed_point_relaxation", 0.0, None),
+            ("lambda_block_consistency", 0.0, None),
+            ("block_consistency_weight", 0.0, None),
         ]
         for name, min_val, max_val in float_fields:
             val = getattr(self, name)
@@ -167,6 +206,11 @@ class DRMConfig:
                 raise ValueError(f"'{name}' must be a boolean, got {type(val).__name__}")
         if self.risk_exponent_min > self.risk_exponent_max:
             raise ValueError("'risk_exponent_min' must be <= 'risk_exponent_max'")
+        if self.sequence_mode not in {"local_step", "geodesic_step", "directional_candidates", "directional_cumsum", "directional_block_cumsum"}:
+            raise ValueError(
+                "'sequence_mode' must be one of: local_step, geodesic_step, "
+                "directional_candidates, directional_cumsum, directional_block_cumsum"
+            )
 
     def __post_init__(self) -> None:  # pragma: no cover
         """Automatically validate configuration on instantiation."""

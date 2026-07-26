@@ -7,6 +7,7 @@ import torch
 from torch import nn
 
 from .config import DRMConfig
+from .deer import causal_anderson_solve, fixed_point_solve, sequential_rollout
 from .direction_field import DirectionField
 from .dynamics import DRMFlow, StateUpdater
 from .emitter import LanguageEmitter, TokenEmbedding
@@ -62,6 +63,15 @@ class DRMEmitterModel(nn.Module):
         batch, seq_len = input_ids.shape
         z = self.initializer(batch, input_ids.device)
         token_embeddings = self.token_embedding(input_ids)
+        if self.config.sequence_mode in {"directional_cumsum", "directional_block_cumsum"}:
+            return self._forward_directional_cumsum(
+                z,
+                token_embeddings,
+                targets,
+                return_states,
+                global_step,
+                collect_diagnostics,
+            )
         need_states = return_states or collect_diagnostics or self.config.lambda_recurrence != 0
         need_stability = collect_diagnostics or self.config.lambda_stability != 0
         need_metric_diversity = collect_diagnostics or self.config.lambda_metric_diversity != 0
@@ -116,6 +126,12 @@ class DRMEmitterModel(nn.Module):
                     strength=naturalization_strength,
                     damping=self.config.metric_damping,
                 )
+                if self.config.sequence_mode == "geodesic_step" and self.config.geodesic_solver_steps > 0:
+                    z_next = self._geodesic_step(z, dz, metric_diag, metric_u)
+                    dz = (z_next - z) / max(self.config.dt, 1e-8)
+                elif self.config.sequence_mode == "directional_candidates":
+                    z_next = self._directional_candidate_step(z, dz, directions, gates, metric_diag, metric_u)
+                    dz = (z_next - z) / max(self.config.dt, 1e-8)
                 energy = self.metric.metric_energy(
                     z, dz, metric_diag, metric_u, risk_mass=risk["risk_mass"]
                 )
@@ -138,7 +154,12 @@ class DRMEmitterModel(nn.Module):
                 u_norm_values.append(u_norm)
                 if collect_diagnostics or self.config.lambda_blindspot != 0:
                     risk_values.append(risk["risk_mass"])
-                z = self.updater(z, dz)
+                if self.config.sequence_mode in {"geodesic_step", "directional_candidates"} and "z_next" in locals():
+                    z = z_next
+                else:
+                    z = self.updater(z, dz)
+                if "z_next" in locals():
+                    del z_next
                 geometry_tick += 1
             emission_states.append(z)
             if need_states:
@@ -276,6 +297,495 @@ class DRMEmitterModel(nn.Module):
 
     def state_dict_with_config(self) -> dict[str, Any]:
         return {"config": asdict(self.config), "model": self.state_dict()}
+
+    def _forward_directional_cumsum(
+        self,
+        z0: torch.Tensor,
+        token_embeddings: torch.Tensor,
+        targets: torch.Tensor | None,
+        return_states: bool,
+        global_step: int | None,
+        collect_diagnostics: bool,
+    ) -> dict[str, Any]:
+        """Approximate the recurrent trajectory by parallel local deltas."""
+
+        batch, seq_len, d_token = token_embeddings.shape
+        if self.config.sequence_mode == "directional_block_cumsum":
+            block_size = self.config.directional_cumsum_block_size or seq_len
+            block_size = max(min(block_size, seq_len), 1)
+        else:
+            block_size = seq_len
+        block_states = []
+        action_values = []
+        dim_values = []
+        entropy_values = []
+        metric_regs = []
+        metric_diag_steps = []
+        condition_values = []
+        active_050_values = []
+        u_norm_values = []
+        risk_values = []
+        consistency_values = []
+        z_block = z0
+        for block_start in range(0, seq_len, block_size):
+            block_tokens = token_embeddings[:, block_start : block_start + block_size]
+            (
+                states_block,
+                action_block,
+                dim_block,
+                entropy_block,
+                metric_reg_block,
+                metric_diag_block,
+                condition_block,
+                active_050_block,
+                u_norm_block,
+                risk_block,
+                consistency_block,
+            ) = self._directional_cumsum_block(z_block, block_tokens, global_step)
+            block_states.append(states_block)
+            action_values.append(action_block)
+            dim_values.append(dim_block)
+            entropy_values.append(entropy_block)
+            metric_regs.append(metric_reg_block)
+            metric_diag_steps.append(metric_diag_block)
+            condition_values.append(condition_block)
+            active_050_values.append(active_050_block)
+            u_norm_values.append(u_norm_block)
+            risk_values.append(risk_block)
+            if consistency_block is not None:
+                consistency_values.append(consistency_block)
+            z_block = states_block[:, -1]
+
+        states = torch.cat(block_states, dim=1)
+        logits = self.emitter(states)
+
+        action_loss = torch.cat(action_values, dim=1).mean()
+        dim_tensor = torch.cat(dim_values, dim=1)
+        dim_sparsity = dim_tensor.mean()
+        dim_std_value = dim_tensor.std(unbiased=False)
+        dim_entropy_value = torch.stack(entropy_values).mean()
+        metric_reg = torch.stack(metric_regs).mean()
+        metric_diag_tensor = torch.cat(metric_diag_steps, dim=1)
+        metric_div_value = metric_diversity(metric_diag_tensor) if self.config.lambda_metric_diversity != 0 else action_loss.new_tensor(0.0)
+        recurrence_value = recurrence_proxy(states) if (return_states or collect_diagnostics or self.config.lambda_recurrence != 0) else action_loss.new_tensor(0.0)
+        stability_value = stability_proxy(logits) if (collect_diagnostics or self.config.lambda_stability != 0) else action_loss.new_tensor(0.0)
+        risk_tensor = torch.cat(risk_values, dim=1)
+        blindspot_value = risk_tensor.mean() if (collect_diagnostics or self.config.lambda_blindspot != 0) else action_loss.new_tensor(0.0)
+        active_050_tensor = torch.cat(active_050_values, dim=1)
+        hard_active_050_value = active_050_tensor.mean()
+        soft_active_value = dim_sparsity / self.config.n_directions
+        condition_value = torch.cat(condition_values, dim=1).mean()
+        u_norm = torch.cat(u_norm_values, dim=1)
+        metric_u_norm_value = u_norm.mean()
+        if self.config.metric_rank > 0:
+            metric_u_floor_loss = (self.config.metric_u_min_norm - u_norm).clamp_min(0.0).pow(2).mean()
+        else:
+            metric_u_floor_loss = action_loss.new_tensor(0.0)
+        ce_loss = next_token_cross_entropy(logits, targets) if targets is not None else None
+        total_loss, aux_losses = combine_losses(
+            self.config,
+            ce_loss,
+            action_loss,
+            dim_sparsity,
+            dim_entropy_value,
+            metric_reg,
+            metric_div_value,
+            recurrence_value,
+            stability_value,
+            blindspot_value,
+            soft_active_value,
+            dim_std_value,
+            condition_value,
+            metric_u_norm_value,
+        )
+        if self.config.lambda_metric_u_floor and self.config.metric_rank > 0:
+            total_loss = total_loss + self.config.lambda_metric_u_floor * metric_u_floor_loss
+            aux_losses["metric_u_floor"] = metric_u_floor_loss
+        if self.config.lambda_block_consistency and consistency_values:
+            block_consistency = torch.cat(consistency_values, dim=1).mean()
+            total_loss = total_loss + self.config.lambda_block_consistency * block_consistency
+            aux_losses["block_consistency"] = block_consistency
+        else:
+            block_consistency = action_loss.new_tensor(0.0)
+
+        diagnostics = {
+            "dimD_mean": dim_sparsity,
+            "dimD_std": dim_std_value,
+            "soft_active_fraction": soft_active_value,
+            "active_fraction": hard_active_050_value,
+            "hard_active_fraction_050": hard_active_050_value,
+            "gate_entropy": dim_entropy_value,
+            "action_mean": action_loss,
+            "metric_U_norm_mean": metric_u_norm_value,
+            "metric_U_variance": u_norm.var(unbiased=False),
+            "condition_proxy": condition_value,
+            "recurrence_proxy": recurrence_value,
+            "stability_proxy": stability_value,
+            "risk_mass_mean": blindspot_value,
+            "metric_u_floor_loss": metric_u_floor_loss,
+            "block_consistency": block_consistency,
+            "metric_naturalization_strength": token_embeddings.new_tensor(float(self._naturalization_strength(global_step))),
+        }
+        if collect_diagnostics:
+            flat_dim = dim_tensor.reshape(-1)
+            gate_quantiles = torch.quantile(
+                flat_dim.float(),
+                torch.tensor([0.10, 0.25, 0.50, 0.75, 0.90], device=states.device),
+            )
+            diagnostics.update(
+                {
+                    "hard_active_fraction_025": (dim_tensor > 0.25).float().mean(),
+                    "hard_active_fraction_075": (dim_tensor > 0.75).float().mean(),
+                    "hard_active_fraction_090": (dim_tensor > 0.90).float().mean(),
+                    "gate_min": dim_tensor.min(),
+                    "gate_max": dim_tensor.max(),
+                    "gate_q10": gate_quantiles[0],
+                    "gate_q25": gate_quantiles[1],
+                    "gate_q50": gate_quantiles[2],
+                    "gate_q75": gate_quantiles[3],
+                    "gate_q90": gate_quantiles[4],
+                    "risk_mass_std": risk_tensor.std(unbiased=False),
+                    "risk_mass_max": risk_tensor.max(),
+                }
+            )
+
+        out: dict[str, Any] = {
+            "logits": logits,
+            "loss": total_loss,
+            "aux_losses": aux_losses,
+            "diagnostics": diagnostics,
+        }
+        if return_states:
+            out["states"] = states
+        return out
+
+    def _directional_cumsum_block(
+        self,
+        z_start: torch.Tensor,
+        token_embeddings: torch.Tensor,
+        global_step: int | None,
+    ) -> tuple[
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor | None,
+    ]:
+        inner_block_size = int(self.config.directional_cumsum_inner_block_size)
+        block_len = token_embeddings.shape[1]
+        if 0 < inner_block_size < block_len:
+            states_parts = []
+            action_parts = []
+            dim_parts = []
+            entropy_parts = []
+            metric_reg_parts = []
+            metric_diag_parts = []
+            condition_parts = []
+            active_parts = []
+            u_norm_parts = []
+            risk_parts = []
+            consistency_parts = []
+            z_inner = z_start
+            for inner_start in range(0, block_len, inner_block_size):
+                inner_tokens = token_embeddings[:, inner_start : inner_start + inner_block_size]
+                (
+                    states_inner,
+                    action_inner,
+                    dim_inner,
+                    entropy_inner,
+                    metric_reg_inner,
+                    metric_diag_inner,
+                    condition_inner,
+                    active_inner,
+                    u_norm_inner,
+                    risk_inner,
+                    consistency_inner,
+                ) = self._directional_cumsum_block_base(z_inner, inner_tokens, global_step)
+                states_parts.append(states_inner)
+                action_parts.append(action_inner)
+                dim_parts.append(dim_inner)
+                entropy_parts.append(entropy_inner)
+                metric_reg_parts.append(metric_reg_inner)
+                metric_diag_parts.append(metric_diag_inner)
+                condition_parts.append(condition_inner)
+                active_parts.append(active_inner)
+                u_norm_parts.append(u_norm_inner)
+                risk_parts.append(risk_inner)
+                if consistency_inner is not None:
+                    consistency_parts.append(consistency_inner)
+                z_inner = states_inner[:, -1]
+            consistency = torch.cat(consistency_parts, dim=1) if consistency_parts else None
+            return (
+                torch.cat(states_parts, dim=1),
+                torch.cat(action_parts, dim=1),
+                torch.cat(dim_parts, dim=1),
+                torch.stack(entropy_parts).mean(),
+                torch.stack(metric_reg_parts).mean(),
+                torch.cat(metric_diag_parts, dim=1),
+                torch.cat(condition_parts, dim=1),
+                torch.cat(active_parts, dim=1),
+                torch.cat(u_norm_parts, dim=1),
+                torch.cat(risk_parts, dim=1),
+                consistency,
+            )
+        return self._directional_cumsum_block_base(z_start, token_embeddings, global_step)
+
+    def _directional_cumsum_block_base(
+        self,
+        z_start: torch.Tensor,
+        token_embeddings: torch.Tensor,
+        global_step: int | None,
+    ) -> tuple[
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor | None,
+    ]:
+        batch, block_len, d_token = token_embeddings.shape
+        flat_z = z_start.unsqueeze(1).expand(-1, block_len, -1).reshape(batch * block_len, z_start.shape[-1])
+        flat_tokens = token_embeddings.reshape(batch * block_len, d_token)
+        directions, gates = self.direction_field(flat_z)
+        metric_diag, metric_u = self.metric(flat_z)
+        risk = self.risk(flat_z)
+        dz_raw, _coefficients = self.flow(flat_z, flat_tokens, directions, gates)
+        dz = self.metric.naturalize(
+            dz_raw,
+            metric_diag,
+            metric_u,
+            strength=self._naturalization_strength(global_step),
+            damping=self.config.metric_damping,
+        )
+        flat_next = self._directional_candidate_step(flat_z, dz, directions, gates, metric_diag, metric_u)
+        local_delta = (flat_next - flat_z).reshape(batch, block_len, -1)
+        states = self._bound_state(z_start.unsqueeze(1) + torch.cumsum(local_delta, dim=1))
+        states = self._apply_endpoint_correction(z_start, token_embeddings, states, global_step)
+        states = self._apply_block_fixed_point(z_start, token_embeddings, states, global_step)
+        states = self._apply_block_anderson(z_start, token_embeddings, states, global_step)
+        consistency = self._block_consistency(z_start, token_embeddings, states, global_step)
+        velocity = (flat_next - flat_z) / max(self.config.dt, 1e-8)
+        action = self.metric.metric_energy(flat_z, velocity, metric_diag, metric_u, risk_mass=risk["risk_mass"]).reshape(batch, block_len)
+        dim = gates.sum(dim=-1).reshape(batch, block_len)
+        entropy = dimension_entropy(gates)
+        metric_reg = metric_diag.pow(2).mean() + metric_u.pow(2).mean()
+        metric_diag_step = metric_diag.reshape(batch, block_len, -1)
+        condition = self.metric.condition_proxy(metric_diag, metric_u).reshape(batch, block_len)
+        active_050 = (gates > 0.50).float().mean(dim=-1).reshape(batch, block_len)
+        u_norm = (
+            metric_u.norm(dim=(1, 2)).reshape(batch, block_len)
+            if metric_u.numel()
+            else metric_diag.new_zeros(batch, block_len)
+        )
+        risk_mass = risk["risk_mass"].reshape(batch, block_len)
+        return states, action, dim, entropy, metric_reg, metric_diag_step, condition, active_050, u_norm, risk_mass, consistency
+
+    def _apply_endpoint_correction(
+        self,
+        z_start: torch.Tensor,
+        token_embeddings: torch.Tensor,
+        states: torch.Tensor,
+        global_step: int | None,
+    ) -> torch.Tensor:
+        weight = float(self.config.directional_endpoint_correction_weight)
+        if weight <= 0.0:
+            return states
+        previous = z_start if states.shape[1] == 1 else states[:, -2]
+        corrected_endpoint = self.directional_transition(previous, token_embeddings[:, -1], global_step)
+        correction = corrected_endpoint - states[:, -1]
+        positions = torch.linspace(
+            1.0 / states.shape[1],
+            1.0,
+            states.shape[1],
+            device=states.device,
+            dtype=states.dtype,
+        )
+        power = float(self.config.directional_endpoint_correction_power)
+        weights = positions.pow(power).view(1, -1, 1)
+        return self._bound_state(states + weight * weights * correction.unsqueeze(1))
+
+    def _apply_block_fixed_point(
+        self,
+        z_start: torch.Tensor,
+        token_embeddings: torch.Tensor,
+        states: torch.Tensor,
+        global_step: int | None,
+    ) -> torch.Tensor:
+        iterations = int(self.config.directional_fixed_point_iterations)
+        if iterations <= 0:
+            return states
+
+        def transition(z: torch.Tensor, token_embedding: torch.Tensor) -> torch.Tensor:
+            return self.directional_transition(z, token_embedding, global_step)
+
+        solved, _residuals = fixed_point_solve(
+            transition,
+            z_start,
+            token_embeddings,
+            iterations=iterations,
+            relaxation=self.config.directional_fixed_point_relaxation,
+            initial_trajectory=states,
+        )
+        return self._bound_state(solved)
+
+    def _apply_block_anderson(
+        self,
+        z_start: torch.Tensor,
+        token_embeddings: torch.Tensor,
+        states: torch.Tensor,
+        global_step: int | None,
+    ) -> torch.Tensor:
+        iterations = int(self.config.directional_anderson_iterations)
+        if iterations <= 0:
+            return states
+
+        def transition(z: torch.Tensor, token_embedding: torch.Tensor) -> torch.Tensor:
+            return self.directional_transition(z, token_embedding, global_step)
+
+        solved, _residuals = causal_anderson_solve(
+            transition,
+            z_start,
+            token_embeddings,
+            iterations=iterations,
+            history_size=self.config.directional_anderson_history_size,
+            ridge=self.config.directional_anderson_ridge,
+            relaxation=self.config.directional_anderson_relaxation,
+            initial_trajectory=states,
+        )
+        return self._bound_state(solved)
+
+    def _block_consistency(
+        self,
+        z_start: torch.Tensor,
+        token_embeddings: torch.Tensor,
+        states: torch.Tensor,
+        global_step: int | None,
+    ) -> torch.Tensor | None:
+        if self.config.lambda_block_consistency <= 0.0:
+            return None
+
+        def transition(z: torch.Tensor, token_embedding: torch.Tensor) -> torch.Tensor:
+            return self.directional_transition(z, token_embedding, global_step)
+
+        target = sequential_rollout(transition, z_start, token_embeddings).detach()
+        return self.config.block_consistency_weight * (states - target).pow(2).mean(dim=-1)
+
+    def directional_transition(
+        self,
+        z: torch.Tensor,
+        token_embedding: torch.Tensor,
+        global_step: int | None = None,
+    ) -> torch.Tensor:
+        """Apply one target-free directional-candidate DRM transition."""
+
+        directions, gates = self.direction_field(z)
+        metric_diag, metric_u = self.metric(z)
+        dz_raw, _coefficients = self.flow(z, token_embedding, directions, gates)
+        dz = self.metric.naturalize(
+            dz_raw,
+            metric_diag,
+            metric_u,
+            strength=self._naturalization_strength(global_step),
+            damping=self.config.metric_damping,
+        )
+        return self._directional_candidate_step(z, dz, directions, gates, metric_diag, metric_u)
+
+    def _bound_state(self, z: torch.Tensor) -> torch.Tensor:
+        if not self.config.bounded_state:
+            return z
+        norm = z.norm(dim=-1, keepdim=True).clamp_min(1e-8)
+        clip = torch.clamp(self.config.state_clip_norm / norm, max=1.0)
+        z = z * clip
+        return self.config.state_clip_norm * torch.tanh(z / self.config.state_clip_norm)
+
+    def _geodesic_step(
+        self,
+        z: torch.Tensor,
+        dz_context: torch.Tensor,
+        metric_diag: torch.Tensor,
+        metric_u: torch.Tensor,
+    ) -> torch.Tensor:
+        """Refine the local DRM proposal by minimizing target-free geometric energy.
+
+        This is an experimental solver path. The supervised next-token target is
+        intentionally not part of the inner energy; CE remains the outer loss.
+        """
+
+        z_start = z
+        z_anchor = self.updater(z_start, dz_context)
+        z_candidate = z_anchor
+        dt = max(self.config.dt, 1e-8)
+        create_graph = torch.is_grad_enabled() and self.training
+
+        for _ in range(self.config.geodesic_solver_steps):
+            with torch.enable_grad():
+                z_candidate = (
+                    z_candidate.detach().requires_grad_(True)
+                    if not create_graph
+                    else z_candidate.requires_grad_(True)
+                )
+                displacement = z_candidate - z_start
+                anchor_loss = (z_candidate - z_anchor).pow(2).sum(dim=-1)
+                metric_loss = self.metric.metric_energy(
+                    z_start,
+                    displacement / dt,
+                    metric_diag,
+                    metric_u,
+                )
+                risk_loss = self.risk(z_candidate)["risk_mass"]
+                energy = (
+                    self.config.geodesic_anchor_weight * anchor_loss
+                    + self.config.geodesic_metric_weight * metric_loss
+                    + self.config.geodesic_risk_weight * risk_loss
+                ).sum()
+                grad = torch.autograd.grad(energy, z_candidate, create_graph=create_graph)[0]
+            z_candidate = self._bound_state(z_candidate - self.config.geodesic_lr * grad)
+        return z_candidate if create_graph else z_candidate.detach()
+
+    def _directional_candidate_step(
+        self,
+        z: torch.Tensor,
+        dz_context: torch.Tensor,
+        directions: torch.Tensor,
+        gates: torch.Tensor,
+        metric_diag: torch.Tensor,
+        metric_u: torch.Tensor,
+    ) -> torch.Tensor:
+        """Choose the next state from parallel directional endpoint candidates."""
+
+        dt = max(self.config.dt, 1e-8)
+        z_anchor = self.updater(z, dz_context)
+        candidate_delta = dt * self.config.directional_candidate_scale * gates.unsqueeze(-1) * directions
+        anchor_delta = (z_anchor - z).unsqueeze(1)
+        candidates = self._bound_state(z.unsqueeze(1) + candidate_delta + anchor_delta)
+        candidate_velocity = (candidates - z.unsqueeze(1)) / dt
+
+        diag_energy = (metric_diag.unsqueeze(1) * candidate_velocity.pow(2)).sum(dim=-1)
+        if metric_u.shape[-1] > 0:
+            low_rank = torch.einsum("bnr,bnrk->bnk", candidate_velocity, metric_u.unsqueeze(1))
+            metric_energy = diag_energy + low_rank.pow(2).sum(dim=-1)
+        else:
+            metric_energy = diag_energy
+        candidate_risk = self.risk(candidates.reshape(-1, candidates.shape[-1]))["risk_mass"].view(candidates.shape[:2])
+        anchor_energy = (candidates - z_anchor.unsqueeze(1)).pow(2).sum(dim=-1)
+        scores = -(
+            self.config.geodesic_metric_weight * metric_energy
+            + self.config.geodesic_risk_weight * candidate_risk
+            + self.config.geodesic_anchor_weight * anchor_energy
+        )
+        weights = torch.softmax(scores / self.config.directional_candidate_temperature, dim=-1)
+        return torch.einsum("bn,bnd->bd", weights, candidates)
 
     def _naturalization_strength(self, global_step: int | None) -> float:
         if not self.config.use_metric_naturalization:

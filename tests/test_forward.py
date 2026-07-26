@@ -84,3 +84,166 @@ def test_bptt_truncate_interval_keeps_backward_finite():
     grads = [p.grad for p in model.parameters() if p.grad is not None]
     assert grads
     assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_geodesic_step_forward_without_targets_is_finite():
+    config = tiny_config()
+    config.sequence_mode = "geodesic_step"
+    config.geodesic_solver_steps = 1
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    out = model(x, collect_diagnostics=False)
+    assert out["logits"].shape == (2, 6, 17)
+    assert torch.isfinite(out["loss"])
+
+
+def test_geodesic_step_forward_works_under_no_grad():
+    config = tiny_config()
+    config.sequence_mode = "geodesic_step"
+    config.geodesic_solver_steps = 1
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    with torch.no_grad():
+        out = model(x, collect_diagnostics=False)
+    assert out["logits"].shape == (2, 6, 17)
+    assert torch.isfinite(out["loss"])
+
+
+def test_geodesic_step_backward_is_finite():
+    config = tiny_config()
+    config.sequence_mode = "geodesic_step"
+    config.geodesic_solver_steps = 1
+    config.geodesic_lr = 0.001
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, collect_diagnostics=False)
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_candidates_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_candidates"
+    config.directional_candidate_temperature = 0.7
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, collect_diagnostics=False)
+    assert out["logits"].shape == (2, 6, 17)
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_cumsum_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_cumsum"
+    config.directional_candidate_scale = 0.01
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert out["logits"].shape == (2, 6, 17)
+    assert out["states"].shape == (2, 6, config.d_state)
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_block_cumsum_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 2
+    config.directional_candidate_scale = 0.01
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert out["logits"].shape == (2, 6, 17)
+    assert out["states"].shape == (2, 6, config.d_state)
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_block_endpoint_correction_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 3
+    config.directional_candidate_scale = 0.01
+    config.directional_endpoint_correction_weight = 0.5
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert out["states"].shape == (2, 6, config.d_state)
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_block_inner_cumsum_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 4
+    config.directional_cumsum_inner_block_size = 2
+    config.directional_candidate_scale = 0.01
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (2, 6))
+    y = torch.randint(0, 17, (2, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert out["states"].shape == (2, 6, config.d_state)
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_block_anderson_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 3
+    config.directional_candidate_scale = 0.01
+    config.directional_anderson_iterations = 2
+    config.directional_anderson_history_size = 2
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    y = torch.randint(0, 17, (1, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert out["states"].shape == (1, 6, config.d_state)
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_block_consistency_loss_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 3
+    config.directional_candidate_scale = 0.01
+    config.lambda_block_consistency = 0.1
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    y = torch.randint(0, 17, (1, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert "block_consistency" in out["aux_losses"]
+    assert torch.isfinite(out["aux_losses"]["block_consistency"])
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)

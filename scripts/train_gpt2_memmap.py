@@ -140,7 +140,11 @@ def load_checkpoint(
         scheduler.load_state_dict(payload["scheduler"])
     torch.set_rng_state(payload["torch_rng_state"].cpu())
     if device.type == "cuda" and payload.get("cuda_rng_state_all") is not None:
-        torch.cuda.set_rng_state_all(payload["cuda_rng_state_all"])
+        cuda_rng_state_all = [
+            state.detach().cpu().to(dtype=torch.uint8)
+            for state in payload["cuda_rng_state_all"]
+        ]
+        torch.cuda.set_rng_state_all(cuda_rng_state_all)
     return int(payload["step"]), int(payload["tokens_seen"]), float(payload.get("best_val_ce", math.inf))
 
 
@@ -275,6 +279,7 @@ def main() -> None:
     history: list[dict[str, Any]] = []
     started = time.perf_counter()
     optimizer.zero_grad(set_to_none=True)
+    step = start_step
 
     for step in range(start_step + 1, final_step + 1):
         step_loss = 0.0
