@@ -1,4 +1,5 @@
 import torch
+import pytest
 
 from drm_language_emitter import DRMConfig, DRMEmitterModel
 from drm_language_emitter.deer import anderson_solve, causal_anderson_solve, cumulative_delta_warmstart, fixed_point_solve, sequential_rollout
@@ -165,7 +166,9 @@ def test_directional_cumsum_pure_is_causal_across_full_sequence():
     assert torch.allclose(base["logits"][:, :4], perturbed["logits"][:, :4], atol=1e-6)
 
 
-def test_directional_block_anderson_is_causal_within_block():
+@pytest.mark.parametrize("transition_mode", ["candidate", "velocity"])
+@pytest.mark.parametrize("scope", ["trajectory", "endpoint"])
+def test_directional_block_anderson_is_causal_within_block(transition_mode, scope):
     torch.manual_seed(41)
     config = deer_tiny_config()
     config.sequence_mode = "directional_block_cumsum"
@@ -173,6 +176,8 @@ def test_directional_block_anderson_is_causal_within_block():
     config.directional_anderson_iterations = 2
     config.directional_anderson_history_size = 4
     config.directional_anderson_ridge = 1e-3
+    config.directional_anderson_transition_mode = transition_mode
+    config.directional_anderson_scope = scope
     model = DRMEmitterModel(config)
     model.eval()
     input_ids = torch.randint(0, 17, (1, 8))
@@ -185,6 +190,29 @@ def test_directional_block_anderson_is_causal_within_block():
 
     assert torch.allclose(base["states"][:, :4], perturbed["states"][:, :4], atol=1e-6)
     assert torch.allclose(base["logits"][:, :4], perturbed["logits"][:, :4], atol=1e-6)
+
+
+def test_directional_superblock_cumsum_is_causal_within_superblock():
+    torch.manual_seed(42)
+    config = deer_tiny_config()
+    config.sequence_mode = "directional_superblock_cumsum"
+    config.directional_superblock_size = 16
+    config.directional_superblock_local_size = 8
+    config.directional_anderson_iterations = 2
+    config.directional_anderson_history_size = 4
+    config.directional_anderson_transition_mode = "velocity"
+    model = DRMEmitterModel(config)
+    model.eval()
+    input_ids = torch.randint(0, 17, (1, 16))
+    changed = input_ids.clone()
+    changed[:, 10:] = (changed[:, 10:] + 5) % 17
+
+    with torch.no_grad():
+        base = model(input_ids, return_states=True, collect_diagnostics=False)
+        perturbed = model(changed, return_states=True, collect_diagnostics=False)
+
+    assert torch.allclose(base["states"][:, :10], perturbed["states"][:, :10], atol=1e-6)
+    assert torch.allclose(base["logits"][:, :10], perturbed["logits"][:, :10], atol=1e-6)
 
 
 def test_directional_block_fixed_point_is_causal_within_block():

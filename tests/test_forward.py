@@ -230,6 +230,49 @@ def test_directional_block_anderson_forward_and_backward_are_finite():
     assert all(torch.isfinite(grad).all() for grad in grads)
 
 
+def test_directional_superblock_cumsum_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_superblock_cumsum"
+    config.directional_superblock_size = 6
+    config.directional_superblock_local_size = 3
+    config.directional_candidate_scale = 0.01
+    config.directional_anderson_iterations = 1
+    config.directional_anderson_history_size = 2
+    config.directional_anderson_transition_mode = "velocity"
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    y = torch.randint(0, 17, (1, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert out["logits"].shape == (1, 6, 17)
+    assert out["states"].shape == (1, 6, config.d_state)
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_block_endpoint_anderson_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 3
+    config.directional_candidate_scale = 0.01
+    config.directional_anderson_iterations = 2
+    config.directional_anderson_history_size = 2
+    config.directional_anderson_transition_mode = "velocity"
+    config.directional_anderson_scope = "endpoint"
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    y = torch.randint(0, 17, (1, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert out["states"].shape == (1, 6, config.d_state)
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
 def test_directional_block_consistency_loss_forward_and_backward_are_finite():
     config = tiny_config()
     config.sequence_mode = "directional_block_cumsum"
@@ -247,3 +290,71 @@ def test_directional_block_consistency_loss_forward_and_backward_are_finite():
     grads = [p.grad for p in model.parameters() if p.grad is not None]
     assert grads
     assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_sampled_block_consistency_loss_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 6
+    config.directional_cumsum_step_mode = "velocity"
+    config.directional_candidate_scale = 0.01
+    config.lambda_sampled_block_consistency = 0.1
+    config.sampled_block_consistency_interval = 1
+    config.sampled_block_consistency_local_size = 3
+    config.sampled_block_consistency_teacher_mode = "candidate"
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    y = torch.randint(0, 17, (1, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert "sampled_block_consistency" in out["aux_losses"]
+    assert torch.isfinite(out["aux_losses"]["sampled_block_consistency"])
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_local_mixer_forward_and_backward_are_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 6
+    config.directional_cumsum_step_mode = "velocity"
+    config.directional_candidate_scale = 0.01
+    config.directional_local_mixer = "causal_conv"
+    config.directional_local_mixer_hidden_size = 16
+    config.directional_local_mixer_kernel_size = 3
+    config.directional_local_mixer_layers = 1
+    config.directional_local_mixer_scale = 0.1
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    y = torch.randint(0, 17, (1, 6))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    assert out["logits"].shape == (1, 6, 17)
+    assert out["states"].shape == (1, 6, config.d_state)
+    assert torch.isfinite(out["loss"])
+    out["loss"].backward()
+    grads = [p.grad for p in model.parameters() if p.grad is not None]
+    assert grads
+    assert all(torch.isfinite(grad).all() for grad in grads)
+
+
+def test_directional_local_mixer_preserves_prefix_causality():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 6
+    config.directional_cumsum_step_mode = "velocity"
+    config.directional_candidate_scale = 0.01
+    config.directional_local_mixer = "causal_conv"
+    config.directional_local_mixer_hidden_size = 16
+    config.directional_local_mixer_kernel_size = 3
+    config.directional_local_mixer_layers = 1
+    config.directional_local_mixer_scale = 0.1
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    changed = x.clone()
+    changed[:, 4:] = torch.randint(0, 17, (1, 2))
+    out = model(x, return_states=True, collect_diagnostics=False)
+    changed_out = model(changed, return_states=True, collect_diagnostics=False)
+    assert torch.allclose(out["logits"][:, :4], changed_out["logits"][:, :4], atol=1e-5, rtol=1e-5)
+    assert torch.allclose(out["states"][:, :4], changed_out["states"][:, :4], atol=1e-5, rtol=1e-5)

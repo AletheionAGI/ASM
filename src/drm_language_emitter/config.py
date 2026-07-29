@@ -69,7 +69,10 @@ class DRMConfig:
     geodesic_risk_weight: float = 0.01
     directional_candidate_temperature: float = 1.0
     directional_candidate_scale: float = 1.0
+    directional_cumsum_step_mode: str = "candidate"
     directional_cumsum_block_size: int = 0
+    directional_superblock_size: int = 0
+    directional_superblock_local_size: int = 8
     directional_endpoint_correction_weight: float = 0.0
     directional_endpoint_correction_power: float = 1.0
     directional_cumsum_inner_block_size: int = 0
@@ -77,10 +80,22 @@ class DRMConfig:
     directional_anderson_history_size: int = 4
     directional_anderson_ridge: float = 1e-4
     directional_anderson_relaxation: float = 1.0
+    directional_anderson_transition_mode: str = "candidate"
+    directional_anderson_block_stride: int = 1
+    directional_anderson_scope: str = "trajectory"
     directional_fixed_point_iterations: int = 0
     directional_fixed_point_relaxation: float = 1.0
+    directional_local_mixer: str = "none"
+    directional_local_mixer_hidden_size: int = 256
+    directional_local_mixer_kernel_size: int = 8
+    directional_local_mixer_layers: int = 1
+    directional_local_mixer_scale: float = 0.1
     lambda_block_consistency: float = 0.0
     block_consistency_weight: float = 1.0
+    lambda_sampled_block_consistency: float = 0.0
+    sampled_block_consistency_interval: int = 8
+    sampled_block_consistency_local_size: int = 8
+    sampled_block_consistency_teacher_mode: str = "candidate"
     geometry_update_interval: int = 1
     direction_basis_size: int = 0
     metric_u_basis_size: int = 0
@@ -108,10 +123,18 @@ class DRMConfig:
             ("gate_top_k", 0, None),
             ("geodesic_solver_steps", 0, None),
             ("directional_cumsum_block_size", 0, None),
+            ("directional_superblock_size", 0, None),
+            ("directional_superblock_local_size", 1, None),
             ("directional_cumsum_inner_block_size", 0, None),
             ("directional_anderson_iterations", 0, None),
             ("directional_anderson_history_size", 1, None),
+            ("directional_anderson_block_stride", 1, None),
             ("directional_fixed_point_iterations", 0, None),
+            ("directional_local_mixer_hidden_size", 1, None),
+            ("directional_local_mixer_kernel_size", 1, None),
+            ("directional_local_mixer_layers", 1, None),
+            ("sampled_block_consistency_interval", 1, None),
+            ("sampled_block_consistency_local_size", 1, None),
             ("geometry_update_interval", 1, None),
             ("direction_basis_size", 0, None),
             ("metric_u_basis_size", 0, None),
@@ -173,8 +196,10 @@ class DRMConfig:
             ("directional_anderson_ridge", 0.0, None),
             ("directional_anderson_relaxation", 0.0, None),
             ("directional_fixed_point_relaxation", 0.0, None),
+            ("directional_local_mixer_scale", 0.0, None),
             ("lambda_block_consistency", 0.0, None),
             ("block_consistency_weight", 0.0, None),
+            ("lambda_sampled_block_consistency", 0.0, None),
         ]
         for name, min_val, max_val in float_fields:
             val = getattr(self, name)
@@ -206,11 +231,29 @@ class DRMConfig:
                 raise ValueError(f"'{name}' must be a boolean, got {type(val).__name__}")
         if self.risk_exponent_min > self.risk_exponent_max:
             raise ValueError("'risk_exponent_min' must be <= 'risk_exponent_max'")
-        if self.sequence_mode not in {"local_step", "geodesic_step", "directional_candidates", "directional_cumsum", "directional_block_cumsum"}:
+        if self.sequence_mode not in {
+            "local_step",
+            "geodesic_step",
+            "directional_candidates",
+            "directional_cumsum",
+            "directional_block_cumsum",
+            "directional_superblock_cumsum",
+        }:
             raise ValueError(
                 "'sequence_mode' must be one of: local_step, geodesic_step, "
-                "directional_candidates, directional_cumsum, directional_block_cumsum"
+                "directional_candidates, directional_cumsum, directional_block_cumsum, "
+                "directional_superblock_cumsum"
             )
+        if self.directional_cumsum_step_mode not in {"candidate", "velocity"}:
+            raise ValueError("'directional_cumsum_step_mode' must be one of: candidate, velocity")
+        if self.directional_anderson_transition_mode not in {"candidate", "velocity"}:
+            raise ValueError("'directional_anderson_transition_mode' must be one of: candidate, velocity")
+        if self.directional_anderson_scope not in {"trajectory", "endpoint"}:
+            raise ValueError("'directional_anderson_scope' must be one of: trajectory, endpoint")
+        if self.directional_local_mixer not in {"none", "causal_conv"}:
+            raise ValueError("'directional_local_mixer' must be one of: none, causal_conv")
+        if self.sampled_block_consistency_teacher_mode not in {"candidate", "velocity"}:
+            raise ValueError("'sampled_block_consistency_teacher_mode' must be one of: candidate, velocity")
 
     def __post_init__(self) -> None:  # pragma: no cover
         """Automatically validate configuration on instantiation."""

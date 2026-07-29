@@ -158,7 +158,14 @@ def main() -> None:
     parser.add_argument("--dry-run-forward", action="store_true")
     parser.add_argument(
         "--sequence-mode",
-        choices=["local_step", "geodesic_step", "directional_candidates", "directional_cumsum", "directional_block_cumsum"],
+        choices=[
+            "local_step",
+            "geodesic_step",
+            "directional_candidates",
+            "directional_cumsum",
+            "directional_block_cumsum",
+            "directional_superblock_cumsum",
+        ],
         default=None,
     )
     parser.add_argument("--geodesic-solver-steps", type=int, default=None)
@@ -168,7 +175,10 @@ def main() -> None:
     parser.add_argument("--geodesic-risk-weight", type=float, default=None)
     parser.add_argument("--directional-candidate-temperature", type=float, default=None)
     parser.add_argument("--directional-candidate-scale", type=float, default=None)
+    parser.add_argument("--directional-cumsum-step-mode", choices=["candidate", "velocity"], default=None)
     parser.add_argument("--directional-cumsum-block-size", type=int, default=None)
+    parser.add_argument("--directional-superblock-size", type=int, default=None)
+    parser.add_argument("--directional-superblock-local-size", type=int, default=None)
     parser.add_argument("--directional-endpoint-correction-weight", type=float, default=None)
     parser.add_argument("--directional-endpoint-correction-power", type=float, default=None)
     parser.add_argument("--directional-cumsum-inner-block-size", type=int, default=None)
@@ -176,10 +186,22 @@ def main() -> None:
     parser.add_argument("--directional-anderson-history-size", type=int, default=None)
     parser.add_argument("--directional-anderson-ridge", type=float, default=None)
     parser.add_argument("--directional-anderson-relaxation", type=float, default=None)
+    parser.add_argument("--directional-anderson-transition-mode", choices=["candidate", "velocity"], default=None)
+    parser.add_argument("--directional-anderson-block-stride", type=int, default=None)
+    parser.add_argument("--directional-anderson-scope", choices=["trajectory", "endpoint"], default=None)
     parser.add_argument("--directional-fixed-point-iterations", type=int, default=None)
     parser.add_argument("--directional-fixed-point-relaxation", type=float, default=None)
+    parser.add_argument("--directional-local-mixer", choices=["none", "causal_conv"], default=None)
+    parser.add_argument("--directional-local-mixer-hidden-size", type=int, default=None)
+    parser.add_argument("--directional-local-mixer-kernel-size", type=int, default=None)
+    parser.add_argument("--directional-local-mixer-layers", type=int, default=None)
+    parser.add_argument("--directional-local-mixer-scale", type=float, default=None)
     parser.add_argument("--lambda-block-consistency", type=float, default=None)
     parser.add_argument("--block-consistency-weight", type=float, default=None)
+    parser.add_argument("--lambda-sampled-block-consistency", type=float, default=None)
+    parser.add_argument("--sampled-block-consistency-interval", type=int, default=None)
+    parser.add_argument("--sampled-block-consistency-local-size", type=int, default=None)
+    parser.add_argument("--sampled-block-consistency-teacher-mode", choices=["candidate", "velocity"], default=None)
     args = parser.parse_args()
 
     ddp, rank, local_rank, world_size = distributed_state()
@@ -208,8 +230,14 @@ def main() -> None:
         config.directional_candidate_temperature = args.directional_candidate_temperature
     if args.directional_candidate_scale is not None:
         config.directional_candidate_scale = args.directional_candidate_scale
+    if args.directional_cumsum_step_mode is not None:
+        config.directional_cumsum_step_mode = args.directional_cumsum_step_mode
     if args.directional_cumsum_block_size is not None:
         config.directional_cumsum_block_size = args.directional_cumsum_block_size
+    if args.directional_superblock_size is not None:
+        config.directional_superblock_size = args.directional_superblock_size
+    if args.directional_superblock_local_size is not None:
+        config.directional_superblock_local_size = args.directional_superblock_local_size
     if args.directional_endpoint_correction_weight is not None:
         config.directional_endpoint_correction_weight = args.directional_endpoint_correction_weight
     if args.directional_endpoint_correction_power is not None:
@@ -224,14 +252,38 @@ def main() -> None:
         config.directional_anderson_ridge = args.directional_anderson_ridge
     if args.directional_anderson_relaxation is not None:
         config.directional_anderson_relaxation = args.directional_anderson_relaxation
+    if args.directional_anderson_transition_mode is not None:
+        config.directional_anderson_transition_mode = args.directional_anderson_transition_mode
+    if args.directional_anderson_block_stride is not None:
+        config.directional_anderson_block_stride = args.directional_anderson_block_stride
+    if args.directional_anderson_scope is not None:
+        config.directional_anderson_scope = args.directional_anderson_scope
     if args.directional_fixed_point_iterations is not None:
         config.directional_fixed_point_iterations = args.directional_fixed_point_iterations
     if args.directional_fixed_point_relaxation is not None:
         config.directional_fixed_point_relaxation = args.directional_fixed_point_relaxation
+    if args.directional_local_mixer is not None:
+        config.directional_local_mixer = args.directional_local_mixer
+    if args.directional_local_mixer_hidden_size is not None:
+        config.directional_local_mixer_hidden_size = args.directional_local_mixer_hidden_size
+    if args.directional_local_mixer_kernel_size is not None:
+        config.directional_local_mixer_kernel_size = args.directional_local_mixer_kernel_size
+    if args.directional_local_mixer_layers is not None:
+        config.directional_local_mixer_layers = args.directional_local_mixer_layers
+    if args.directional_local_mixer_scale is not None:
+        config.directional_local_mixer_scale = args.directional_local_mixer_scale
     if args.lambda_block_consistency is not None:
         config.lambda_block_consistency = args.lambda_block_consistency
     if args.block_consistency_weight is not None:
         config.block_consistency_weight = args.block_consistency_weight
+    if args.lambda_sampled_block_consistency is not None:
+        config.lambda_sampled_block_consistency = args.lambda_sampled_block_consistency
+    if args.sampled_block_consistency_interval is not None:
+        config.sampled_block_consistency_interval = args.sampled_block_consistency_interval
+    if args.sampled_block_consistency_local_size is not None:
+        config.sampled_block_consistency_local_size = args.sampled_block_consistency_local_size
+    if args.sampled_block_consistency_teacher_mode is not None:
+        config.sampled_block_consistency_teacher_mode = args.sampled_block_consistency_teacher_mode
     config._validate()
     model = DRMEmitterModel(config).to(device)
     parameter_count = count_parameters(model)

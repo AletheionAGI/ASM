@@ -41,23 +41,83 @@ def test_config_validates_sequence_mode_and_geodesic_fields():
     assert candidate_config.sequence_mode == "directional_candidates"
     cumsum_config = DRMConfig(sequence_mode="directional_cumsum")
     assert cumsum_config.sequence_mode == "directional_cumsum"
+    velocity_cumsum_config = DRMConfig(directional_cumsum_step_mode="velocity")
+    assert velocity_cumsum_config.directional_cumsum_step_mode == "velocity"
     block_config = DRMConfig(sequence_mode="directional_block_cumsum", directional_cumsum_block_size=4)
     assert block_config.directional_cumsum_block_size == 4
+    superblock_config = DRMConfig(
+        sequence_mode="directional_superblock_cumsum",
+        directional_superblock_size=16,
+        directional_superblock_local_size=4,
+    )
+    assert superblock_config.sequence_mode == "directional_superblock_cumsum"
+    assert superblock_config.directional_superblock_size == 16
+    assert superblock_config.directional_superblock_local_size == 4
     endpoint_config = DRMConfig(directional_endpoint_correction_weight=0.5, directional_endpoint_correction_power=2.0)
     assert endpoint_config.directional_endpoint_correction_weight == 0.5
     inner_config = DRMConfig(directional_cumsum_inner_block_size=2)
     assert inner_config.directional_cumsum_inner_block_size == 2
     anderson_config = DRMConfig(directional_anderson_iterations=2, directional_anderson_history_size=3)
     assert anderson_config.directional_anderson_iterations == 2
+    velocity_anderson_config = DRMConfig(directional_anderson_transition_mode="velocity")
+    assert velocity_anderson_config.directional_anderson_transition_mode == "velocity"
+    endpoint_anderson_config = DRMConfig(directional_anderson_scope="endpoint")
+    assert endpoint_anderson_config.directional_anderson_scope == "endpoint"
+    local_mixer_config = DRMConfig(
+        directional_local_mixer="causal_conv",
+        directional_local_mixer_hidden_size=32,
+        directional_local_mixer_kernel_size=4,
+        directional_local_mixer_layers=2,
+        directional_local_mixer_scale=0.2,
+    )
+    assert local_mixer_config.directional_local_mixer == "causal_conv"
+    assert local_mixer_config.directional_local_mixer_hidden_size == 32
+    assert local_mixer_config.directional_local_mixer_kernel_size == 4
+    assert local_mixer_config.directional_local_mixer_layers == 2
+    assert local_mixer_config.directional_local_mixer_scale == 0.2
     consistency_config = DRMConfig(lambda_block_consistency=0.1)
     assert consistency_config.lambda_block_consistency == 0.1
+    sampled_consistency_config = DRMConfig(
+        lambda_sampled_block_consistency=0.1,
+        sampled_block_consistency_interval=2,
+        sampled_block_consistency_local_size=4,
+        sampled_block_consistency_teacher_mode="velocity",
+    )
+    assert sampled_consistency_config.lambda_sampled_block_consistency == 0.1
+    assert sampled_consistency_config.sampled_block_consistency_interval == 2
+    assert sampled_consistency_config.sampled_block_consistency_local_size == 4
+    assert sampled_consistency_config.sampled_block_consistency_teacher_mode == "velocity"
     with pytest.raises(ValueError, match="sequence_mode"):
         DRMConfig(sequence_mode="not_a_solver")
     with pytest.raises(ValueError, match="geodesic_solver_steps"):
         DRMConfig(geodesic_solver_steps=-1)
     with pytest.raises(ValueError, match="directional_candidate_temperature"):
         DRMConfig(directional_candidate_temperature=0.0)
+    with pytest.raises(ValueError, match="directional_cumsum_step_mode"):
+        DRMConfig(directional_cumsum_step_mode="not_a_step")
     with pytest.raises(ValueError, match="directional_cumsum_block_size"):
         DRMConfig(directional_cumsum_block_size=-1)
+    with pytest.raises(ValueError, match="directional_superblock_size"):
+        DRMConfig(directional_superblock_size=-1)
+    with pytest.raises(ValueError, match="directional_superblock_local_size"):
+        DRMConfig(directional_superblock_local_size=0)
     with pytest.raises(ValueError, match="directional_cumsum_inner_block_size"):
         DRMConfig(directional_cumsum_inner_block_size=-1)
+    with pytest.raises(ValueError, match="directional_anderson_transition_mode"):
+        DRMConfig(directional_anderson_transition_mode="not_a_transition")
+    with pytest.raises(ValueError, match="directional_anderson_scope"):
+        DRMConfig(directional_anderson_scope="not_a_scope")
+    with pytest.raises(ValueError, match="directional_local_mixer"):
+        DRMConfig(directional_local_mixer="not_a_mixer")
+    with pytest.raises(ValueError, match="directional_local_mixer_hidden_size"):
+        DRMConfig(directional_local_mixer_hidden_size=0)
+    with pytest.raises(ValueError, match="directional_local_mixer_kernel_size"):
+        DRMConfig(directional_local_mixer_kernel_size=0)
+    with pytest.raises(ValueError, match="directional_local_mixer_layers"):
+        DRMConfig(directional_local_mixer_layers=0)
+    with pytest.raises(ValueError, match="sampled_block_consistency_interval"):
+        DRMConfig(sampled_block_consistency_interval=0)
+    with pytest.raises(ValueError, match="sampled_block_consistency_local_size"):
+        DRMConfig(sampled_block_consistency_local_size=0)
+    with pytest.raises(ValueError, match="sampled_block_consistency_teacher_mode"):
+        DRMConfig(sampled_block_consistency_teacher_mode="not_a_teacher")
