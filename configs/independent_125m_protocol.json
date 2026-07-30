@@ -1,0 +1,45 @@
+{
+  "protocol_version": 1,
+  "status": "draft",
+  "frozen_before_training": false,
+  "models": ["drm_125m_real_local_mixer", "gpt2_125m_real"],
+  "seeds": [1, 2, 3],
+  "train_tokens_per_seed": 150000000,
+  "checkpoint_selection_metric": "validation_ce",
+  "checkpoint_selection_rule": "minimum validation CE",
+  "test_evaluations_per_checkpoint": 1,
+  "test_tokens": 10000000,
+  "test_seq_len": 512,
+  "primary_metric": "test_ce",
+  "secondary_metrics": [
+    "test_ppl",
+    "tokens_to_validation_target",
+    "seconds_to_validation_target",
+    "tokens_per_sec",
+    "max_memory_mb",
+    "gpu_hours"
+  ],
+  "validation_target_ce": null,
+  "stopping_rule": "fixed token budget",
+  "contamination_audit": {
+    "block_size": 512,
+    "stride": 256,
+    "maximum_allowed_overlaps": 0
+  },
+  "datasets": {
+    "train_manifest": "data/benchmark_125m_wikipedia/train/manifest.json",
+    "train_corpus_sha256": "7c0a78cebc7e744b31034c4e25cefef1456144d95c3aa86b7114b43d5bc95127",
+    "validation_manifest": "data/benchmark_125m_wikipedia/validation/manifest.json",
+    "validation_corpus_sha256": "9629998457a98582f275f86c41a56915d3b25e688f217bb079fbfc28c0afb581",
+    "test_manifest": "data/benchmark_125m_external/test/manifest.json",
+    "test_corpus_sha256": "610d4f67cca125e220a6612928cfc7dd396736f84008af3cb0e64f73c6a96e5e",
+    "provenance": {
+      "wikipedia": "data/benchmark_125m_wikipedia/provenance.json",
+      "pg19_download": "data/external/pg19/download_provenance.json",
+      "pg19_preparation": "data/benchmark_125m_external/provenance.json"
+    }
+  },
+  "hardware": null,
+  "repository_commit": null,
+  "notes": "Datasets and contamination audits are fixed. Define validation_target_ce, hardware and repository_commit; then set status=frozen and frozen_before_training=true before benchmark runs."
+}

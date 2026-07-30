@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "block_size": 512,
+  "stride": 256,
+  "split_filter": null,
+  "manifests": {
+    "wikipedia_train": "data/benchmark_125m_wikipedia/train/manifest.json",
+    "wikipedia_validation": "data/benchmark_125m_wikipedia/validation/manifest.json"
+  },
+  "blocks_scanned": {
+    "wikipedia_train": 19588906,
+    "wikipedia_validation": 18884
+  },
+  "overlaps": {
+    "wikipedia_train__wikipedia_validation": 0
+  },
+  "samples": []
+}

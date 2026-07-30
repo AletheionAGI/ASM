@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "block_size": 512,
+  "stride": 256,
+  "split_filter": null,
+  "manifests": {
+    "wikipedia": "data/tokens_5b/manifest.json",
+    "pg19_test": "data/benchmark_125m_external/test/manifest.json"
+  },
+  "blocks_scanned": {
+    "wikipedia": 19608056,
+    "pg19_test": 155853
+  },
+  "overlaps": {
+    "wikipedia__pg19_test": 0
+  },
+  "samples": []
+}
