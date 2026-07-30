@@ -1,6 +1,43 @@
 # DRM Formal Implementation Roadmap
 
-Date: 2026-07-11
+Original date: 2026-07-11
+Last aligned with repository: 2026-07-30
+
+## Project Status on 2026-07-30
+
+The project is currently in **Gate 0 — empirical validation and runtime
+correctness**, before Phase 1 of the formal DRM roadmap.
+
+The active milestone is the frozen independent 125M benchmark:
+
+- document-disjoint Wikipedia train/validation manifests are prepared;
+- the external PG-19 test split is frozen and has not been consulted by the
+  training launcher;
+- exact-block contamination audits passed with zero overlaps;
+- the CUDA smoke test passed on one RTX 4090;
+- three DRM and three GPT-2 runs at 150M tokens each are in progress;
+- final PG-19 evaluation remains pending until best checkpoints are selected
+  using validation CE.
+
+Formal roadmap status:
+
+| Gate/phase | Status | Repository evidence |
+|---|---|---|
+| Gate 0 — benchmark and runtime correctness | In progress | Frozen protocol, independent manifests, active six-run benchmark |
+| Phase 1 — metric rank, kernel and strata | Not started | Current SPD metric has full mathematical rank |
+| Phase 2 — transition maps and energy criteria | Not started | No explicit interstratum `J` maps |
+| Phase 3 — anchor and admissible motion | Not started | Existing “anchor” variables are solver proposals, not `rho_p` |
+| Phase 4 — stratumwise connection and transport | Not started | No connection or formal parallel transport |
+| Phase 5 — hybrid holonomy and hysteresis | Not started | No ordered hybrid loop operators/invariants |
+| Phase 6 — reduction diagnostics | Not started | No Riemannian/sub-Riemannian/Fisher identification |
+
+Gate 0 is complete only after:
+
+1. all six frozen runs finish and their best validation checkpoints are fixed;
+2. each selected checkpoint is evaluated once on PG-19;
+3. results and uncertainty across seeds are published;
+4. generation is made faithful to the trained sequence mode/local mixer;
+5. inert public configuration flags are implemented or rejected explicitly.
 
 This roadmap describes the next formal DRM implementation layers needed to bring
 `drm-language-emitter` closer to the mathematical article:
@@ -32,6 +69,12 @@ Implemented today:
 - `RelationalMetric.naturalize`: applies Woodbury-style `G^{-1}` preconditioning.
 - `StateUpdater`: updates `z <- z + dt * dz` with optional bounded state.
 - Geometry diagnostics: active fractions, gate quantiles, action proxy, condition proxy, metric norms, recurrence and stability proxies.
+- Causal block/superblock cumsum sequence paths and optional causal local mixer.
+- Causal Anderson/fixed-point experimental paths and causality regression tests.
+- Memory-mapped byte-token datasets with shard integrity verification.
+- Safe weights-only checkpoint loading with payload/config validation.
+- Independent train/validation/test preparation and frozen-test evaluation
+  infrastructure.
 
 Important current limitations:
 
@@ -41,18 +84,68 @@ Important current limitations:
 - Curvature and holonomy are not computed.
 - `use_toroidal_state` exists but does not change the dynamics.
 - The metric is numerically positive definite by construction, not semidefinite with an actual kernel.
+- Consequently, its exact rank is always `d_state`; current `dimD` is the sum
+  of directional gates and is **not** the paper's
+  `d_DRM(p) = rank(g_p)`.
 - Fisher-Rao geometry is mentioned as a future connection but not implemented.
+- Autoregressive `generation.py` still advances with the basic recurrent
+  transition and does not reproduce the block-cumsum/local-mixer forward path.
+- `tie_embeddings` is accepted by `DRMConfig` but is not wired into the model.
+- `geometry_report` uses same-token targets when none are supplied; its default
+  CE must not be interpreted as next-token CE.
 
 ## Roadmap Summary
 
-| Phase | Feature | Priority | First integration mode |
-|---:|---|---|---|
-| 1 | Relational transport diagnostics | High | Evaluation-only |
-| 2 | Curvature and holonomy diagnostics | High | Evaluation-only |
-| 3 | Effective rank and soft kernel diagnostics | High | Evaluation + optional regularizer |
-| 4 | Approximate Fisher-Rao pullback metric | Medium/high | Diagnostic, then optional auxiliary loss |
-| 5 | Conditional toroidal state dynamics | Medium | Optional config path |
-| 6 | Explicit anchor map `rho_p` | Medium/low | Optional module and diagnostics |
+| Phase | Feature | Status | Priority | First integration mode |
+|---:|---|---|---|---|
+| 0 | Independent validation and runtime fidelity | In progress | Critical | Frozen benchmark + correctness fixes |
+| 1 | Metric rank, soft kernel and rank strata | Not started | Critical | Evaluation-only, then optional PSD path |
+| 2 | Interstratum transition maps and energy defects | Not started | High | Evaluation-only |
+| 3 | Explicit anchor `rho` and admissible motion | Not started | High | Identity/default diagnostic path |
+| 4 | Stratumwise connection and metric transport | Not started | High | Evaluation-only |
+| 5 | Ordered hybrid holonomy and hysteresis invariants | Not started | High | Evaluation-only |
+| 6 | Riemannian/sub-Riemannian/Fisher reductions | Not started | Medium | Diagnostic identification |
+
+Conditional toroidal closure is an optional appendix track, not a core phase:
+the paper explicitly states that boundedness and recurrence do not imply a
+torus. It must not be inferred from `bounded_state`.
+
+## Alignment with `docs/paper/drm_v6.tex`
+
+The paper's dependency chain is authoritative for formal implementation:
+
+```text
+PSD metric
+→ kernel and quotient effective fiber
+→ constant-rank strata
+→ kernel-compatible anchor
+→ stratumwise connection/transport
+→ explicit rank-transition maps
+→ ordered hybrid holonomy/hysteresis
+```
+
+The neural implementation currently covers only an engineering analogue of
+the ambient state, directional dynamics, a strictly positive-definite metric
+and an action-like energy. It does not yet instantiate the formal tuple
+
+```text
+(M, E, g, rho, {S_alpha}, {nabla_alpha}, {J_e}).
+```
+
+Terminology must therefore remain precise:
+
+- gate activity is not metric rank;
+- low metric condition is not a kernel or quotient fiber;
+- causal Anderson/local mixing is not relational parallel transport;
+- recurrence proxies are not closed-loop holonomy;
+- bounded latent states are not toroidal closure;
+- Fisher pullback diagnostics would be an empirical extension, while the
+  paper itself proves a conditional Fisher–Rao reduction.
+
+The detailed phase sketches below predate `drm_v6.tex`. They remain useful
+implementation notes, but their old numbering/order is superseded by the
+paper-aligned summary above. In particular, the old “Phase 3 — Effective Rank”
+must be implemented before the old transport/holonomy sketches.
 
 ---
 
@@ -795,61 +888,79 @@ anchor_cosine = F.cosine_similarity(anchored_directions, directions, dim=-1).mea
 
 # Recommended Implementation Order
 
+## Gate 0
+
+Complete the independent 125M benchmark without changing its frozen training
+path. In parallel, prepare (but do not inject into active runs) correctness
+fixes for generation parity, inert config flags and default geometry-report
+target semantics. Merge those fixes after the frozen run artifact is secured,
+then add regression tests proving that generation uses the configured sequence
+mode.
+
 ## Step 1
 
-Implement transport diagnostics:
+Implement metric-rank semantics:
 
-- `transport.py`;
-- tests;
-- add diagnostics to geometry report.
+- distinguish exact rank, numerical effective rank and gate activity;
+- expose eigenvalue, participation-rank and kernel-mass diagnostics;
+- identify candidate constant-rank strata without changing training.
 
-Reason: high conceptual value, low training risk.
+Reason: the paper defines every later effective fiber and transition from
+`Ker(g)` and `rank(g)`.
 
 ## Step 2
 
-Implement holonomy diagnostics:
+Implement transition identification:
 
-- `curvature.py`;
-- `scripts/eval_holonomy.py`;
-- tests.
+- detect crossings between candidate rank strata;
+- estimate explicit linear transition maps `J`;
+- report rank defect, operator norm and `J^T G_+ J <= G_-` violations.
 
-Reason: strong link to article and good visualization potential.
+Reason: paper-level hybrid transport requires explicit interstratum maps.
 
 ## Step 3
 
-Implement effective rank diagnostics:
+Implement the explicit anchor:
 
-- metric rank diagnostics;
-- no singular training metric yet.
+- identity anchor as the safe default;
+- kernel-compatibility diagnostics;
+- admissible-motion and observable-mobility ranks.
 
-Reason: gives measurable emergent dimensionality.
+Reason: the anchor precedes connections and admissible curves in the formal
+construction.
 
 ## Step 4
 
-Implement Fisher-Rao approximation:
+Implement stratumwise connection and transport:
 
-- diagnostic-only first;
-- optional alignment loss later.
+- transport only inside identified constant-rank strata;
+- verify metric compatibility and invertibility;
+- label frame-alignment transport clearly as an approximation.
 
-Reason: connects latent geometry to emitted language distributions.
+Reason: regular parallel transport is defined on the quotient metric bundle,
+not on unclassified raw direction frames.
 
 ## Step 5
 
-Implement toroidal state:
+Implement hybrid holonomy and hysteresis:
 
-- phase wrapping first;
-- feature augmentation later only if needed.
+- ordered products of intrastatum transports and transition maps;
+- rank, norm, energy, spectrum and order-memory defects;
+- flat-stratum hysteresis tests matching the paper examples.
 
-Reason: useful for cyclic domains, music, recurrence, memory.
+Reason: this is the paper's central global construction.
 
 ## Step 6
 
-Implement explicit anchor:
+Validate reduction regimes:
 
-- identity by default;
-- learned anchor optional.
+- Riemannian and sub-Riemannian identification checks;
+- Fisher–Rao reduction diagnostics when hypotheses are satisfied;
+- toroidal closure only as a separate optional experiment requiring the
+  appendix hypotheses.
 
-Reason: mathematically clean, but not urgent for language modeling.
+Reason: these are conditional reductions, not substitutes for the core
+rank-transition construction.
 
 ---
 
@@ -910,4 +1021,3 @@ Until then, the most accurate claim remains:
 drm-language-emitter is a neural language-modeling prototype inspired by
 Directional Relational Manifolds.
 ```
-
