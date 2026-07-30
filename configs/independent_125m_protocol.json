@@ -73,7 +73,7 @@
     "pytorch_cuda": "13.0",
     "precision": "bf16"
   },
-  "repository_commit": "4f98b97a",
+  "repository_commit": "b6e9587a",
   "smoke_test": {
     "status": "passed",
     "drm_parameters": 127266438,
