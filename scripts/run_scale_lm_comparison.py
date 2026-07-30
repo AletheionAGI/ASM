@@ -14,7 +14,7 @@ from typing import Any
 import torch
 
 from drm_language_emitter.config import DRMConfig
-from drm_language_emitter.data import build_tokenizer, ensure_text, make_lm_batch
+from drm_language_emitter.data import build_tokenizer, ensure_text, make_lm_batch, split_lm_ids
 from drm_language_emitter.model import DRMEmitterModel
 from drm_language_emitter.utils import load_yaml_or_json, save_json
 from prepare_wikipedia_en import (
@@ -116,6 +116,7 @@ def make_model(
         config.vocab_size = vocab_size
         config.max_seq_len = max_seq_len
         config.dropout = dropout
+        config = config.validated_copy()
         model = DRMEmitterModel(config)
         metadata = config.to_dict()
     else:
@@ -151,6 +152,7 @@ def evaluate(
     batches: int,
     global_step: int,
 ) -> tuple[float, dict[str, float]]:
+    was_training = model.training
     model.eval()
     losses = []
     diagnostics_accum: dict[str, list[float]] = {}
@@ -161,7 +163,7 @@ def evaluate(
         for key, value in diagnostics.items():
             if isinstance(value, torch.Tensor) and value.numel() == 1:
                 diagnostics_accum.setdefault(key, []).append(float(value.detach().cpu()))
-    model.train()
+    model.train(was_training)
     diag = {key: mean(values) for key, values in diagnostics_accum.items() if values}
     return mean(losses), diag
 
@@ -226,9 +228,7 @@ def train_one(
     data_vocab_size = tokenizer.vocab_size
     model_vocab_size = hf_vocab_size if MODEL_SPECS[model_name]["family"] != "drm" else data_vocab_size
     ids = tokenizer.encode(text)
-    split = max(int(len(ids) * 0.9), seq_len + 2)
-    train_ids = ids[:split]
-    val_ids = ids[max(0, split - seq_len - 1) :]
+    train_ids, val_ids = split_lm_ids(ids, 0.1)
     model, model_config = make_model(model_name, model_vocab_size, seq_len, dropout, device)
     family = MODEL_SPECS[model_name]["family"]
     parameter_count = count_parameters(model)

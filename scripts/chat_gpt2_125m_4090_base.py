@@ -69,10 +69,7 @@ def apply_dtype(model: torch.nn.Module, device: torch.device, dtype_name: str) -
 
 
 def load_payload(checkpoint: Path) -> dict[str, Any]:
-    try:
-        payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
-    except TypeError:
-        payload = torch.load(checkpoint, map_location="cpu")
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
     if not isinstance(payload, dict) or not isinstance(payload.get("config"), dict) or not isinstance(payload.get("model"), dict):
         raise ValueError("checkpoint must contain dictionary keys: config, model")
     return payload

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import bisect
+import hashlib
 import json
 import mmap
 from contextlib import AbstractContextManager
@@ -41,20 +42,35 @@ def build_tokenizer(text: str, tokenizer_type: str = "byte") -> ByteTokenizer | 
     return make_tokenizer(text, tokenizer_type)
 
 
+def split_lm_ids(ids: list[int], val_fraction: float = 0.1) -> tuple[list[int], list[int]]:
+    """Split token IDs into disjoint training and validation partitions."""
+    if not 0.0 < val_fraction < 1.0:
+        raise ValueError("val_fraction must be between 0 and 1")
+    if len(ids) < 3:
+        raise ValueError("at least 3 token IDs are required for a train/validation split")
+    split = min(max(int(len(ids) * (1.0 - val_fraction)), 2), len(ids) - 1)
+    return ids[:split], ids[split:]
+
+
 class MemmapTokenDataset(AbstractContextManager["MemmapTokenDataset"]):
     """Read fixed uint8 token shards without loading the corpus into RAM."""
 
-    def __init__(self, manifest_path: str | Path, split: str = "train") -> None:
+    def __init__(
+        self,
+        manifest_path: str | Path,
+        split: str = "train",
+        verify_integrity: bool = True,
+    ) -> None:
         self.manifest_path = Path(manifest_path)
-        self.root = self.manifest_path.parent
+        self.root = self.manifest_path.resolve().parent
         self.manifest: dict[str, Any] = json.loads(self.manifest_path.read_text(encoding="utf-8"))
         if self.manifest.get("dtype") != "uint8":
             raise ValueError(f"unsupported token dtype: {self.manifest.get('dtype')!r}")
         self.shards = [shard for shard in self.manifest.get("shards", []) if shard.get("split") == split]
         if not self.shards:
             raise ValueError(f"manifest has no shards for split={split!r}")
-        self._paths = [self.root / shard["path"] for shard in self.shards]
-        self._lengths = [int(shard["bytes"]) for shard in self.shards]
+        self._paths = [self._resolve_shard_path(shard) for shard in self.shards]
+        self._lengths = [self._validate_shard(shard, path, verify_integrity) for shard, path in zip(self.shards, self._paths)]
         self._handles = [path.open("rb") for path in self._paths]
         self._maps = [mmap.mmap(handle.fileno(), 0, access=mmap.ACCESS_READ) for handle in self._handles]
         self._ends: list[int] = []
@@ -63,6 +79,43 @@ class MemmapTokenDataset(AbstractContextManager["MemmapTokenDataset"]):
             total += length
             self._ends.append(total)
         self.total_tokens = total
+
+    def _resolve_shard_path(self, shard: dict[str, Any]) -> Path:
+        raw_path = shard.get("path")
+        if not isinstance(raw_path, str) or not raw_path:
+            raise ValueError("each shard must have a non-empty string path")
+        path = (self.root / raw_path).resolve()
+        if not path.is_relative_to(self.root):
+            raise ValueError(f"shard path escapes manifest directory: {raw_path!r}")
+        return path
+
+    @staticmethod
+    def _validate_shard(shard: dict[str, Any], path: Path, verify_integrity: bool) -> int:
+        try:
+            declared_size = int(shard["bytes"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError(f"invalid byte count for shard {path.name!r}") from exc
+        if declared_size <= 0:
+            raise ValueError(f"shard {path.name!r} must contain at least one byte")
+        try:
+            actual_size = path.stat().st_size
+        except FileNotFoundError as exc:
+            raise ValueError(f"shard file does not exist: {path}") from exc
+        if actual_size != declared_size:
+            raise ValueError(
+                f"shard size mismatch for {path.name!r}: expected {declared_size}, got {actual_size}"
+            )
+        expected_digest = shard.get("sha256")
+        if verify_integrity:
+            if not isinstance(expected_digest, str) or len(expected_digest) != 64:
+                raise ValueError(f"shard {path.name!r} is missing a valid sha256 digest")
+            digest = hashlib.sha256()
+            with path.open("rb") as handle:
+                for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                    digest.update(chunk)
+            if digest.hexdigest() != expected_digest.lower():
+                raise ValueError(f"sha256 mismatch for shard {path.name!r}")
+        return declared_size
 
     def __len__(self) -> int:
         return self.total_tokens

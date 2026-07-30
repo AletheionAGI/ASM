@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
+import pytest
 import torch
 
-from drm_language_emitter.data import MemmapTokenDataset
+from drm_language_emitter.data import MemmapTokenDataset, split_lm_ids
 from scripts.tokenize_corpus_to_uint8 import tokenize_corpus_to_uint8
 
 
@@ -55,3 +57,51 @@ def test_memmap_token_dataset_reads_windows_across_shards(tmp_path: Path) -> Non
 
     assert x.tolist() == list(b"ghijk")
     assert y.tolist() == list(b"hijkl")
+
+
+def test_split_lm_ids_produces_disjoint_partitions() -> None:
+    ids = list(range(100))
+    train_ids, val_ids = split_lm_ids(ids, 0.1)
+    assert train_ids == list(range(90))
+    assert val_ids == list(range(90, 100))
+    assert set(train_ids).isdisjoint(val_ids)
+
+
+def test_memmap_token_dataset_rejects_shard_outside_manifest_root(tmp_path: Path) -> None:
+    outside = tmp_path / "outside.bin"
+    outside.write_bytes(b"abc")
+    root = tmp_path / "tokens"
+    root.mkdir()
+    manifest = {
+        "dtype": "uint8",
+        "shards": [
+            {
+                "split": "train",
+                "path": "../outside.bin",
+                "bytes": 3,
+                "sha256": "0" * 64,
+            }
+        ],
+    }
+    path = root / "manifest.json"
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="escapes manifest directory"):
+        MemmapTokenDataset(path)
+
+
+def test_memmap_token_dataset_detects_corrupted_shard(tmp_path: Path) -> None:
+    source = tmp_path / "corpus.txt"
+    source.write_text("abcdefghijklmnopqrstuvwxyz", encoding="utf-8")
+    manifest = tokenize_corpus_to_uint8(
+        inputs=[source],
+        output_dir=tmp_path / "tokens",
+        shard_bytes=20,
+        val_bytes=6,
+    )
+    train_shard = next(item for item in manifest["shards"] if item["split"] == "train")
+    shard = tmp_path / "tokens" / train_shard["path"]
+    shard.write_bytes(b"X" + shard.read_bytes()[1:])
+
+    with pytest.raises(ValueError, match="sha256 mismatch"):
+        MemmapTokenDataset(tmp_path / "tokens" / "manifest.json", split="train")

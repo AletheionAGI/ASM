@@ -82,7 +82,7 @@ def load_checkpoint(
     optimizer: torch.optim.Optimizer,
     device: torch.device,
 ) -> tuple[int, int, float]:
-    payload = torch.load(path, map_location=device, weights_only=False)
+    payload = torch.load(path, map_location=device, weights_only=True)
     module = model.module if hasattr(model, "module") else model
     module.load_state_dict(payload["model"])
     optimizer.load_state_dict(payload["optimizer"])
@@ -121,6 +121,7 @@ def evaluate_ce(
     precision: str,
     global_step: int,
 ) -> float:
+    was_training = model.training
     model.eval()
     generator = torch.Generator().manual_seed(100_000 + global_step)
     losses: list[float] = []
@@ -129,7 +130,7 @@ def evaluate_ce(
         with autocast_context(device, precision):
             out = model(x, y, global_step=global_step, collect_diagnostics=False)
         losses.append(float(out["aux_losses"].get("ce", out["loss"]).detach().cpu()))
-    model.train()
+    model.train(was_training)
     return sum(losses) / max(len(losses), 1)
 
 
@@ -285,7 +286,7 @@ def main() -> None:
         config.sampled_block_consistency_local_size = args.sampled_block_consistency_local_size
     if args.sampled_block_consistency_teacher_mode is not None:
         config.sampled_block_consistency_teacher_mode = args.sampled_block_consistency_teacher_mode
-    config._validate()
+    config = config.validated_copy()
     model = DRMEmitterModel(config).to(device)
     parameter_count = count_parameters(model)
 
