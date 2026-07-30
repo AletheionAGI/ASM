@@ -64,7 +64,9 @@ def checkpoint_payload(
         "best_val_ce": best_val_ce,
         "world_size": world_size,
         "precision": args.precision,
-        "dataset_manifest": str(args.dataset_manifest),
+        "dataset_manifest": str(args.train_manifest),
+        "train_manifest": str(args.train_manifest),
+        "validation_manifest": str(args.validation_manifest),
         "args": vars(args),
         "torch_rng_state": torch.get_rng_state(),
         "cuda_rng_state_all": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
@@ -137,7 +139,13 @@ def evaluate_ce(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train DRM on uint8 token shards from a manifest.")
     parser.add_argument("--config", default="configs/drm_500m.yaml")
-    parser.add_argument("--dataset-manifest", default="data/tokens_5b/manifest.json")
+    parser.add_argument(
+        "--dataset-manifest",
+        default=None,
+        help="Legacy combined manifest containing train/val splits.",
+    )
+    parser.add_argument("--train-manifest", default=None)
+    parser.add_argument("--validation-manifest", default=None)
     parser.add_argument("--output-root", default="runs/drm_500m_5b")
     parser.add_argument("--target-tokens", type=int, default=5_000_000_000)
     parser.add_argument("--steps", type=int, default=0, help="Override target-tokens with a fixed step count when > 0.")
@@ -205,12 +213,25 @@ def main() -> None:
     parser.add_argument("--sampled-block-consistency-local-size", type=int, default=None)
     parser.add_argument("--sampled-block-consistency-teacher-mode", choices=["candidate", "velocity"], default=None)
     args = parser.parse_args()
+    if args.dataset_manifest:
+        if args.train_manifest or args.validation_manifest:
+            parser.error("--dataset-manifest cannot be combined with --train-manifest/--validation-manifest")
+        args.train_manifest = args.dataset_manifest
+        args.validation_manifest = args.dataset_manifest
+        train_split = "train"
+        validation_split = "val"
+    else:
+        args.train_manifest = args.train_manifest or "data/tokens_5b/manifest.json"
+        args.validation_manifest = args.validation_manifest or args.train_manifest
+        train_split = "train"
+        validation_split = "val" if args.validation_manifest == args.train_manifest else "validation"
 
     ddp, rank, local_rank, world_size = distributed_state()
     rank_zero = rank == 0
     device = resolve_device(args.device, local_rank)
     output_root = Path(args.output_root)
-    dataset_manifest = Path(args.dataset_manifest)
+    train_manifest = Path(args.train_manifest)
+    validation_manifest = Path(args.validation_manifest)
     torch.manual_seed(args.seed + rank)
 
     config = DRMConfig.from_dict(load_yaml_or_json(args.config))
@@ -300,7 +321,9 @@ def main() -> None:
             {
                 "config": config.to_dict(),
                 "parameter_count": parameter_count,
-                "dataset_manifest": str(dataset_manifest),
+                "dataset_manifest": str(train_manifest),
+                "train_manifest": str(train_manifest),
+                "validation_manifest": str(validation_manifest),
                 "target_tokens": args.target_tokens,
                 "tokens_per_step": count_tokens_per_step(args.batch_size, args.seq_len, args.grad_accum_steps, world_size),
                 "world_size": world_size,
@@ -308,11 +331,12 @@ def main() -> None:
             },
         )
         print(f"parameter_count={parameter_count}", flush=True)
-        print(f"dataset_manifest={dataset_manifest}", flush=True)
+        print(f"train_manifest={train_manifest}", flush=True)
+        print(f"validation_manifest={validation_manifest}", flush=True)
         print(f"world_size={world_size}", flush=True)
 
-    train_dataset = MemmapTokenDataset(dataset_manifest, split="train")
-    val_dataset = MemmapTokenDataset(dataset_manifest, split="val")
+    train_dataset = MemmapTokenDataset(train_manifest, split=train_split)
+    val_dataset = MemmapTokenDataset(validation_manifest, split=validation_split)
     if rank_zero:
         print(f"train_tokens_available={len(train_dataset)}", flush=True)
         print(f"val_tokens_available={len(val_dataset)}", flush=True)
@@ -436,7 +460,9 @@ def main() -> None:
                 "parameter_count": parameter_count,
                 "best_val_ce": best_val_ce if math.isfinite(best_val_ce) else None,
                 "world_size": world_size,
-                "dataset_manifest": str(dataset_manifest),
+                "dataset_manifest": str(train_manifest),
+                "train_manifest": str(train_manifest),
+                "validation_manifest": str(validation_manifest),
             },
         )
 

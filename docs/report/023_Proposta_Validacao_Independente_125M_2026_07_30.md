@@ -231,6 +231,24 @@ Depois disso, devem ser executadas três seeds por arquitetura, selecionando
 checkpoints somente pela validação e consultando PG-19 uma única vez por
 checkpoint escolhido.
 
+### Preparação para a RTX 4090
+
+O ambiente confirmado pelo operador é Ubuntu 26.04 LTS, RTX 4090 com 23,51 GiB
+visíveis ao PyTorch, driver 595.84, PyTorch 2.13.0+cu130, i7-14700K e 62 GiB de
+RAM. O target CE foi pré-registrado como `1.3216`, valor publicado no benchmark
+anterior e escolhido sem consultar a nova validação ou o PG-19.
+
+Os treinadores agora aceitam `--train-manifest` e `--validation-manifest`
+separados. `--dataset-manifest` permanece disponível para compatibilidade com
+os manifests combinados antigos. O smoke test nativo para Ubuntu é:
+
+```bash
+./scripts/run_independent_125m_smoke.sh
+```
+
+O protocolo somente deve mudar para `frozen` depois que esse teste passar na
+máquina com acesso direto à GPU.
+
 ## Validação da implementação
 
 Foram executados:

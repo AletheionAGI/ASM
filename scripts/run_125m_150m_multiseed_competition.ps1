@@ -1,6 +1,8 @@
 param(
     [string]$Python = ".\.venv\Scripts\python.exe",
-    [string]$DatasetManifest = "data\tokens_5b\manifest.json",
+    [string]$DatasetManifest = "",
+    [string]$TrainManifest = "data\benchmark_125m_wikipedia\train\manifest.json",
+    [string]$ValidationManifest = "data\benchmark_125m_wikipedia\validation\manifest.json",
     [string]$DrmConfig = "configs\drm_125m_real.yaml",
     [string]$OutputRoot = "runs\competition_125m_150m_multiseed",
     [int[]]$Seeds = @(1, 2, 3),
@@ -64,8 +66,15 @@ if (-not (Test-Path $Python)) {
     $Python = "python"
 }
 
-if (-not (Test-Path $DatasetManifest)) {
-    throw "Missing dataset manifest: $DatasetManifest"
+if ($DatasetManifest -ne "") {
+    $TrainManifest = $DatasetManifest
+    $ValidationManifest = $DatasetManifest
+}
+if (-not (Test-Path $TrainManifest)) {
+    throw "Missing train manifest: $TrainManifest"
+}
+if (-not (Test-Path $ValidationManifest)) {
+    throw "Missing validation manifest: $ValidationManifest"
 }
 
 New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
@@ -197,7 +206,8 @@ function Invoke-DrmRun {
     $ArgsList = @(
         "scripts\train_drm_memmap.py",
         "--config", $DrmConfig,
-        "--dataset-manifest", $DatasetManifest,
+        "--train-manifest", $TrainManifest,
+        "--validation-manifest", $ValidationManifest,
         "--output-root", $RunDir,
         "--target-tokens", "$TargetTokens",
         "--batch-size", "$BatchSize",
@@ -278,7 +288,8 @@ function Invoke-Gpt2Run {
     $ArgsList = @(
         "scripts\train_gpt2_memmap.py",
         "--model-size", "gpt2_125m_real",
-        "--dataset-manifest", $DatasetManifest,
+        "--train-manifest", $TrainManifest,
+        "--validation-manifest", $ValidationManifest,
         "--output-root", $RunDir,
         "--target-tokens", "$TargetTokens",
         "--batch-size", "$BatchSize",
@@ -333,7 +344,8 @@ if (-not $SkipGpt2) {
 Write-Host "125M / 150M-token multiseed competition"
 Write-Host "--------------------------------------"
 Write-Host "output_root: $OutputRoot"
-Write-Host "dataset: $DatasetManifest"
+Write-Host "train_manifest: $TrainManifest"
+Write-Host "validation_manifest: $ValidationManifest"
 Write-Host "seeds: $($Seeds -join ', ')"
 Write-Host "target_tokens_per_run: $TargetTokens"
 Write-Host "tokens_per_step: $TokensPerStep"

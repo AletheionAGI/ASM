@@ -19,7 +19,7 @@
     "max_memory_mb",
     "gpu_hours"
   ],
-  "validation_target_ce": null,
+  "validation_target_ce": 1.3216,
   "stopping_rule": "fixed token budget",
   "contamination_audit": {
     "block_size": 512,
@@ -39,7 +39,19 @@
       "pg19_preparation": "data/benchmark_125m_external/provenance.json"
     }
   },
-  "hardware": null,
-  "repository_commit": null,
-  "notes": "Datasets and contamination audits are fixed. Define validation_target_ce, hardware and repository_commit; then set status=frozen and frozen_before_training=true before benchmark runs."
+  "hardware": {
+    "os": "Ubuntu 26.04 LTS",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_memory_gib": 23.5096435546875,
+    "gpu_count": 1,
+    "cpu": "Intel(R) Core(TM) i7-14700K",
+    "ram_gib": 62,
+    "nvidia_driver": "595.84",
+    "python": "3.14.4",
+    "pytorch": "2.13.0+cu130",
+    "pytorch_cuda": "13.0",
+    "precision": "bf16"
+  },
+  "repository_commit": "1b1925305f8a34c5df69fb8d5d92fb4ac995de48",
+  "notes": "Hardware and target CE are preregistered. Run scripts/run_independent_125m_smoke.sh successfully, commit this protocol revision, update repository_commit to that commit, and freeze before full benchmark runs."
 }
