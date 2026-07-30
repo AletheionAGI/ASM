@@ -30,7 +30,7 @@ Versão principal em inglês: [README.md](README.md).
 - [Paper DRM v6](docs/paper/drm_v6.tex)
 - [Notas matemáticas](docs/math.md)
 - [Protocolo de competição](docs/competition.md)
-- [Metodologia e FAQ técnico](docs/TECHNICAL_QA.md)
+- [Metodologia e FAQ técnico](docs/TECHNICAL_QA_ptbr.md)
 - [Artefatos de benchmark](docs/benchmarks/README.md)
 - [Índice cronológico dos scripts](scripts/INDEX.md)
 - [Model card](MODEL_CARD.md)
