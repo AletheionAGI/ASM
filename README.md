@@ -60,6 +60,8 @@ token e_t
 
 The current experimental high-quality path can also solve short causal trajectory blocks without a Python loop over every token. In `directional_block_cumsum`, local directional deltas are evaluated in parallel inside blocks, prefix states are recovered with `torch.cumsum`, and optional causal Anderson refinement computes prefix-only coefficients with cumulative Gram matrices plus batched small linear solves. This keeps autoregressive prefix causality while replacing the strict one-step-at-a-time loop with a blockwise solver.
 
+At the 125M-parameter scale, the current leading path replaces the expensive b8 causal Anderson refinement with a larger `block64` velocity scan plus a lightweight causal local mixer. This keeps prefix-causal state evolution while using a cheaper, more parallelizable local correction layer.
+
 The working hypothesis is that language generation can be modeled as motion through a relational state space, where geometry is measurable through action, condition, active dimension, recurrence, stability, and low-action path diagnostics.
 
 ## Install
@@ -145,6 +147,24 @@ LanguageEmitter(states) -> logits
 
 The model is autoregressive, but its memory is the evolving latent state rather than attention over a token sequence. The causal Anderson path is not self-attention: it mixes only solver histories for prefix-consistent trajectory refinement, and tests check that future tokens do not change prefix states/logits.
 
+Current 125M local-mixer path:
+
+```text
+input_ids
+  |
+TokenEmbedding
+  |
+split sequence into causal block64 chunks
+  |
+parallel directional velocity candidates
+  |
+prefix cumsum of local deltas -> causal states
+  |
+causal local mixer over state/features
+  |
+LanguageEmitter(states) -> logits
+```
+
 Read the full design in [ARCHITECTURE.md](ARCHITECTURE.md). The planned formal DRM implementation layers, including relational transport, holonomy diagnostics, effective rank, Fisher-Rao pullback, toroidal state dynamics, and explicit anchor maps, are tracked in [roadmap.md](roadmap.md).
 
 ## Main Components
@@ -178,6 +198,33 @@ Another caveat: some diagnostics in experimental blockwise modes summarize appro
 ## Benchmarks
 
 Benchmark outputs that are small enough to keep are copied to `docs/benchmarks/`. Large run directories remain under `runs/` and are ignored by git.
+
+### 125M Time-To-Quality: DRM Local Mixer vs GPT-2
+
+Versioned dashboard:
+
+```text
+docs/benchmarks/competition_125m_local_mixer_h256_l2_s02_150m/dashboard.html
+```
+
+Versioned curves and CSVs:
+
+```text
+docs/benchmarks/competition_125m_local_mixer_h256_l2_s02_150m/
+```
+
+Latest versioned 3-seed result at ~125M parameters and 150M tokens per seed:
+
+| Model | Seeds | Parameters | Best Val CE Mean | Best Val CE Std | Target Reached | Tokens/sec Mean | Time To Target Median |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| DRM block64 velocity + causal local mixer | 3 | 127.27M | 1.3116 | 0.0019 | 3/3 | 10,678.7 | 6,456.7s |
+| GPT-2 125M real | 3 | 126.08M | 1.7305 | 0.0259 | 0/3 | 41,224.4 | n/a |
+
+The target CE was `1.3216`, computed as the DRM aggregate best plus a 0.01 margin. GPT-2 trained all three seeds through the same 150M-token budget and did not reach the target. GPT-2 remained much faster in raw throughput, about 3.9x on this run, but the DRM local-mixer path reached substantially lower validation CE within the same token budget.
+
+Important checkpoint caveat: this run preserved the final checkpoints and token checkpoints, but it was completed before automatic `checkpoint_best.pt` saving was enabled for DRM. The `best_val_ce` values above are the best validation CE values observed in the logged curve. The preserved exportable DRM checkpoints are final checkpoints, whose final validation CE was around 1.38-1.39 rather than the exact best observed point. Future runs save `checkpoint_best.pt` automatically.
+
+This is a language-modeling CE and time-to-quality benchmark, not a conversational or instruction-following result. The trained checkpoints are base byte-level language models; interactive chat quality requires a separate SFT/instruction-tuning phase.
 
 ### Time-To-Quality: DRM Causal Anderson vs GPT-2 36M
 
@@ -313,12 +360,14 @@ Allowed claims:
 - The repository includes controlled tiny comparisons against Transformer and a tiny symbolic world model.
 - The repository includes an experimental causal blockwise trajectory solver using prefix cumsum and causal Anderson refinement.
 - In a 3-seed time-to-quality run at ~37M parameters, DRM causal Anderson b8 reached the target CE in 3/3 seeds, while GPT-2 36M reached it in 0/3 seeds before plateau under the tested token floor.
+- In a 3-seed time-to-quality run at ~125M parameters and 150M tokens per seed, DRM block64 velocity plus causal local mixer reached the target CE in 3/3 seeds, while matched GPT-2 125M reached it in 0/3 seeds under the same token budget.
 
 Not allowed:
 
 - DRM is better than Transformers in general.
 - DRM is better than world models in general.
 - The 3-seed time-to-quality result is definitive across larger scales, datasets, tokenizer regimes, or production workloads.
+- The 125M base LM checkpoints are chat or instruction-tuned models.
 - The model has proven emergent geodesics.
 - The model has proven toroidal topology.
 - The model is production-ready or safety-evaluated.
@@ -326,12 +375,14 @@ Not allowed:
 ## Limitations
 
 - The default recurrent path is slow compared with optimized Transformer kernels.
-- The experimental blockwise causal Anderson path removes the strict token-by-token Python loop inside blocks, but its solver is still much slower than GPT-2 kernels in current benchmarks.
-- Benchmarks are tiny and diagnostic.
-- The strongest time-to-quality result currently versioned is 3-seed at ~37M parameters and still needs larger-token and larger-parameter confirmation.
+- The experimental blockwise causal Anderson path removes the strict token-by-token Python loop inside blocks, but its b8 solver became too slow at 125M scale.
+- The current 125M local-mixer path is still slower than GPT-2 in raw tokens/sec, despite stronger time-to-quality in the versioned 150M-token benchmark.
+- Benchmarks are diagnostic and tied to the exact dataset, tokenizer, optimizer, hardware, and run scripts in this repository.
+- The strongest time-to-quality result currently versioned is 3-seed at ~125M parameters and 150M tokens per seed; it still needs larger-parameter, larger-token, and independent replication.
+- The 125M local-mixer benchmark preserved final checkpoints but not exact best-checkpoint weights; future runs now save `checkpoint_best.pt`.
 - Low-action path evaluation is not a formal geodesic solver.
 - Symbolic world-modeling exact match is still low.
-- No large-scale benchmark, RLHF, alignment evaluation, or safety validation is included.
+- No RLHF, alignment evaluation, instruction tuning, or safety validation is included.
 - Toroidal convergence is not guaranteed; it is only a possible diagnostic under boundedness, recurrence, and stability assumptions.
 
 ## Roadmap
