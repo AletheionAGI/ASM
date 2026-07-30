@@ -25,9 +25,9 @@ Formal roadmap status:
 |---|---|---|
 | Gate 0 — benchmark and runtime correctness | In progress | Frozen protocol, independent manifests, active six-run benchmark |
 | Phase 1 — metric rank, kernel and strata | Not started | Current SPD metric has full mathematical rank |
-| Phase 2 — transition maps and energy criteria | Not started | No explicit interstratum `J` maps |
-| Phase 3 — anchor and admissible motion | Not started | Existing “anchor” variables are solver proposals, not `rho_p` |
-| Phase 4 — stratumwise connection and transport | Not started | No connection or formal parallel transport |
+| Phase 2 — anchor and admissible motion | Not started | Existing “anchor” variables are solver proposals, not `rho_p` |
+| Phase 3 — stratumwise connection and transport | Not started | No connection or formal parallel transport |
+| Phase 4 — transition maps and energy criteria | Not started | No explicit interstratum `J` maps |
 | Phase 5 — hybrid holonomy and hysteresis | Not started | No ordered hybrid loop operators/invariants |
 | Phase 6 — reduction diagnostics | Not started | No Riemannian/sub-Riemannian/Fisher identification |
 
@@ -100,9 +100,9 @@ Important current limitations:
 |---:|---|---|---|---|
 | 0 | Independent validation and runtime fidelity | In progress | Critical | Frozen benchmark + correctness fixes |
 | 1 | Metric rank, soft kernel and rank strata | Not started | Critical | Evaluation-only, then optional PSD path |
-| 2 | Interstratum transition maps and energy defects | Not started | High | Evaluation-only |
-| 3 | Explicit anchor `rho` and admissible motion | Not started | High | Identity/default diagnostic path |
-| 4 | Stratumwise connection and metric transport | Not started | High | Evaluation-only |
+| 2 | Explicit anchor `rho` and admissible motion | Not started | High | Identity/default diagnostic path |
+| 3 | Stratumwise connection and metric transport | Not started | High | Evaluation-only |
+| 4 | Interstratum transition maps and energy defects | Not started | High | Evaluation-only |
 | 5 | Ordered hybrid holonomy and hysteresis invariants | Not started | High | Evaluation-only |
 | 6 | Riemannian/sub-Riemannian/Fisher reductions | Not started | Medium | Diagnostic identification |
 
@@ -910,16 +910,6 @@ Reason: the paper defines every later effective fiber and transition from
 
 ## Step 2
 
-Implement transition identification:
-
-- detect crossings between candidate rank strata;
-- estimate explicit linear transition maps `J`;
-- report rank defect, operator norm and `J^T G_+ J <= G_-` violations.
-
-Reason: paper-level hybrid transport requires explicit interstratum maps.
-
-## Step 3
-
 Implement the explicit anchor:
 
 - identity anchor as the safe default;
@@ -929,7 +919,7 @@ Implement the explicit anchor:
 Reason: the anchor precedes connections and admissible curves in the formal
 construction.
 
-## Step 4
+## Step 3
 
 Implement stratumwise connection and transport:
 
@@ -937,8 +927,18 @@ Implement stratumwise connection and transport:
 - verify metric compatibility and invertibility;
 - label frame-alignment transport clearly as an approximation.
 
-Reason: regular parallel transport is defined on the quotient metric bundle,
-not on unclassified raw direction frames.
+Reason: regular parallel transport is defined on the quotient metric bundle.
+
+## Step 4
+
+Implement transition identification:
+
+- detect crossings between candidate rank strata;
+- estimate explicit linear transition maps `J`;
+- report rank defect, operator norm and `J^T G_+ J <= G_-` violations.
+
+Reason: hybrid transport composes these maps with the already defined regular
+transports.
 
 ## Step 5
 

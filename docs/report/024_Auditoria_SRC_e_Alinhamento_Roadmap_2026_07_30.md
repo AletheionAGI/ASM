@@ -129,9 +129,9 @@ O roadmap anterior colocava transporte e holonomia antes de rank/kernel. A
 ordem foi corrigida para respeitar as dependências de `drm_v6.tex`:
 
 1. estimar/representar rank, kernel, fibra efetiva e estratos;
-2. identificar mapas de transição e defeitos energéticos;
-3. introduzir anchor explícito e movimento admissível;
-4. definir conexão e transporte dentro de cada estrato;
+2. introduzir anchor explícito e movimento admissível;
+3. definir conexão e transporte dentro de cada estrato;
+4. identificar mapas de transição e defeitos energéticos;
 5. compor transporte híbrido e medir holonomia/histerese;
 6. validar reduções clássicas, incluindo Fisher–Rao.
 
