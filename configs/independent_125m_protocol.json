@@ -1,7 +1,7 @@
 {
   "protocol_version": 1,
-  "status": "draft",
-  "frozen_before_training": false,
+  "status": "frozen",
+  "frozen_before_training": true,
   "models": ["drm_125m_real_local_mixer", "gpt2_125m_real"],
   "seeds": [1, 2, 3],
   "train_tokens_per_seed": 150000000,
@@ -21,6 +21,27 @@
   ],
   "validation_target_ce": 1.3216,
   "stopping_rule": "fixed token budget",
+  "training": {
+    "batch_size": 2,
+    "gradient_accumulation_steps": 8,
+    "sequence_length": 512,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.01,
+    "max_gradient_norm": 1.0,
+    "precision": "bf16",
+    "evaluation_interval_tokens": 1000000,
+    "evaluation_batches": 4,
+    "checkpoint_interval_tokens": 50000000,
+    "drm_sequence_mode": "directional_block_cumsum",
+    "drm_block_size": 64,
+    "drm_anderson_iterations": 0,
+    "drm_cumsum_step_mode": "velocity",
+    "drm_local_mixer": "causal_conv",
+    "drm_local_mixer_hidden_size": 256,
+    "drm_local_mixer_kernel_size": 8,
+    "drm_local_mixer_layers": 2,
+    "drm_local_mixer_scale": 0.2
+  },
   "contamination_audit": {
     "block_size": 512,
     "stride": 256,
@@ -52,6 +73,13 @@
     "pytorch_cuda": "13.0",
     "precision": "bf16"
   },
-  "repository_commit": "1b1925305f8a34c5df69fb8d5d92fb4ac995de48",
-  "notes": "Hardware and target CE are preregistered. Run scripts/run_independent_125m_smoke.sh successfully, commit this protocol revision, update repository_commit to that commit, and freeze before full benchmark runs."
+  "repository_commit": "4f98b97a",
+  "smoke_test": {
+    "status": "passed",
+    "drm_parameters": 127266438,
+    "drm_loss": 5.607479,
+    "gpt2_parameters": 126080640,
+    "gpt2_loss": 5.460302
+  },
+  "notes": "Frozen after the CUDA smoke test passed on the declared hardware. PG-19 must not be evaluated until all six best checkpoints have been selected using validation CE."
 }

@@ -246,8 +246,18 @@ os manifests combinados antigos. O smoke test nativo para Ubuntu é:
 ./scripts/run_independent_125m_smoke.sh
 ```
 
-O protocolo somente deve mudar para `frozen` depois que esse teste passar na
-máquina com acesso direto à GPU.
+O smoke passou na máquina com acesso direto à GPU: DRM com 127.266.438
+parâmetros e loss inicial `5.607479`; GPT-2 com 126.080.640 parâmetros e loss
+inicial `5.460302`. O protocolo foi então congelado.
+
+O launcher nativo dos seis treinamentos é:
+
+```bash
+./scripts/run_independent_125m_benchmark.sh
+```
+
+Ele executa DRM seeds 1–3 e GPT-2 seeds 1–3, retoma
+`checkpoint_latest.pt` quando disponível e não acessa o PG-19.
 
 ## Validação da implementação
 
