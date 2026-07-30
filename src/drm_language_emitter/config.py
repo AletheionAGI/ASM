@@ -104,6 +104,10 @@ class DRMConfig:
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
+    def validated_copy(self) -> "DRMConfig":
+        """Return a freshly validated copy after runtime overrides."""
+        return type(self).from_dict(self.to_dict())
+
     # ------------------------------------------------------------------
     # Validation helpers
     # ------------------------------------------------------------------

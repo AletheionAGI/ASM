@@ -68,8 +68,7 @@ def build_config(args: argparse.Namespace, checkpoint_payload: dict[str, Any] | 
     config.directional_local_mixer_kernel_size = args.drm_local_mixer_kernel_size
     config.directional_local_mixer_layers = args.drm_local_mixer_layers
     config.directional_local_mixer_scale = args.drm_local_mixer_scale
-    config._validate()
-    return config
+    return config.validated_copy()
 
 
 def prefix_lengths(seq_len: int, requested: list[int]) -> list[int]:
@@ -136,7 +135,7 @@ def main() -> None:
     checkpoint_path = resolve_checkpoint(run_dir, args.checkpoint)
     checkpoint_payload = None
     if checkpoint_path is not None and checkpoint_path.exists():
-        checkpoint_payload = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+        checkpoint_payload = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
 
     config = build_config(args, checkpoint_payload)
     device = resolve_device(args.device)

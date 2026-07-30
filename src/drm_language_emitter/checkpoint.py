@@ -9,10 +9,7 @@ from .model import DRMEmitterModel
 
 
 def load_model(checkpoint: str | Path) -> DRMEmitterModel:
-    try:
-        payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
-    except TypeError:
-        payload = torch.load(checkpoint, map_location="cpu")
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
     if not isinstance(payload, dict):
         raise ValueError("checkpoint payload must be a dictionary")
     missing = {"config", "model"} - set(payload)

@@ -7,7 +7,7 @@ from pathlib import Path
 import torch
 
 from drm_language_emitter.config import DRMConfig
-from drm_language_emitter.data import build_tokenizer, ensure_text, make_lm_batch
+from drm_language_emitter.data import build_tokenizer, ensure_text, make_lm_batch, split_lm_ids
 from drm_language_emitter.model import DRMEmitterModel
 from drm_language_emitter.utils import load_yaml_or_json, save_json
 
@@ -36,13 +36,12 @@ def run_variant(base: DRMConfig, name: str, ids: list[int], vocab_size: int) -> 
         config.lambda_active_fraction = max(config.lambda_active_fraction, 0.05)
         config.target_active_fraction = 0.45
         config.gate_logit_bias = -1.8
+    config = config.validated_copy()
     model = DRMEmitterModel(config)
     if name == "no_direction_gates":
         model.direction_field.gate_head.weight.data.zero_()
         model.direction_field.gate_head.bias.data.fill_(8.0)
-    split = max(int(len(ids) * 0.9), 2)
-    train_ids = ids[:split]
-    val_ids = ids[max(0, split - config.max_seq_len - 1) :]
+    train_ids, val_ids = split_lm_ids(ids, 0.1)
     seq_len = min(32, config.max_seq_len)
     x, y = make_lm_batch(train_ids, 2, seq_len, torch.device("cpu"))
     xv, yv = make_lm_batch(val_ids, 2, seq_len, torch.device("cpu"))

@@ -40,6 +40,7 @@ def evaluate_world_model(
     max_items: int = 256,
     grid_size: int = 5,
 ) -> dict[str, float]:
+    was_training = model.training
     model.eval()
     device = next(model.parameters()).device
     config = model.config
@@ -87,7 +88,7 @@ def evaluate_world_model(
             rollout_total += 1
             rollout_exact += is_exact
     denom = max(len(items), 1)
-    return {
+    result = {
         "best_val_ce": total_ce / max(total_tokens, 1),
         "final_val_ce": total_ce / max(total_tokens, 1),
         "next_state_exact_match": next_exact / max(next_total, 1),
@@ -97,6 +98,8 @@ def evaluate_world_model(
         "rollout_token_accuracy": token_correct / max(total_tokens, 1),
         "invalid_state_rate": invalid / denom,
     }
+    model.train(was_training)
+    return result
 
 
 def train_world_model(

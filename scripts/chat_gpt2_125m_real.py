@@ -39,10 +39,7 @@ def resolve_device(requested: str) -> torch.device:
 
 
 def load_gpt2_checkpoint(checkpoint: Path, device: torch.device) -> torch.nn.Module:
-    try:
-        payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
-    except TypeError:
-        payload = torch.load(checkpoint, map_location="cpu")
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
     if not isinstance(payload, dict) or not isinstance(payload.get("config"), dict) or not isinstance(payload.get("model"), dict):
         raise ValueError("checkpoint must contain dictionary keys: config, model")
 

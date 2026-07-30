@@ -13,7 +13,7 @@ sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from drm_language_emitter.config import DRMConfig
-from drm_language_emitter.data import build_tokenizer, ensure_text, make_lm_batch
+from drm_language_emitter.data import build_tokenizer, ensure_text, make_lm_batch, split_lm_ids
 from drm_language_emitter.model import DRMEmitterModel
 from drm_language_emitter.training import count_parameters, evaluate_ce
 from drm_language_emitter.utils import load_yaml_or_json, save_json
@@ -46,9 +46,7 @@ def run_drm(config_path: str, text_path: str, duration_sec: float, batch_size: i
     model = DRMEmitterModel(config).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     ids = tokenizer.encode(text)
-    split = max(int(len(ids) * 0.9), 2)
-    train_ids = ids[:split]
-    val_ids = ids[max(0, split - config.max_seq_len - 1) :]
+    train_ids, val_ids = split_lm_ids(ids, 0.1)
     seq_len = min(config.max_seq_len, 64)
     start = perf_counter()
     step = 0
@@ -102,9 +100,7 @@ def run_transformer(config_path: str, text_path: str, duration_sec: float, batch
     model = TinyTransformerLM(config).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     ids = tokenizer.encode(text)
-    split = max(int(len(ids) * 0.9), 2)
-    train_ids = ids[:split]
-    val_ids = ids[max(0, split - config.max_seq_len - 1) :]
+    train_ids, val_ids = split_lm_ids(ids, 0.1)
     seq_len = min(config.max_seq_len, 64)
     start = perf_counter()
     step = 0

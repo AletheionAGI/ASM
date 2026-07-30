@@ -34,7 +34,7 @@ def synchronize(device: torch.device) -> None:
         torch.cuda.synchronize()
 
 
-def apply_drm_overrides(config: DRMConfig, args: argparse.Namespace) -> None:
+def apply_drm_overrides(config: DRMConfig, args: argparse.Namespace) -> DRMConfig:
     config.max_seq_len = args.seq_len
     config.vocab_size = 256
     config.sequence_mode = args.sequence_mode
@@ -50,7 +50,7 @@ def apply_drm_overrides(config: DRMConfig, args: argparse.Namespace) -> None:
     config.directional_local_mixer_kernel_size = args.drm_local_mixer_kernel_size
     config.directional_local_mixer_layers = args.drm_local_mixer_layers
     config.directional_local_mixer_scale = args.drm_local_mixer_scale
-    config._validate()
+    return config.validated_copy()
 
 
 def main() -> None:
@@ -93,7 +93,7 @@ def main() -> None:
     output_root.mkdir(parents=True, exist_ok=True)
 
     config = DRMConfig.from_dict(load_yaml_or_json(args.config))
-    apply_drm_overrides(config, args)
+    config = apply_drm_overrides(config, args)
     model = DRMEmitterModel(config).to(device)
     model.train()
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01)

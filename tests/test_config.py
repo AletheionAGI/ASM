@@ -33,6 +33,13 @@ def test_config_validates_bptt_truncate_interval():
         DRMConfig(bptt_truncate_interval=-1)
 
 
+def test_validated_copy_rechecks_runtime_mutations():
+    config = DRMConfig()
+    config.max_seq_len = 0
+    with pytest.raises(ValueError, match="max_seq_len"):
+        config.validated_copy()
+
+
 def test_config_validates_sequence_mode_and_geodesic_fields():
     config = DRMConfig(sequence_mode="geodesic_step", geodesic_solver_steps=2, geodesic_lr=0.01)
     assert config.sequence_mode == "geodesic_step"

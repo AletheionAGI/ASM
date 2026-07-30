@@ -132,7 +132,7 @@ def load_checkpoint(
     scheduler: torch.optim.lr_scheduler.LRScheduler | None,
     device: torch.device,
 ) -> tuple[int, int, float]:
-    payload = torch.load(path, map_location=device, weights_only=False)
+    payload = torch.load(path, map_location=device, weights_only=True)
     module = model.module if hasattr(model, "module") else model
     module.load_state_dict(payload["model"])
     optimizer.load_state_dict(payload["optimizer"])
@@ -167,6 +167,7 @@ def evaluate_ce(
     device: torch.device,
     precision: str,
 ) -> float:
+    was_training = model.training
     model.eval()
     generator = torch.Generator().manual_seed(100_000)
     losses: list[float] = []
@@ -175,7 +176,7 @@ def evaluate_ce(
         with autocast_context(device, precision):
             out = model(input_ids=x, labels=y)
         losses.append(float(out.loss.detach().cpu()))
-    model.train()
+    model.train(was_training)
     return sum(losses) / max(len(losses), 1)
 
 

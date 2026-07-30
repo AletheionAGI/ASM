@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from dataclasses import asdict
 from typing import Any
 
@@ -108,7 +109,12 @@ class DRMEmitterModel(nn.Module):
         if config.use_torch_compile and hasattr(torch, "compile"):
             try:
                 self._compiled_forward = torch.compile(self._forward_impl)
-            except Exception:
+            except Exception as exc:
+                warnings.warn(
+                    f"torch.compile initialization failed; using eager execution: {exc}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
                 self._compiled_forward = None
 
     def _forward_impl(
@@ -354,7 +360,12 @@ class DRMEmitterModel(nn.Module):
         if self._compiled_forward is not None:
             try:
                 return self._compiled_forward(input_ids, targets, return_states, global_step, collect_diagnostics)
-            except Exception:
+            except Exception as exc:
+                warnings.warn(
+                    f"compiled forward failed; disabling torch.compile and retrying eagerly: {exc}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
                 self._compiled_forward = None
         return self._forward_impl(input_ids, targets, return_states, global_step, collect_diagnostics)
 

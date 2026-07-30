@@ -69,10 +69,7 @@ def apply_dtype(model: torch.nn.Module, device: torch.device, dtype_name: str) -
 
 
 def checkpoint_summary(checkpoint: Path) -> dict[str, object]:
-    try:
-        payload = torch.load(checkpoint, map_location="cpu", weights_only=False)
-    except TypeError:
-        payload = torch.load(checkpoint, map_location="cpu")
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
     if not isinstance(payload, dict):
         return {}
     return {

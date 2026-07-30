@@ -8,7 +8,7 @@ from .tiny_transformer import TinyTransformerConfig, TinyTransformerLM
 
 
 def load_transformer(checkpoint: str | Path) -> TinyTransformerLM:
-    payload = torch.load(checkpoint, map_location="cpu")
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
     config = TinyTransformerConfig.from_dict(payload["config"])
     model = TinyTransformerLM(config)
     model.load_state_dict(payload["model"])

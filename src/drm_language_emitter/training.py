@@ -6,7 +6,7 @@ from time import perf_counter
 import torch
 
 from .config import DRMConfig
-from .data import build_tokenizer, ensure_text, make_lm_batch
+from .data import build_tokenizer, ensure_text, make_lm_batch, split_lm_ids
 from .model import DRMEmitterModel
 from .utils import save_json
 
@@ -29,12 +29,11 @@ def train_tiny(
     text = ensure_text(text_path)
     tokenizer = build_tokenizer(text, config.tokenizer_type)
     config.vocab_size = tokenizer.vocab_size
+    config = config.validated_copy()
     model = DRMEmitterModel(config).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     ids = tokenizer.encode(text)
-    split = max(int(len(ids) * (1.0 - val_fraction)), 2)
-    train_ids = ids[:split]
-    val_ids = ids[max(0, split - config.max_seq_len - 1) :]
+    train_ids, val_ids = split_lm_ids(ids, val_fraction)
     seq_len = min(config.max_seq_len, 64)
     history = []
     train_start = perf_counter()
@@ -121,6 +120,7 @@ def evaluate_ce(
     device: torch.device,
     global_step: int | None = None,
 ) -> tuple[float, dict[str, float]]:
+    was_training = model.training
     model.eval()
     if len(ids) < seq_len + 1:
         ids = ids * ((seq_len + 1) // max(len(ids), 1) + 1)
@@ -129,5 +129,5 @@ def evaluate_ce(
     out = model(x, y, global_step=global_step)
     ce = float(out["aux_losses"].get("ce", out["loss"]).detach())
     diag = {k: float(v.detach()) for k, v in out["diagnostics"].items()}
-    model.train()
+    model.train(was_training)
     return ce, diag
