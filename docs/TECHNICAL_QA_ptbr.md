@@ -38,6 +38,10 @@ modularizada em:
 
 O modelo é autoregressivo e a loss principal é cross-entropy do próximo token.
 
+O caminho 125M líder usa cumsum de velocidade causal em blocos de 64 tokens e
+um mixer convolucional causal de duas camadas. Testes de causalidade garantem
+que alterações em tokens futuros não mudam estados ou logits do prefixo.
+
 ## Como o DRM difere de um Transformer?
 
 Um Transformer contextualiza tokens principalmente com projeções de attention
@@ -153,7 +157,7 @@ da atualização neural.
 Esses valores não são medições psicológicas ou semânticas. Sua utilidade exige
 análises de estabilidade, correlação, intervenção e ablação.
 
-## Qual benchmark 36M/37M está versionado?
+## Qual é o benchmark histórico 36M/37M?
 
 ```text
 docs/benchmarks/bench_36M/
@@ -168,7 +172,8 @@ Ele compara famílias com aproximadamente 37 milhões de parâmetros:
 | `opt_36M` | OPT | 36.916.992 | 1, 2, 3 | 2.048.000 |
 
 Labels internos legados ainda contêm `125m`, mas não representam o número real
-de parâmetros desse experimento.
+de parâmetros desse experimento. Ele não é mais o benchmark grande mais
+recente.
 
 ## Qual dataset e tokenizer foram usados no benchmark 36M?
 
@@ -407,6 +412,9 @@ O protocolo atual adiciona:
 - três seeds por família;
 - uma única consulta externa após seleção por validação.
 
+Em 2026-07-30, os treinamentos estão em andamento e o PG-19 ainda não foi
+usado para seleção de modelo nem possui resultados de teste publicados.
+
 ```text
 configs/independent_125m_protocol.json
 scripts/run_independent_125m_benchmark.sh
@@ -417,6 +425,16 @@ Avaliações intermediárias de quatro batches ainda são ruidosas. Checkpoints
 candidatos devem ser comparados posteriormente sobre tokens determinísticos e
 idênticos de validação antes de acessar o PG-19. O desvio do protocolo deve ser
 documentado.
+
+## A geração reproduz o forward local-mixer treinado?
+
+Ainda não. `generation.py` avança o estado pela transição recorrente básica e
+não reproduz o caminho block-cumsum/local-mixer usado pelo modelo 125M líder.
+
+Isso não invalida treino ou avaliação CE, que chamam
+`DRMEmitterModel.forward`. Porém, chat e amostras desses checkpoints ainda não
+devem ser apresentados como inferência fiel do sequence engine treinado. É
+necessária uma API comum de prefill/decode com testes de paridade.
 
 ## Como reproduzir o benchmark 36M?
 

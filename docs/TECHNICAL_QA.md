@@ -4,7 +4,16 @@ This document describes the currently implemented DRM Language Emitter architect
 
 ## What is implemented?
 
-The implemented DRM model is a causal language emitter built around recurrent latent-state dynamics rather than Transformer attention. The core module is `DRMEmitterModel` in `src/drm_language_emitter/model.py`.
+The implemented DRM model is a causal language emitter built around recurrent
+latent-state dynamics rather than Transformer attention. `DRMEmitterModel` is
+assembled in `src/drm_language_emitter/model.py`; the blockwise implementation
+is split across focused modules:
+
+- `model_components.py`: state initializer and causal local mixer;
+- `directional_forward.py`: cumsum forward, losses, and diagnostics;
+- `directional_blocks.py`: block and superblock construction;
+- `directional_solvers.py`: fixed-point, Anderson, and transition helpers;
+- `geometric_steps.py`: state bounding, candidates, and geodesic refinement.
 
 The implemented path is:
 
@@ -21,6 +30,10 @@ input_ids
 ```
 
 The model is autoregressive: the emitter projects the updated state to next-token logits and the training objective includes next-token cross entropy.
+
+The leading 125M path uses causal block64 velocity cumsum plus a two-layer
+causal convolutional local mixer. Prefix-causality tests verify that changing
+future tokens does not alter earlier states or logits.
 
 ## How is DRM different from a Transformer?
 
@@ -86,6 +99,27 @@ condition_proxy = upper / lower
 
 This is a numerical proxy, not an exact eigenspectrum calculation.
 
+## Does the current metric implement the formal rank from the paper?
+
+No. Because `softplus(d) + eps > 0`, the current neural metric is strictly
+positive definite:
+
+```text
+Ker(G) = {0}
+rank(G) = d_state
+```
+
+The current `dimD` diagnostic is the sum of directional gates. It measures
+directional activity, not the paper's formal definition:
+
+```text
+d_DRM(p) = rank(g_p)
+```
+
+A tolerance-based numerical rank can be a useful spectral approximation, but
+it must be labeled as such. A literal implementation of the paper requires a
+PSD parameterization capable of producing a genuine kernel.
+
 ## What does "direction" mean?
 
 Direction is a learned vector in latent state space. `DirectionField(z)` produces a set of directions and sigmoid gates. The flow computes movement inside the span of the active directions.
@@ -108,9 +142,9 @@ The model reports operational diagnostics including:
 
 These diagnostics are not psychological or semantic measurements. Their technical value must be tested through stability analysis, correlation, interventions, and ablations.
 
-## What benchmark is currently versioned?
+## What is the historical 36M/37M benchmark?
 
-The current public benchmark artifact is:
+The historical public artifact is:
 
 ```text
 docs/benchmarks/bench_36M/
@@ -124,7 +158,9 @@ It compares DRM, GPT-2-style, and OPT-style models with approximately matched pa
 | `gpt2_36M` | GPT-2 | 36,915,984 | 1, 2, 3 | 2,048,000 |
 | `opt_36M` | OPT | 36,916,992 | 1, 2, 3 | 2,048,000 |
 
-The corrected public name for this result is "36M/37M benchmark"; the `125m` label should be treated as a legacy script/configuration label, not the real size of the run.
+The corrected public name for this result is "36M/37M benchmark"; the `125m`
+label should be treated as a legacy script/configuration label, not the real
+size of the run. It is no longer the latest large benchmark.
 
 ## What dataset and tokenizer were used?
 
@@ -273,7 +309,11 @@ Auxiliary loss and regularization settings:
 
 No. In the internal benchmark config `configs/drm_125m.yaml`, `tie_embeddings: false`. The current implementation uses `TokenEmbedding.embedding` for input and a separate `LanguageEmitter.lm_head` for output.
 
-This choice affects parameter count and regularization. It should be declared, and future comparisons should either match or explicitly control this choice.
+This choice affects parameter count and regularization. It should be declared,
+and future comparisons should either match or explicitly control this choice.
+Enabling `tie_embeddings` currently has no effect because the flag is not yet
+wired into model construction; it should be implemented or rejected
+explicitly before use.
 
 ## Where do the 37M parameters come from?
 
@@ -328,7 +368,70 @@ Inspection of internal diagnostics alone does not prove causality. Causal eviden
 
 If these interventions do not measurably change behavior, strong interpretations of direction or metric should be reduced.
 
-## How can the benchmark be reproduced?
+## What is the published 125M benchmark?
+
+The strongest completed and versioned benchmark uses three seeds per family
+and 150M tokens per seed:
+
+| model | parameters | best validation CE mean | std | tokens/sec |
+|---|---:|---:|---:|---:|
+| DRM block64 + causal local mixer | 127.27M | 1.3116 | 0.0019 | 10,678.7 |
+| GPT-2 real | 126.08M | 1.7305 | 0.0259 | 41,224.4 |
+
+Artifacts:
+
+```text
+docs/benchmarks/competition_125m_local_mixer_h256_l2_s02_150m/
+```
+
+This result is evidence under its specific protocol, not a general
+superiority claim. It used a token-level validation split and did not preserve
+the exact best DRM checkpoint weights.
+
+## What changed in the independent 125M benchmark?
+
+The frozen independent protocol adds:
+
+- document-disjoint Wikipedia train and validation manifests;
+- exact-document deduplication before tokenization;
+- the official PG-19 test split as a frozen external source;
+- zero-overlap contamination audits using 512-byte blocks and stride 256;
+- recorded corpus hashes, hardware, software, and seeds;
+- three DRM and three GPT-2 runs at 150M tokens each;
+- best-checkpoint saving;
+- one external evaluation after validation-only checkpoint selection.
+
+Primary files:
+
+```text
+configs/independent_125m_protocol.json
+scripts/run_independent_125m_smoke.sh
+scripts/run_independent_125m_benchmark.sh
+scripts/evaluate_frozen_test.py
+docs/report/023_Proposta_Validacao_Independente_125M_2026_07_30.md
+```
+
+As of 2026-07-30, training is in progress and PG-19 has not been used for
+model selection or reported test results.
+
+There is a methodological caveat: intermediate validation uses only four
+batches. The observed difference between best and final validation CE shows
+that this estimate is noisy. Before PG-19 is accessed, candidate checkpoints
+should be rescored on a larger deterministic validation traversal using
+identical tokens for DRM and GPT-2. This protocol deviation must be disclosed.
+
+## Does generation reproduce the trained local-mixer forward path?
+
+Not yet. `generation.py` currently advances the state through the basic
+recurrent transition and does not reproduce the block-cumsum/local-mixer
+forward path used by the leading 125M model.
+
+This does not invalidate training or CE evaluation, which call
+`DRMEmitterModel.forward`. It does mean that chat or samples from those
+checkpoints should not yet be treated as faithful inference from the trained
+sequence engine. A shared prefill/decode API and parity tests are required.
+
+## How can the historical 36M benchmark be reproduced?
 
 The benchmark script is:
 
@@ -358,14 +461,32 @@ Install optional Hugging Face dependencies before running the comparison:
 pip install -e ".[hf]"
 ```
 
+## How can the independent 125M benchmark be reproduced?
+
+Verify CUDA, manifests, and both model forwards:
+
+```bash
+./scripts/run_independent_125m_smoke.sh
+```
+
+Run or resume all six training runs:
+
+```bash
+./scripts/run_independent_125m_benchmark.sh
+```
+
+Do not run the frozen PG-19 evaluation before checkpoints have been selected
+using validation only.
+
 ## What should be improved next?
 
 High-priority next steps:
 
-- correct legacy `125m` labels in benchmark configs and dashboards;
-- record hardware, PyTorch version, CUDA status, and wall-clock environment in artifacts;
-- increase validation batches;
-- run more seeds and larger token budgets;
+- complete and publish the independent 125M validation;
+- rescore checkpoint candidates on a deterministic validation traversal;
+- unify generation with the block-cumsum/local-mixer forward path;
+- implement or reject inert configuration flags;
+- implement numerical-rank/kernel/strata diagnostics from the formal roadmap;
 - add Mamba and modern SSM baselines;
 - run compute-matched and time-matched comparisons;
 - run ablations for direction, metric, gates, flow, and naturalization;
