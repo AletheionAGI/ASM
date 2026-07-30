@@ -124,14 +124,22 @@ O tokenizer padrão opera sobre bytes UTF-8.
 
 ## Componentes principais
 
-- `src/drm_language_emitter/config.py`: configuração validada do DRM.
-- `src/drm_language_emitter/direction_field.py`: direções e gates ativos.
-- `src/drm_language_emitter/metric.py`: métrica `diag + U Uᵀ`.
-- `src/drm_language_emitter/dynamics.py`: fluxo e atualização de estado.
-- `src/drm_language_emitter/deer.py`: fixed point e Anderson causal.
-- `src/drm_language_emitter/model.py`: modelo de linguagem causal.
+- `src/drm_language_emitter/config.py`: schema validado do `DRMConfig`.
+- `src/drm_language_emitter/model.py`: montagem do modelo e forward recorrente principal.
+- `src/drm_language_emitter/model_components.py`: inicializador de estado e mixer causal local.
+- `src/drm_language_emitter/direction_field.py`: campos direcionais ativos e gates.
+- `src/drm_language_emitter/metric.py`: métrica relacional `diag + U Uᵀ` e naturalização.
+- `src/drm_language_emitter/dynamics.py`: fluxo direcional e atualização de estado.
+- `src/drm_language_emitter/directional_forward.py`: forward directional cumsum, losses e diagnósticos.
+- `src/drm_language_emitter/directional_blocks.py`: construção de trajetórias em blocos e superblocos.
+- `src/drm_language_emitter/directional_solvers.py`: fixed point, Anderson causal e helpers de transição.
+- `src/drm_language_emitter/geometric_steps.py`: limitação de estado, refinamento geodésico e candidatos direcionais.
+- `src/drm_language_emitter/deer.py`: solvers reutilizáveis de trajetória.
+- `src/drm_language_emitter/emitter.py`: embedding de tokens e cabeça emissora.
 - `src/drm_language_emitter/generation.py`: geração autoregressiva.
-- `transformer/`: baseline Transformer.
+- `src/drm_language_emitter/data.py`: datasets em memória e memory-mapped.
+- `src/drm_language_emitter/checkpoint.py`: carregamento validado de checkpoints weights-only.
+- `transformer/`: baselines Transformer.
 - `world_model/`: baseline simbólico seq2seq.
 
 ## Diagnósticos

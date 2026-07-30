@@ -169,14 +169,23 @@ Read the full design in [ARCHITECTURE.md](ARCHITECTURE.md). The planned formal D
 
 ## Main Components
 
-- `src/drm_language_emitter/config.py`: `DRMConfig`
-- `src/drm_language_emitter/direction_field.py`: active directional fields and gates
-- `src/drm_language_emitter/metric.py`: relational metric `diag + U U^T`
-- `src/drm_language_emitter/dynamics.py`: DRM flow and metric naturalization
-- `src/drm_language_emitter/deer.py`: blockwise fixed-point and causal Anderson trajectory solvers
-- `src/drm_language_emitter/model.py`: causal language emitter
-- `transformer/`: tiny Transformer baseline
-- `world_model/`: tiny symbolic seq2seq world-model baseline
+- `src/drm_language_emitter/config.py`: validated `DRMConfig` schema.
+- `src/drm_language_emitter/model.py`: model assembly and core recurrent forward path.
+- `src/drm_language_emitter/model_components.py`: state initializer and causal local mixer.
+- `src/drm_language_emitter/direction_field.py`: active directional fields and gates.
+- `src/drm_language_emitter/metric.py`: relational metric `diag + U U^T` and naturalization.
+- `src/drm_language_emitter/dynamics.py`: directional flow and state update.
+- `src/drm_language_emitter/directional_forward.py`: directional cumsum forward path, losses, and diagnostics.
+- `src/drm_language_emitter/directional_blocks.py`: block and superblock trajectory construction.
+- `src/drm_language_emitter/directional_solvers.py`: fixed-point, causal Anderson, and transition helpers.
+- `src/drm_language_emitter/geometric_steps.py`: state bounding, geodesic refinement, and directional candidates.
+- `src/drm_language_emitter/deer.py`: reusable trajectory solvers.
+- `src/drm_language_emitter/emitter.py`: token embedding and language-emission head.
+- `src/drm_language_emitter/generation.py`: autoregressive generation.
+- `src/drm_language_emitter/data.py`: in-memory and memory-mapped language-model datasets.
+- `src/drm_language_emitter/checkpoint.py`: validated weights-only checkpoint loading.
+- `transformer/`: Transformer baselines.
+- `world_model/`: symbolic seq2seq world-model baseline.
 
 ## Diagnostics
 
