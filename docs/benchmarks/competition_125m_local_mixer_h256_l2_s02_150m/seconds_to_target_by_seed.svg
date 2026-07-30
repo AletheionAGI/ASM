@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="580" viewBox="0 0 1100 580">
+<rect width="100%" height="100%" fill="white"/>
+<text x="60" y="34" font-size="22" font-family="Arial" font-weight="700" fill="#111827">Seconds To Target CE</text>
+<text x="60" y="56" font-size="13" font-family="Arial" fill="#4b5563">Lower is better.</text>
+<line x1="50" y1="470" x2="1060" y2="470" stroke="#111827"/>
+<rect x='70' y='174.3' width='90' height='295.7' fill='#0f766e'/><text x='70' y='166.3' font-size='11'>1.33e+04</text><text x='70' y='488' font-size='10'>drm_s1</text><rect x='184' y='326.0' width='90' height='144.0' fill='#0f766e'/><text x='184' y='318.0' font-size='11'>6.46e+03</text><text x='184' y='488' font-size='10'>drm_s2</text><rect x='298' y='360.5' width='90' height='109.5' fill='#0f766e'/><text x='298' y='352.5' font-size='11'>4.91e+03</text><text x='298' y='488' font-size='10'>drm_s3</text>
+</svg>

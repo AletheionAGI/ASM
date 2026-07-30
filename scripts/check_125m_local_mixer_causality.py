@@ -40,7 +40,7 @@ def resolve_checkpoint(run_dir: Path | None, checkpoint: str) -> Path | None:
         return path
     if run_dir is None:
         return None
-    for name in ("checkpoint_last.pt", "checkpoint_latest.pt", "best_model.pt"):
+    for name in ("checkpoint_best.pt", "checkpoint_last.pt", "checkpoint_latest.pt", "best_model.pt"):
         path = run_dir / name
         if path.exists():
             return path

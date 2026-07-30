@@ -18,6 +18,7 @@ param(
     [int]$EvalBatches = 4,
     [int]$DrmLogInterval = 10,
     [int]$Gpt2LogInterval = 100,
+    [bool]$SaveBestCheckpoint = $true,
     [ValidateSet("directional_block_cumsum", "directional_superblock_cumsum")]
     [string]$DrmSequenceMode = "directional_block_cumsum",
     [int]$DrmBlockSize = 8,
@@ -237,6 +238,11 @@ function Invoke-DrmRun {
         "--sampled-block-consistency-local-size", "$DrmSampledConsistencyLocalSize",
         "--sampled-block-consistency-teacher-mode", "$DrmSampledConsistencyTeacherMode"
     )
+    if ($SaveBestCheckpoint) {
+        $ArgsList += "--save-best-checkpoint"
+    } else {
+        $ArgsList += "--no-save-best-checkpoint"
+    }
     if ($Resume -ne "") {
         $ArgsList += @("--resume", $Resume)
     }
@@ -290,6 +296,9 @@ function Invoke-Gpt2Run {
         "--eval-batches", "$EvalBatches",
         "--log-interval", "$Gpt2LogInterval"
     )
+    if ($SaveBestCheckpoint) {
+        $ArgsList += "--save-best-checkpoint"
+    }
     if ($Resume -ne "") {
         $ArgsList += @("--resume", $Resume)
     }
@@ -331,6 +340,7 @@ Write-Host "tokens_per_step: $TokensPerStep"
 Write-Host "steps_per_run: $StepsPerRun"
 Write-Host "eval_every_tokens: $EvalTokensInterval"
 Write-Host "checkpoint_every_tokens: $CheckpointTokensInterval"
+Write-Host "save_best_checkpoint: $SaveBestCheckpoint"
 Write-Host "drm_sequence_mode: $DrmSequenceMode"
 Write-Host "drm_block_size: $DrmBlockSize"
 Write-Host "drm_superblock_size: $DrmSuperblockSize"

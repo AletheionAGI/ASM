@@ -154,6 +154,7 @@ def main() -> None:
     parser.add_argument("--eval-batches", type=int, default=4)
     parser.add_argument("--log-interval", type=int, default=10)
     parser.add_argument("--resume", default="", help="Path to checkpoint, or 'latest'.")
+    parser.add_argument("--save-best-checkpoint", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--dry-run-forward", action="store_true")
     parser.add_argument(
@@ -383,7 +384,11 @@ def main() -> None:
 
         if eval_due and rank_zero:
             val_ce = evaluate_ce(model, val_dataset, args.batch_size, args.seq_len, args.eval_batches, device, args.precision, step)
-            best_val_ce = min(best_val_ce, val_ce)
+            if val_ce < best_val_ce:
+                best_val_ce = val_ce
+                if args.save_best_checkpoint:
+                    payload = checkpoint_payload(model, optimizer, config, args, step, tokens_seen, parameter_count, best_val_ce, world_size)
+                    save_checkpoint(output_root / "checkpoint_best.pt", payload)
         else:
             val_ce = None
         if eval_due:
