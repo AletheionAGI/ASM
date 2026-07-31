@@ -88,9 +88,9 @@ unified with model forward semantics.
 
 The implemented metric
 
-\[
-G(z)=\operatorname{diag}(\operatorname{softplus}(d(z))+\epsilon)+U(z)U(z)^\top
-\]
+$$
+G(z)=\mathrm{diag}(\mathrm{softplus}(d(z))+\epsilon)+U(z)U(z)^\top
+$$
 
 is SPD because of its positive diagonal floor. Its exact matrix rank is
 therefore `d_state`. `dimD`, gate activity, low-rank factor size, and numerical
