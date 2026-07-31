@@ -13,6 +13,13 @@ class RiskField(nn.Module):
         super().__init__()
         self.config = config
         self.enabled = config.use_powerlaw_risk
+        if not self.enabled and not config.instantiate_disabled_risk:
+            self.net = None
+            self.register_parameter("alpha_b", None)
+            self.register_parameter("alpha_d", None)
+            self.register_parameter("beta_b", None)
+            self.register_parameter("beta_d", None)
+            return
         h = config.hidden_size
         self.net = nn.Sequential(
             nn.Linear(config.d_state, h),
@@ -29,6 +36,11 @@ class RiskField(nn.Module):
         if not self.enabled:
             zero = z.new_zeros(z.shape[0])
             return {"blindspot": zero, "dubiety": zero, "risk_mass": zero, "risk_mass_raw": zero}
+        assert self.net is not None
+        assert self.alpha_b is not None
+        assert self.alpha_d is not None
+        assert self.beta_b is not None
+        assert self.beta_d is not None
         values = self.net(z)
         blindspot = values[:, 0]
         dubiety = values[:, 1]

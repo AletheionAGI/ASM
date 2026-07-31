@@ -19,6 +19,10 @@ class DRMConfig:
     bounded_state: bool = True
     use_toroidal_state: bool = False
     use_powerlaw_risk: bool = False
+    instantiate_disabled_risk: bool = True
+    use_drm_geometry: bool = True
+    use_direction_field: bool = True
+    use_relational_metric: bool = True
     lambda_action: float = 0.01
     lambda_dim_sparsity: float = 0.001
     lambda_dim_entropy: float = 0.001
@@ -45,6 +49,7 @@ class DRMConfig:
     gate_logit_bias: float = -1.0
     gate_top_k: int = 0
     gate_top_k_renorm: bool = False
+    active_fraction_loss_mode: str = "upper_bound"
     lambda_active_fraction: float = 0.01
     target_active_fraction: float = 0.65
     use_metric_naturalization: bool = True
@@ -89,7 +94,16 @@ class DRMConfig:
     directional_local_mixer_hidden_size: int = 256
     directional_local_mixer_kernel_size: int = 8
     directional_local_mixer_layers: int = 1
+    directional_local_mixer_dilation_growth: int = 1
     directional_local_mixer_scale: float = 0.1
+    token_state_residual: bool = False
+    token_state_residual_scale: float = 0.1
+    selective_memory: bool = False
+    selective_memory_hidden_size: int = 256
+    selective_memory_scale: float = 0.1
+    selective_memory_forget_bias: float = 2.0
+    directional_refinement_layers: int = 0
+    directional_refinement_scale: float = 0.1
     lambda_block_consistency: float = 0.0
     block_consistency_weight: float = 1.0
     lambda_sampled_block_consistency: float = 0.0
@@ -137,6 +151,9 @@ class DRMConfig:
             ("directional_local_mixer_hidden_size", 1, None),
             ("directional_local_mixer_kernel_size", 1, None),
             ("directional_local_mixer_layers", 1, None),
+            ("directional_local_mixer_dilation_growth", 1, None),
+            ("directional_refinement_layers", 0, None),
+            ("selective_memory_hidden_size", 1, None),
             ("sampled_block_consistency_interval", 1, None),
             ("sampled_block_consistency_local_size", 1, None),
             ("geometry_update_interval", 1, None),
@@ -201,6 +218,10 @@ class DRMConfig:
             ("directional_anderson_relaxation", 0.0, None),
             ("directional_fixed_point_relaxation", 0.0, None),
             ("directional_local_mixer_scale", 0.0, None),
+            ("token_state_residual_scale", 0.0, None),
+            ("directional_refinement_scale", 0.0, None),
+            ("selective_memory_scale", 0.0, None),
+            ("selective_memory_forget_bias", -10.0, 10.0),
             ("lambda_block_consistency", 0.0, None),
             ("block_consistency_weight", 0.0, None),
             ("lambda_sampled_block_consistency", 0.0, None),
@@ -221,10 +242,16 @@ class DRMConfig:
             "bounded_state",
             "use_toroidal_state",
             "use_powerlaw_risk",
+            "instantiate_disabled_risk",
+            "use_drm_geometry",
+            "use_direction_field",
+            "use_relational_metric",
             "direction_norm",
             "tie_embeddings",
             "use_metric_naturalization",
             "gate_top_k_renorm",
+            "token_state_residual",
+            "selective_memory",
             "emitter_swiglu",
             "emitter_residual",
             "use_torch_compile",
@@ -256,8 +283,22 @@ class DRMConfig:
             raise ValueError("'directional_anderson_scope' must be one of: trajectory, endpoint")
         if self.directional_local_mixer not in {"none", "causal_conv"}:
             raise ValueError("'directional_local_mixer' must be one of: none, causal_conv")
+        if self.active_fraction_loss_mode not in {"upper_bound", "target"}:
+            raise ValueError("'active_fraction_loss_mode' must be one of: upper_bound, target")
         if self.sampled_block_consistency_teacher_mode not in {"candidate", "velocity"}:
             raise ValueError("'sampled_block_consistency_teacher_mode' must be one of: candidate, velocity")
+        if not self.use_drm_geometry and (
+            self.use_direction_field or self.use_relational_metric
+        ):
+            raise ValueError(
+                "geometry-free models must disable use_direction_field and "
+                "use_relational_metric"
+            )
+        if not self.use_direction_field and self.directional_cumsum_step_mode != "velocity":
+            raise ValueError(
+                "models without a direction field require "
+                "directional_cumsum_step_mode='velocity'"
+            )
 
     def __post_init__(self) -> None:  # pragma: no cover
         """Automatically validate configuration on instantiation."""

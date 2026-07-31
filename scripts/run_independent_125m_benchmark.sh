@@ -37,6 +37,8 @@ resume_args() {
     local run_dir="$1"
     if [[ -f "$run_dir/checkpoint_latest.pt" ]]; then
         printf '%s\n' "--resume" "latest"
+    elif [[ -f "$run_dir/checkpoint_best.pt" ]]; then
+        printf '%s\n' "--resume" "$run_dir/checkpoint_best.pt"
     fi
 }
 
@@ -81,7 +83,10 @@ for seed in "${seeds[@]}"; do
 done
 
 for seed in "${seeds[@]}"; do
-    run_dir="$output_root/gpt2_125m_real_seed_$seed"
+    # The original gpt2_125m_real_seed_* runs used targets that were shifted
+    # twice by the dataset and GPT2LMHeadModel. Keep those artifacts intact and
+    # train corrected explicit next-token baselines in separate directories.
+    run_dir="$output_root/gpt2_125m_real_next_token_seed_$seed"
     if is_complete "$run_dir/summary.json"; then
         echo "GPT-2 seed $seed já concluído; reutilizando."
         continue

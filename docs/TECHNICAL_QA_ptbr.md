@@ -341,8 +341,52 @@ fontes são:
 
 ## Como DRM se relaciona com RNN, SSM, Mamba e Neural ODE?
 
-DRM é relacionado a métodos recorrentes e state-space porque mantém um estado.
-A combinação proposta é:
+DRM é relacionado a métodos recorrentes e state-space porque mantém e atualiza
+um estado. A diferença central é:
+
+> Mamba é fundamentalmente um modelo de espaço de estados linear e seletivo; o
+> DRM pretende ser uma dinâmica não linear orientada por uma geometria
+> relacional aprendida.
+
+Uma transição Mamba pode ser representada aproximadamente por:
+
+\[
+h_t = A_t h_{t-1} + B_t x_t,\qquad y_t = C_t h_t
+\]
+
+Os parâmetros dependentes da entrada decidem quanto preservar, escrever e ler.
+Apesar da seletividade, a transição mantém uma estrutura de SSM projetada para
+execução eficiente por selective scan.
+
+No DRM original, a atualização conceitual é mais próxima de:
+
+\[
+\Delta z_t =
+g(z_t)^{-1}
+\sum_k \alpha_k(z_t,x_t)\,v_k(z_t)
+\]
+
+Aqui, \(z_t\) é o estado latente, \(v_k\) são direções aprendidas,
+\(\alpha_k\) são gates de direção e \(g(z_t)\) é uma métrica SPD aprendida que
+precondiciona ou “naturaliza” a atualização. Também podem ser investigados
+passos geodésicos, candidatos direcionais, energia, risco e fixed points.
+
+Em termos simplificados, Mamba pergunta o que deve guardar, esquecer e
+recuperar. O DRM pergunta em qual direção o estado deve se mover considerando a
+geometria relacional local.
+
+| Aspecto | Mamba | DRM |
+|---|---|---|
+| Núcleo | SSM seletivo | Campo direcional e métrica relacional |
+| Transição de estado | Recorrência linear seletiva | Dinâmica geométrica não linear |
+| Seleção | Parâmetros da transição dependem do token | Gates escolhem direções de movimento |
+| Geometria SPD | Não é o mecanismo central | Central na proposta DRM |
+| Geodésicas/fixed points | Não fazem parte do núcleo | Investigados pelo DRM |
+| Memória forget/write | Central | Adicionada experimentalmente na variante J |
+| Execução eficiente | Selective scan otimizado para hardware | Depende da variante e do solver |
+| Maturidade | Arquitetura consolidada | Arquitetura experimental |
+
+A combinação proposta pela implementação DRM é:
 
 - campo direcional aprendido;
 - gates de direção;
@@ -350,7 +394,33 @@ A combinação proposta é:
 - fluxo precondicionado pela métrica;
 - emissor causal.
 
-Mamba e outros SSMs modernos são baselines relevantes ainda pendentes.
+### Por que a variante J e o Mamba parecem mais semelhantes?
+
+A variante J acrescenta uma memória seletiva forget/write:
+
+\[
+m_t=f_t\odot m_{t-1}+w_t\odot c_t
+\]
+
+Esse mecanismo é conceitualmente próximo de Mamba, embora não seja uma
+implementação de Mamba. J e J_DILATED são híbridos: combinam memória seletiva
+parecida com SSM e dinâmica geométrica DRM. Eles foram introduzidos porque o
+DRM original mostrou baixa eficiência amostral e possíveis limitações de
+associative recall.
+
+Se remover métrica, direções e fluxo não piorar o CE, isso indicará que a
+memória seletiva — e não a geometria DRM — oferece a maior parte da capacidade
+útil. A ablação decisiva é:
+
+1. J completa;
+2. J sem métrica relacional;
+3. J sem campo direcional;
+4. somente memória seletiva + mixer + emitter;
+5. J completa com o mesmo orçamento de parâmetros.
+
+Essa ablação é necessária para determinar empiricamente se a geometria DRM
+oferece capacidade além do mecanismo inspirado em Mamba. Mamba e outros SSMs
+modernos também continuam sendo baselines externos necessários.
 
 O modelo também lembra Neural ODEs, mas usa update discreto:
 

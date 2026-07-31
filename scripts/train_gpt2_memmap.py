@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import torch
+from torch.nn import functional as F
 
 from drm_language_emitter.data import MemmapTokenDataset
 from drm_language_emitter.training import count_parameters
@@ -49,6 +50,12 @@ def count_tokens_per_step(batch_size: int, seq_len: int, grad_accum_steps: int, 
 def autocast_context(device: torch.device, precision: str):
     enabled = precision == "bf16" and device.type == "cuda"
     return torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=enabled)
+
+
+def next_token_ce(model: torch.nn.Module, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    """Score the explicit next-token targets without Hugging Face's internal shift."""
+    logits = model(input_ids=x).logits
+    return F.cross_entropy(logits.reshape(-1, logits.shape[-1]), y.reshape(-1))
 
 
 def make_gpt2_model(model_size: str, seq_len: int, vocab_size: int, dropout: float) -> torch.nn.Module:
@@ -176,8 +183,8 @@ def evaluate_ce(
     for _ in range(max(batches, 1)):
         x, y = dataset.make_batch(batch_size, seq_len, device, generator=generator)
         with autocast_context(device, precision):
-            out = model(input_ids=x, labels=y)
-        losses.append(float(out.loss.detach().cpu()))
+            loss = next_token_ce(model, x, y)
+        losses.append(float(loss.detach().cpu()))
     model.train(was_training)
     return sum(losses) / max(len(losses), 1)
 
@@ -275,9 +282,9 @@ def main() -> None:
         if args.dry_run_forward:
             x, y = train_dataset.make_batch(1, min(args.seq_len, 16), device, generator=torch.Generator().manual_seed(args.seed))
             with autocast_context(device, args.precision):
-                out = model(input_ids=x, labels=y)
+                loss = next_token_ce(model, x, y)
             if rank_zero:
-                print(f"dry_run_loss={float(out.loss.detach().cpu()):.6f}", flush=True)
+                print(f"dry_run_loss={float(loss.detach().cpu()):.6f}", flush=True)
         train_dataset.close()
         val_dataset.close()
         if ddp:
@@ -318,10 +325,10 @@ def main() -> None:
                 world_size=world_size,
             )
             with autocast_context(device, args.precision):
-                out = model(input_ids=x, labels=y)
-                loss = out.loss / args.grad_accum_steps
+                token_loss = next_token_ce(model, x, y)
+                loss = token_loss / args.grad_accum_steps
             loss.backward()
-            step_loss += float(out.loss.detach().cpu())
+            step_loss += float(token_loss.detach().cpu())
         torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
         optimizer.step()
         optimizer.zero_grad(set_to_none=True)

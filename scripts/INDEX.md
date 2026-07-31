@@ -192,6 +192,21 @@ Commit: `b6e9587`
 
 1. `run_independent_125m_benchmark.sh`
 
+### 015 — 2026-07-30 — corrected validation and DRM CE ablations
+
+Commit: pending
+
+1. `rescore_independent_125m_validation.py`
+2. `run_independent_125m_validation_rescore.sh`
+3. `run_drm_fix_ablation.py`
+4. `run_drm_fix_ablation.sh`
+5. `summarize_drm_fix_validation.py`
+6. `rescore_drm_fix_validation.py`
+7. `run_drm_fix_paired_5m.sh`
+8. `run_mqar_architecture_probe.py`
+9. `check_drm_fix_promotion.py`
+10. `run_drm_geometry_component_suite.sh`
+
 ## Naming guidance
 
 - `train_*`: training entry points.

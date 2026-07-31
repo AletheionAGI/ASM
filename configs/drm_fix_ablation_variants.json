@@ -1,0 +1,230 @@
+{
+  "base_config": "configs/drm_125m_real.yaml",
+  "common": {
+    "sequence_mode": "directional_block_cumsum",
+    "directional_cumsum_block_size": 64,
+    "directional_cumsum_step_mode": "velocity",
+    "directional_anderson_iterations": 0,
+    "directional_local_mixer": "causal_conv",
+    "directional_local_mixer_hidden_size": 256,
+    "directional_local_mixer_kernel_size": 8,
+    "directional_local_mixer_layers": 2,
+    "directional_local_mixer_dilation_growth": 1,
+    "directional_local_mixer_scale": 0.2
+  },
+  "ce_only": {
+    "lambda_action": 0.0,
+    "lambda_dim_sparsity": 0.0,
+    "lambda_dim_entropy": 0.0,
+    "lambda_dim_variance": 0.0,
+    "lambda_metric_reg": 0.0,
+    "lambda_metric_diversity": 0.0,
+    "lambda_recurrence": 0.0,
+    "lambda_stability": 0.0,
+    "lambda_blindspot": 0.0,
+    "lambda_active_fraction": 0.0,
+    "lambda_metric_u_floor": 0.0,
+    "lambda_metric_u_target": 0.0,
+    "lambda_condition": 0.0,
+    "lambda_block_consistency": 0.0,
+    "lambda_sampled_block_consistency": 0.0
+  },
+  "variants": {
+    "A": {
+      "description": "Current block64 DRM baseline with geometric auxiliary losses."
+    },
+    "B": {
+      "description": "A with next-token CE only.",
+      "inherit": ["ce_only"]
+    },
+    "C": {
+      "description": "B with symmetric gate activity targeting.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "active_fraction_loss_mode": "target",
+        "lambda_active_fraction": 0.01,
+        "target_active_fraction": 0.5,
+        "gate_logit_bias": 0.0
+      }
+    },
+    "D": {
+      "description": "C plus a direct causal token-to-state residual.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "active_fraction_loss_mode": "target",
+        "lambda_active_fraction": 0.01,
+        "target_active_fraction": 0.5,
+        "gate_logit_bias": 0.0,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1
+      }
+    },
+    "E": {
+      "description": "D with block size reduced from 64 to 16.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "active_fraction_loss_mode": "target",
+        "lambda_active_fraction": 0.01,
+        "target_active_fraction": 0.5,
+        "gate_logit_bias": 0.0,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "directional_cumsum_block_size": 16
+      }
+    },
+    "F": {
+      "description": "D with a wider four-layer dilated causal mixer.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "active_fraction_loss_mode": "target",
+        "lambda_active_fraction": 0.01,
+        "target_active_fraction": 0.5,
+        "gate_logit_bias": 0.0,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "directional_local_mixer_hidden_size": 512,
+        "directional_local_mixer_layers": 4,
+        "directional_local_mixer_dilation_growth": 2
+      }
+    },
+    "G": {
+      "description": "Two-stage narrower DRM with state-dependent causal refinement.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "d_token": 1024,
+        "d_state": 1024,
+        "n_directions": 48,
+        "metric_rank": 48,
+        "hidden_size": 3200,
+        "direction_basis_size": 64,
+        "metric_u_basis_size": 64,
+        "active_fraction_loss_mode": "target",
+        "lambda_active_fraction": 0.01,
+        "target_active_fraction": 0.5,
+        "gate_logit_bias": 0.0,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "directional_local_mixer_hidden_size": 512,
+        "directional_refinement_layers": 1,
+        "directional_refinement_scale": 0.1
+      }
+    },
+    "H": {
+      "description": "CE-only residual DRM with the dilated mixer, default gates, and no disabled RiskField parameters.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "directional_local_mixer_hidden_size": 512,
+        "directional_local_mixer_layers": 4,
+        "directional_local_mixer_dilation_growth": 2
+      }
+    },
+    "I": {
+      "description": "Parameter-matched F: corrected gates, residual path, dilated mixer, and no disabled RiskField parameters.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "active_fraction_loss_mode": "target",
+        "lambda_active_fraction": 0.01,
+        "target_active_fraction": 0.5,
+        "gate_logit_bias": 0.0,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "directional_local_mixer_hidden_size": 512,
+        "directional_local_mixer_layers": 4,
+        "directional_local_mixer_dilation_growth": 2
+      }
+    },
+    "J": {
+      "description": "Parameter-matched selective forget/write memory with the short causal mixer.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_DILATED": {
+      "description": "Selective forget/write memory combined with the four-layer dilated mixer.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0,
+        "directional_local_mixer_hidden_size": 352,
+        "directional_local_mixer_layers": 4,
+        "directional_local_mixer_dilation_growth": 2
+      }
+    },
+    "SSM_CONTROL": {
+      "description": "Parameter-matched selective memory, short causal mixer, and emitter without DRM geometry.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "use_drm_geometry": false,
+        "use_direction_field": false,
+        "use_relational_metric": false,
+        "instantiate_disabled_risk": false,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 14944,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_NO_METRIC": {
+      "description": "J with identity geometry and no RelationalMetric module.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "use_relational_metric": false,
+        "use_metric_naturalization": false,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_NO_DIRECTION": {
+      "description": "J with its directional field and constrained flow replaced by a direct causal transition.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "use_direction_field": false,
+        "directional_cumsum_step_mode": "velocity",
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_NO_NATURALIZATION": {
+      "description": "J with the relational metric retained but prevented from preconditioning the flow.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "use_metric_naturalization": false,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    }
+  }
+}

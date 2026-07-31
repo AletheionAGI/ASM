@@ -358,3 +358,96 @@ def test_directional_local_mixer_preserves_prefix_causality():
     changed_out = model(changed, return_states=True, collect_diagnostics=False)
     assert torch.allclose(out["logits"][:, :4], changed_out["logits"][:, :4], atol=1e-5, rtol=1e-5)
     assert torch.allclose(out["states"][:, :4], changed_out["states"][:, :4], atol=1e-5, rtol=1e-5)
+
+
+def test_token_state_residual_is_causal_and_receives_gradients():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 6
+    config.directional_cumsum_step_mode = "velocity"
+    config.token_state_residual = True
+    config.token_state_residual_scale = 0.2
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    y = torch.randint(0, 17, (1, 6))
+    changed = x.clone()
+    changed[:, 4:] = torch.randint(0, 17, (1, 2))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    changed_out = model(changed, return_states=True, collect_diagnostics=False)
+    assert torch.allclose(out["logits"][:, :4], changed_out["logits"][:, :4], atol=1e-5, rtol=1e-5)
+    out["loss"].backward()
+    assert model.token_state_residual.projection.weight.grad is not None
+
+
+def test_dilated_local_mixer_and_refinement_are_causal_and_finite():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 6
+    config.directional_cumsum_step_mode = "velocity"
+    config.directional_local_mixer = "causal_conv"
+    config.directional_local_mixer_hidden_size = 16
+    config.directional_local_mixer_kernel_size = 3
+    config.directional_local_mixer_layers = 2
+    config.directional_local_mixer_dilation_growth = 2
+    config.directional_refinement_layers = 1
+    config.directional_refinement_scale = 0.1
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    y = torch.randint(0, 17, (1, 6))
+    changed = x.clone()
+    changed[:, 4:] = torch.randint(0, 17, (1, 2))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    changed_out = model(changed, return_states=True, collect_diagnostics=False)
+    assert torch.isfinite(out["loss"])
+    assert torch.allclose(out["logits"][:, :4], changed_out["logits"][:, :4], atol=1e-5, rtol=1e-5)
+    out["loss"].backward()
+    refinement_grads = [
+        parameter.grad
+        for parameter in model.refinement_layers.parameters()
+        if parameter.grad is not None
+    ]
+    assert refinement_grads
+    assert all(torch.isfinite(gradient).all() for gradient in refinement_grads)
+
+
+def test_optional_risk_does_not_change_other_component_initialization():
+    with_risk_parameters = tiny_config()
+    with_risk_parameters.seed = 7
+    with_risk_parameters.directional_local_mixer = "causal_conv"
+    without_risk_parameters = with_risk_parameters.validated_copy()
+    without_risk_parameters.instantiate_disabled_risk = False
+
+    first = DRMEmitterModel(with_risk_parameters)
+    second = DRMEmitterModel(without_risk_parameters)
+    first_state = first.state_dict()
+    second_state = second.state_dict()
+    common = sorted(set(first_state) & set(second_state))
+    assert common
+    assert all(torch.equal(first_state[name], second_state[name]) for name in common)
+
+
+def test_selective_memory_is_causal_and_receives_finite_gradients():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 6
+    config.directional_cumsum_step_mode = "velocity"
+    config.selective_memory = True
+    config.selective_memory_hidden_size = 8
+    config.selective_memory_scale = 0.1
+    model = DRMEmitterModel(config)
+    x = torch.randint(0, 17, (1, 6))
+    y = torch.randint(0, 17, (1, 6))
+    changed = x.clone()
+    changed[:, 4:] = torch.randint(0, 17, (1, 2))
+    out = model(x, y, return_states=True, collect_diagnostics=False)
+    changed_out = model(changed, return_states=True, collect_diagnostics=False)
+    assert torch.isfinite(out["loss"])
+    assert torch.allclose(out["logits"][:, :4], changed_out["logits"][:, :4], atol=1e-5, rtol=1e-5)
+    out["loss"].backward()
+    memory_grads = [
+        parameter.grad
+        for parameter in model.selective_memory.parameters()
+        if parameter.grad is not None
+    ]
+    assert memory_grads
+    assert all(torch.isfinite(gradient).all() for gradient in memory_grads)
