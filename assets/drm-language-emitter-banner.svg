@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 620" role="img" aria-labelledby="title desc">
-  <title id="title">DRM Language Emitter banner</title>
-  <desc id="desc">Abstract relational manifold with directional trajectories and token particles.</desc>
+  <title id="title">Aletheion State Models banner</title>
+  <desc id="desc">Abstract state trajectories connecting direct, selective, relational, and geometric models.</desc>
   <defs>
     <radialGradient id="bgGlow" cx="68%" cy="44%" r="70%">
       <stop offset="0%" stop-color="#164e63" stop-opacity="0.55"/>
@@ -77,11 +77,11 @@
   <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="28" font-weight="700">
     <g opacity="0.82">
       <rect x="185" y="118" width="72" height="46" rx="12" fill="#0f172a" stroke="#22d3ee" stroke-opacity="0.55"/>
-      <text x="211" y="150" fill="#67e8f9">D</text>
+      <text x="211" y="150" fill="#67e8f9">A</text>
     </g>
     <g opacity="0.75">
       <rect x="319" y="86" width="92" height="46" rx="12" fill="#0f172a" stroke="#2dd4bf" stroke-opacity="0.55"/>
-      <text x="352" y="118" fill="#99f6e4">R</text>
+      <text x="352" y="118" fill="#99f6e4">S</text>
     </g>
     <g opacity="0.72">
       <rect x="456" y="155" width="104" height="46" rx="12" fill="#0f172a" stroke="#fbbf24" stroke-opacity="0.55"/>
@@ -89,11 +89,11 @@
     </g>
     <g opacity="0.68">
       <rect x="1118" y="456" width="190" height="46" rx="12" fill="#0f172a" stroke="#22d3ee" stroke-opacity="0.5"/>
-      <text x="1140" y="488" fill="#bae6fd" font-size="24">LANGUAGE</text>
+      <text x="1140" y="488" fill="#bae6fd" font-size="24">STATE</text>
     </g>
     <g opacity="0.64">
       <rect x="1324" y="386" width="174" height="46" rx="12" fill="#0f172a" stroke="#f59e0b" stroke-opacity="0.55"/>
-      <text x="1346" y="418" fill="#fed7aa" font-size="24">EMITTER</text>
+      <text x="1346" y="418" fill="#fed7aa" font-size="24">MODELS</text>
     </g>
   </g>
 

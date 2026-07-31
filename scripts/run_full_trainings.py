@@ -28,7 +28,7 @@ def run_command(command: list[str]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run full DRM Language Emitter training/eval sweeps on CPU."
+        description="Run full ASM/legacy DRM training and evaluation sweeps on CPU."
     )
     parser.add_argument("--configs", nargs="+", default=DEFAULT_CONFIGS)
     parser.add_argument("--text", default="data/tiny.txt")

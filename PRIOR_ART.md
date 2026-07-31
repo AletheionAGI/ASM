@@ -1,6 +1,8 @@
 # Prior Art
 
-This project explores DRM Language Emitter, an experimental non-Transformer language model based on Directional Relational Manifold dynamics.
+This project is now organized as ASM — Aletheion State Models, an experimental
+attention-free causal state-model family that originated in DRM Language
+Emitter and Directional Relational Manifold dynamics.
 
 ## Related Areas
 
@@ -14,7 +16,7 @@ This project explores DRM Language Emitter, an experimental non-Transformer lang
 
 ## DRM-Specific Position
 
-DRM Language Emitter is intended as a research implementation of language generation through:
+ASM-X, historically DRM Language Emitter, is intended as a research implementation of language generation through:
 
 - active directional fields;
 - variable effective dimension;

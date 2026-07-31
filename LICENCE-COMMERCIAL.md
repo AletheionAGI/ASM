@@ -1,6 +1,6 @@
 # Commercial Licence
 
-DRM Language Emitter is available under the GNU Affero General Public License version 3.0 only for open-source use.
+ASM — Aletheion State Models is available under the GNU Affero General Public License version 3.0 only for open-source use.
 
 Separate commercial licensing may be available under a written agreement.
 

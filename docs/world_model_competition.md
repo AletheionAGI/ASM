@@ -4,7 +4,7 @@
 
 This benchmark compares three small model families on the same serialized symbolic gridworld:
 
-- DRM Language Emitter;
+- ASM-X, historically DRM Language Emitter;
 - Tiny Transformer baseline;
 - Tiny supervised symbolic world model.
 

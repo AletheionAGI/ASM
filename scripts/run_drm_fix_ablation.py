@@ -50,6 +50,12 @@ def main() -> None:
     parser.add_argument("--seq-len", type=int, default=512)
     parser.add_argument("--eval-tokens-interval", type=int, default=1_000_000)
     parser.add_argument("--eval-batches", type=int, default=16)
+    parser.add_argument("--checkpoint-token-milestones", default="")
+    parser.add_argument(
+        "--save-best-checkpoint",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
     parser.add_argument("--precision", choices=["fp32", "bf16"], default="bf16")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="cuda")
     parser.add_argument("--dry-run", action="store_true")
@@ -110,8 +116,13 @@ def main() -> None:
             str(args.eval_batches),
             "--log-interval",
             "10",
-            "--save-best-checkpoint",
         ]
+        if args.save_best_checkpoint:
+            command.append("--save-best-checkpoint")
+        if args.checkpoint_token_milestones:
+            command.extend(
+                ["--checkpoint-token-milestones", args.checkpoint_token_milestones]
+            )
         if args.dry_run:
             command.append("--dry-run")
         if args.dry_run_forward:

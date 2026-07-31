@@ -1,8 +1,10 @@
 # FAQ técnico e metodologia de benchmark
 
-Este documento descreve a arquitetura atualmente implementada do DRM Language
-Emitter e suas evidências experimentais. Ele distingue comportamento
-verificado, resultados preliminares e questões de pesquisa em aberto.
+Este documento descreve a família ASM — Aletheion State Models atualmente
+implementada e suas evidências experimentais derivadas do DRM. Ele distingue
+comportamento verificado, resultados preliminares e questões de pesquisa em
+aberto. Nomes históricos como `DRMEmitterModel` permanecem por compatibilidade
+de checkpoints; ASM-X designa a arquitetura DRM explícita.
 
 Versão original em inglês: [TECHNICAL_QA.md](TECHNICAL_QA.md).
 

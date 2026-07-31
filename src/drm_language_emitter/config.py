@@ -53,6 +53,7 @@ class DRMConfig:
     lambda_active_fraction: float = 0.01
     target_active_fraction: float = 0.65
     use_metric_naturalization: bool = True
+    directional_metric_composition: str = "post_naturalize"
     metric_naturalization_strength: float = 0.5
     metric_naturalization_warmup_steps: int = 500
     metric_damping: float = 0.3
@@ -277,6 +278,23 @@ class DRMConfig:
             )
         if self.directional_cumsum_step_mode not in {"candidate", "velocity"}:
             raise ValueError("'directional_cumsum_step_mode' must be one of: candidate, velocity")
+        if self.directional_metric_composition not in {
+            "post_naturalize",
+            "metric_subspace",
+            "metric_orthonormal",
+        }:
+            raise ValueError(
+                "'directional_metric_composition' must be one of: "
+                "post_naturalize, metric_subspace, metric_orthonormal"
+            )
+        if (
+            self.directional_metric_composition != "post_naturalize"
+            and (not self.use_direction_field or not self.use_relational_metric)
+        ):
+            raise ValueError(
+                "metric-aware directional composition requires both a "
+                "direction field and relational metric"
+            )
         if self.directional_anderson_transition_mode not in {"candidate", "velocity"}:
             raise ValueError("'directional_anderson_transition_mode' must be one of: candidate, velocity")
         if self.directional_anderson_scope not in {"trajectory", "endpoint"}:

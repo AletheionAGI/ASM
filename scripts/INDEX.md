@@ -206,6 +206,10 @@ Commit: pending
 8. `run_mqar_architecture_probe.py`
 9. `check_drm_fix_promotion.py`
 10. `run_drm_geometry_component_suite.sh`
+11. `run_drm_direct_control_suite.sh`
+12. `run_drm_metric_order_suite.sh`
+13. `rescore_drm_scaling_law.py`
+14. `run_drm_scaling_law_100m.sh`
 
 ## Naming guidance
 

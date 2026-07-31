@@ -1,6 +1,10 @@
 # Technical FAQ and Benchmark Methodology
 
-This document describes the currently implemented DRM Language Emitter architecture and experimental evidence. It distinguishes verified behavior, preliminary results, and open research questions.
+This document describes the currently implemented ASM — Aletheion State Models
+family and its DRM-derived experimental evidence. It distinguishes verified
+behavior, preliminary results, and open research questions. Historical
+`DRMEmitterModel` names remain for checkpoint compatibility; ASM-X denotes the
+explicit DRM architecture.
 
 ## What is implemented?
 

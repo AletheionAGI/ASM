@@ -1,8 +1,8 @@
-# DRM Language Emitter
+# ASM — Aletheion State Models
 
-**A geometry-first language model lab for building generative AI without attention, without Q/K/V, and without Transformer blocks.**
+**An attention-free causal state-model research family, derived from DRM and selected by ablations and scaling evidence.**
 
-![DRM Language Emitter manifold banner](assets/drm-language-emitter-banner.svg)
+![Aletheion State Models banner](assets/drm-language-emitter-banner.svg)
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](pyproject.toml)
 [![PyTorch](https://img.shields.io/badge/PyTorch-pure%20torch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](pyproject.toml)
@@ -11,13 +11,24 @@
 [![Benchmarks](https://img.shields.io/badge/benchmarks-audited-F59E0B?style=for-the-badge)](docs/benchmarks/README.md)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-64748B?style=for-the-badge)](LICENSE)
 
-DRM Language Emitter turns language generation into controlled motion through a learned relational manifold: active directions choose where the model can move, a learned metric shapes how expensive that movement is, and an emitter decodes the resulting state into tokens.
+ASM studies language generation as the evolution of a persistent causal state.
+The family contains explicit DRM geometry, metric-conditioned direct
+transitions, geometry-free controls, and selective-memory models under one
+reproducible experimental framework.
+
+This repository was formerly named **DRM Language Emitter**. DRM now identifies
+the theory and the explicit geometric variant **ASM-X**, while the public model
+family remains free to follow the architecture that survives ablations and
+scaling-law evaluation.
 
 This is a research scaffold, not a production model and not a claim of superiority over Transformers or general world models.
 
 ## Quick Links
 
 - [Architecture](ARCHITECTURE.md)
+- [ASM Model Family](docs/MODEL_FAMILY.md)
+- [DRM Philosophy and Re-evaluation](docs/drm_philosophy.md)
+- [Project History and Rename](HISTORY.md)
 - [Formal DRM Implementation Roadmap](roadmap.md)
 - [Mathematical Notes](docs/math.md)
 - [Competition Protocol](docs/competition.md)
@@ -35,9 +46,9 @@ This is a research scaffold, not a production model and not a claim of superiori
 - [Third-Party Licenses And Data Provenance](docs/third_party_licenses.md)
 - [Commercial License](LICENCE-COMMERCIAL.md)
 
-## What Makes It Different
+## What Makes ASM Different
 
-DRM Language Emitter does not use:
+The current ASM variants do not use:
 
 - Transformer blocks;
 - self-attention;
@@ -45,7 +56,8 @@ DRM Language Emitter does not use:
 - `nn.MultiheadAttention`;
 - KV cache.
 
-Its central computation is a latent trajectory. The baseline path is a causal latent recurrence:
+Their central computation is a latent trajectory. ASM-X, the explicit DRM
+variant, uses this causal path:
 
 ```text
 token e_t
@@ -60,10 +72,11 @@ token e_t
 
 The current experimental high-quality path can also solve short causal trajectory blocks without a Python loop over every token. In `directional_block_cumsum`, local directional deltas are evaluated in parallel inside blocks, prefix states are recovered with `torch.cumsum`, and optional causal Anderson refinement computes prefix-only coefficients with cumulative Gram matrices plus batched small linear solves. This keeps autoregressive prefix causality while replacing the strict one-step-at-a-time loop with a blockwise solver.
 
-At the 125M-parameter scale, the current leading candidate is variant J:
-`block64` directional flow, metric naturalization, a short causal mixer, a
-token-to-state residual, and selective forget/write memory. The selective
-memory is a later SSM-inspired addition, not part of the original DRM design.
+The current leading candidate is **ASM-R**, represented experimentally by
+`J_NO_DIRECTION`: a direct contextual transition, relational metric
+naturalization, causal mixer, token-to-state residual, and selective
+forget/write memory. ASM-S learns faster at 5M tokens, while ASM-R overtook it
+at 30M; a continuous scaling-law run is designed to resolve that crossover.
 
 The working hypothesis is that language generation can be modeled as motion through a relational state space, where geometry is measurable through action, condition, active dimension, recurrence, stability, and low-action path diagnostics.
 
@@ -83,7 +96,7 @@ The project is CPU-runnable. CUDA is optional but recommended for the larger mem
 
 ## Quickstart
 
-Train a tiny DRM model:
+Train a tiny legacy DRM/ASM-X model:
 
 ```bash
 python scripts/train_tiny.py --config configs/tiny.yaml --text data/tiny.txt
@@ -104,7 +117,24 @@ python scripts/eval_geodesic_paths.py --checkpoint runs/tiny/drm_tiny.pt
 
 If `data/tiny.txt` is missing, the training script creates a tiny fallback corpus. The default tokenizer is byte-level, so mixed case, digits, punctuation, and prompts such as `DRM` are representable.
 
-## Architecture
+## Architecture Family
+
+The provisional family taxonomy is:
+
+| Code | Architecture | Experimental variant |
+|---|---|---|
+| ASM-X | Explicit DRM State Model | J |
+| ASM-U | Metric Subspace State Model | J_METRIC_SUBSPACE |
+| ASM-F | Relational Frame State Model | J_METRIC_ORTHONORMAL_DIRECTION |
+| ASM-R | Relational State Model | J_NO_DIRECTION |
+| ASM-D | Direct State Model | J_DIRECT_CONTROL |
+| ASM-S | Selective State Model | J_DIRECT_CONTROL_MATCHED |
+| ASM-M | Causal Memory State Model | SSM_CONTROL |
+
+See [MODEL_FAMILY.md](docs/MODEL_FAMILY.md) for definitions and promotion
+criteria.
+
+### ASM-X recurrent path
 
 Default recurrent path:
 
@@ -174,6 +204,11 @@ Read the full design in [ARCHITECTURE.md](ARCHITECTURE.md). The planned formal D
 
 ## Main Components
 
+- `src/aletheion_state_models/core/`: architecture-neutral state, transition, memory, mixer, and emitter interfaces.
+- `src/aletheion_state_models/geometry/`: optional metric, directional basis, and naturalization operators.
+- `src/aletheion_state_models/variants/`: named ASM-X, ASM-U, ASM-R, ASM-D, and ASM-S constructors.
+- `src/drm_language_emitter/`: checkpoint-compatible legacy implementation retained during migration.
+
 - `src/drm_language_emitter/config.py`: validated `DRMConfig` schema.
 - `src/drm_language_emitter/model.py`: model assembly and core recurrent forward path.
 - `src/drm_language_emitter/model_components.py`: state initializer, causal mixer, direct control transition, and selective memory.
@@ -222,8 +257,8 @@ against GPT-2 are **deprecated and retracted as comparative evidence**.
 
 The historical GPT-2 training path shifted next-token labels before passing
 them to a Hugging Face causal-LM implementation that performs its own internal
-shift. GPT-2 was therefore trained against \(x_{t+2}\) instead of the intended
-\(x_{t+1}\). This double-shift made the GPT-2 CE artificially poor. The bug has
+shift. GPT-2 was therefore trained against $x_{t+2}$ instead of the intended
+$x_{t+1}$. This double-shift made the GPT-2 CE artificially poor. The bug has
 been corrected in `scripts/train_gpt2_memmap.py` and covered by regression
 tests.
 
@@ -243,7 +278,7 @@ docs/benchmarks/competition_125m_local_mixer_h256_l2_s02_150m/
 docs/benchmarks/tta/
 ```
 
-### Current valid DRM component evidence
+### Current valid ASM component evidence
 
 The current controlled 5M-token, three-seed result uses deterministic
 continuous validation over 4,834,787 targets:
@@ -255,9 +290,14 @@ continuous validation over 4,834,787 targets:
 | SSM_CONTROL | 126.08M | 1.806518 | 0.006191 | selective memory without geometry |
 
 J beat SSM_CONTROL in all three seeds by 0.045937 CE on average, while the
-control trained about 2.5x faster. This supports a contribution from the
-geometric system under this internal control; it is not a comparison with
-Mamba or GPT-2.
+control trained about 2.5x faster. This historical component result motivated
+the decomposed ASM family; it is not a comparison with Mamba or GPT-2.
+
+At 30M tokens and three paired seeds, ASM-R (`J_NO_DIRECTION`) achieved mean
+validation CE `1.477576`, while parameter-matched ASM-S
+(`J_DIRECT_CONTROL_MATCHED`) achieved `1.487258`. At 5M the order was reversed.
+This crossover motivates the continuous 1M–100M scaling-law protocol rather
+than selection from a single early budget.
 
 See [report 027](docs/report/027_Contribuicao_Geometrica_J_vs_SSM_Control_e_Proximas_Ablacoes_2026_07_31.md).
 
@@ -357,7 +397,8 @@ CUDA tests are conditional. They run only when `torch.cuda.is_available()` is tr
 configs/                 DRM and benchmark configs
 docs/                    math, limitations, competition notes, benchmark artifacts
 scripts/                 training, generation, evaluation, sweeps, dashboards
-src/drm_language_emitter/ DRM model package
+src/aletheion_state_models/ ASM family and neutral public interfaces
+src/drm_language_emitter/ checkpoint-compatible legacy implementation
 tests/                   smoke and invariant tests
 transformer/             tiny Transformer baseline
 world_model/             tiny symbolic world-model baseline
@@ -367,7 +408,9 @@ world_model/             tiny symbolic world-model baseline
 
 Allowed claims:
 
-- DRM Language Emitter is a functional non-Transformer language model prototype.
+- ASM is a functional attention-free causal state-model research family.
+- ASM-X preserves the explicit DRM architecture inside the family.
+- ASM-R and ASM-S exhibit a measured ranking crossover between 5M and 30M tokens.
 - Its geometry is explicit, measurable, and trainable in small experiments.
 - The repository includes controlled tiny comparisons against Transformer and a tiny symbolic world model.
 - The repository includes an experimental causal blockwise trajectory solver using prefix cumsum and causal Anderson refinement.

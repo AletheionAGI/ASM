@@ -3,13 +3,13 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "drm-language-emitter"
-version = "0.1.0"
-description = "Experimental non-Transformer language model driven by Directional Relational Manifold dynamics."
+name = "aletheion-state-models"
+version = "0.2.0"
+description = "Experimental attention-free causal state-model family derived from DRM research."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "AGPL-3.0-only" }
-authors = [{ name = "DRM Language Emitter contributors" }]
+authors = [{ name = "Aletheion State Models contributors" }]
 dependencies = [
   "torch>=2.0",
 ]
@@ -22,7 +22,7 @@ hf = ["transformers>=4.40", "datasets>=2.18"]
 
 [tool.setuptools.packages.find]
 where = ["src", "."]
-include = ["drm_language_emitter*", "world_model*", "transformer*"]
+include = ["aletheion_state_models*", "drm_language_emitter*", "world_model*", "transformer*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

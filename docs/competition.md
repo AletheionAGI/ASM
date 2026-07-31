@@ -2,7 +2,7 @@
 
 ## Current Result
 
-In the controlled 400-step tiny byte-level comparison, the Tiny Transformer baseline outperformed DRM Language Emitter in validation CE:
+In the controlled 400-step tiny byte-level comparison, the Tiny Transformer baseline outperformed ASM-X (then named DRM Language Emitter) in validation CE:
 
 - DRM best validation CE: `2.8752`
 - Tiny Transformer best validation CE: `2.1369`
@@ -18,7 +18,7 @@ At the same time, DRM maintained stable geometry:
 
 ## Permitted Claims
 
-- DRM Language Emitter is a functional non-Transformer language model.
+- ASM-X is a functional attention-free causal state model.
 - DRM geometry is active and measurable in the current implementation.
 - The project now has a controlled Transformer comparison harness.
 - Competition Phase 1 can test whether DRM wins in specific arenas.

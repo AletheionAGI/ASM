@@ -75,7 +75,20 @@ def checkpoint_payload(
 
 def save_checkpoint(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(payload, path)
+    temporary = path.with_name(f".{path.name}.tmp")
+    try:
+        torch.save(payload, temporary)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def link_checkpoint(source: Path, target: Path) -> None:
+    """Point a checkpoint alias at an existing payload without duplicating it."""
+    temporary = target.with_name(f".{target.name}.tmp-link")
+    temporary.unlink(missing_ok=True)
+    os.link(source, temporary)
+    os.replace(temporary, target)
 
 
 def load_checkpoint(
@@ -160,6 +173,11 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=1337)
     parser.add_argument("--eval-tokens-interval", type=int, default=50_000_000)
     parser.add_argument("--checkpoint-tokens-interval", type=int, default=250_000_000)
+    parser.add_argument(
+        "--checkpoint-token-milestones",
+        default="",
+        help="Comma-separated token milestones; overrides the checkpoint interval.",
+    )
     parser.add_argument("--eval-batches", type=int, default=4)
     parser.add_argument("--log-interval", type=int, default=10)
     parser.add_argument("--resume", default="", help="Path to checkpoint, or 'latest'.")
@@ -213,6 +231,15 @@ def main() -> None:
     parser.add_argument("--sampled-block-consistency-local-size", type=int, default=None)
     parser.add_argument("--sampled-block-consistency-teacher-mode", choices=["candidate", "velocity"], default=None)
     args = parser.parse_args()
+    checkpoint_milestones = sorted(
+        {
+            int(item.strip())
+            for item in args.checkpoint_token_milestones.split(",")
+            if item.strip()
+        }
+    )
+    if any(value <= 0 for value in checkpoint_milestones):
+        raise ValueError("checkpoint token milestones must be positive")
     if args.dataset_manifest:
         if args.train_manifest or args.validation_manifest:
             parser.error("--dataset-manifest cannot be combined with --train-manifest/--validation-manifest")
@@ -369,9 +396,21 @@ def main() -> None:
     total_steps = args.steps if args.steps > 0 else math.ceil(max(args.target_tokens - tokens_seen, 0) / tokens_per_step)
     final_step = start_step + total_steps
     next_eval_tokens = ((tokens_seen // args.eval_tokens_interval) + 1) * args.eval_tokens_interval
-    next_checkpoint_tokens = ((tokens_seen // args.checkpoint_tokens_interval) + 1) * args.checkpoint_tokens_interval
+    pending_milestones = [value for value in checkpoint_milestones if value > tokens_seen]
+    next_checkpoint_tokens = (
+        pending_milestones[0]
+        if pending_milestones
+        else ((tokens_seen // args.checkpoint_tokens_interval) + 1) * args.checkpoint_tokens_interval
+    )
     generator = torch.Generator().manual_seed(args.seed + rank * 9973 + start_step)
+    metrics_path = output_root / "metrics_latest.json"
     history: list[dict[str, Any]] = []
+    elapsed_offset = 0.0
+    if resume_path is not None and metrics_path.is_file():
+        previous_metrics = load_yaml_or_json(metrics_path)
+        history = list(previous_metrics.get("history", []))
+        if history:
+            elapsed_offset = float(history[-1].get("elapsed_sec", 0.0))
     started = time.perf_counter()
     optimizer.zero_grad(set_to_none=True)
     step = start_step
@@ -423,14 +462,14 @@ def main() -> None:
                 torch.distributed.barrier()
 
         if should_log or (eval_due and rank_zero):
-            elapsed = time.perf_counter() - started
+            elapsed = elapsed_offset + time.perf_counter() - started
             row = {
                 "step": step,
                 "tokens_seen": tokens_seen,
                 "train_ce": train_ce,
                 "val_ce": val_ce,
                 "best_val_ce": best_val_ce if math.isfinite(best_val_ce) else None,
-                "tokens_per_sec": (tokens_seen - (start_step * tokens_per_step)) / max(elapsed, 1e-8),
+                "tokens_per_sec": tokens_seen / max(elapsed, 1e-8),
                 "elapsed_sec": elapsed,
             }
             history.append(row)
@@ -439,10 +478,23 @@ def main() -> None:
 
         if checkpoint_due and rank_zero:
             payload = checkpoint_payload(model, optimizer, config, args, step, tokens_seen, parameter_count, best_val_ce, world_size)
-            save_checkpoint(output_root / "checkpoint_latest.pt", payload)
-            save_checkpoint(output_root / f"checkpoint_tokens_{tokens_seen}.pt", payload)
+            if pending_milestones:
+                reached = [value for value in pending_milestones if value <= tokens_seen]
+                for milestone in reached:
+                    milestone_path = output_root / f"checkpoint_milestone_{milestone}.pt"
+                    save_checkpoint(milestone_path, payload)
+                    link_checkpoint(milestone_path, output_root / "checkpoint_latest.pt")
+                pending_milestones = [value for value in pending_milestones if value > tokens_seen]
+            else:
+                checkpoint_path = output_root / f"checkpoint_tokens_{tokens_seen}.pt"
+                save_checkpoint(checkpoint_path, payload)
+                link_checkpoint(checkpoint_path, output_root / "checkpoint_latest.pt")
         if checkpoint_due:
-            next_checkpoint_tokens += args.checkpoint_tokens_interval
+            next_checkpoint_tokens = (
+                pending_milestones[0]
+                if pending_milestones
+                else next_checkpoint_tokens + args.checkpoint_tokens_interval
+            )
             if ddp:
                 torch.distributed.barrier()
 
@@ -451,7 +503,11 @@ def main() -> None:
 
     if rank_zero:
         payload = checkpoint_payload(model, optimizer, config, args, step, tokens_seen, parameter_count, best_val_ce, world_size)
-        save_checkpoint(output_root / "checkpoint_last.pt", payload)
+        latest_checkpoint = output_root / "checkpoint_latest.pt"
+        if latest_checkpoint.is_file() and tokens_seen >= args.target_tokens:
+            link_checkpoint(latest_checkpoint, output_root / "checkpoint_last.pt")
+        else:
+            save_checkpoint(output_root / "checkpoint_last.pt", payload)
         save_json(
             output_root / "summary.json",
             {

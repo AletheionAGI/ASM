@@ -1,10 +1,15 @@
 # Arquitetura
 
-O DRM Language Emitter é um modelo de linguagem causal construído em torno de
-um estado latente `z_t`. Ele não usa atenção sobre sequências. O repositório
+ASM — Aletheion State Models é uma família de modelos de estado causais
+construída em torno de um estado latente `z_t`. Ela não usa atenção sobre sequências. O repositório
 agora contém o DRM recorrente original, aproximações em blocos, híbridos com
 memória seletiva e controles sem geometria. Esses caminhos precisam ser
 diferenciados ao relatar um resultado.
+
+A arquitetura DRM explícita recebe o nome **ASM-X**. As interfaces neutras da
+família ficam em `src/aletheion_state_models/`; `src/drm_language_emitter/`
+permanece como implementação compatível com checkpoints durante a migração.
+Consulte [docs/MODEL_FAMILY_ptbr.md](docs/MODEL_FAMILY_ptbr.md).
 
 ## Famílias de arquitetura atuais
 
@@ -132,8 +137,8 @@ estados dos prefixos são aproximados por uma soma cumulativa:
 = z_b + \sum_{j \le t} dt\,\Delta z_{b,j}
 ```
 
-Os blocos permanecem sequenciais porque o estado final do bloco \(b\)
-inicializa o bloco \(b+1\). As posições dentro de um bloco permanecem causais
+Os blocos permanecem sequenciais porque o estado final do bloco $b$
+inicializa o bloco $b+1$. As posições dentro de um bloco permanecem causais
 em relação ao prefixo. Um mixer convolucional causal depthwise opcional corrige
 os estados aproximados usando somente o contexto à esquerda.
 

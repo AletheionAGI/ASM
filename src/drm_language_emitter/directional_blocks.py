@@ -123,14 +123,15 @@ class DirectionalBlocksMixin:
             .expand(-1, block_len, -1, -1)
             .reshape(batch * block_len, self.config.d_state, self.config.metric_rank)
         )
-        dz_raw, _coefficients = self.flow(flat_z, flat_tokens, directions, gates)
-        dz = self.metric.naturalize(
-            dz_raw,
-            metric_diag,
-            metric_u,
-            strength=self._naturalization_strength(global_step),
-            damping=self.config.metric_damping,
-        )
+        _dz_raw, coefficients = self.flow(flat_z, flat_tokens, directions, gates)
+        dz = self._compose_metric_and_directions(
+            base_directions,
+            base_gates,
+            coefficients.reshape(batch, block_len, self.config.n_directions),
+            base_metric_diag,
+            base_metric_u,
+            global_step,
+        ).reshape(batch * block_len, self.config.d_state)
         if self.config.directional_cumsum_step_mode == "velocity":
             flat_next = self.updater(flat_z, dz)
         else:
@@ -178,7 +179,7 @@ class DirectionalBlocksMixin:
                 .reshape(batch * block_len, self.config.n_directions)
             )
             assert self.flow is not None
-            dz_raw, _coefficients = self.flow(
+            dz_raw, coefficients = self.flow(
                 flat_z,
                 flat_tokens,
                 directions,
@@ -213,13 +214,27 @@ class DirectionalBlocksMixin:
                     self.config.metric_rank,
                 )
             )
-            dz = self.metric.naturalize(
-                dz_raw,
-                metric_diag,
-                metric_u,
-                strength=self._naturalization_strength(global_step),
-                damping=self.config.metric_damping,
-            )
+            if self.direction_field is not None:
+                dz = self._compose_metric_and_directions(
+                    base_directions,
+                    base_gates,
+                    coefficients.reshape(
+                        batch,
+                        block_len,
+                        self.config.n_directions,
+                    ),
+                    base_metric_diag,
+                    base_metric_u,
+                    global_step,
+                ).reshape(batch * block_len, self.config.d_state)
+            else:
+                dz = self.metric.naturalize(
+                    dz_raw,
+                    metric_diag,
+                    metric_u,
+                    strength=self._naturalization_strength(global_step),
+                    damping=self.config.metric_damping,
+                )
         else:
             metric_diag = flat_z.new_ones(
                 batch * block_len,

@@ -98,3 +98,118 @@ class GeometricStepsMixin:
         if global_step is None or warmup <= 0:
             return max_strength
         return max_strength * min(max(global_step, 0) / warmup, 1.0)
+
+    def _compose_metric_and_directions(
+        self,
+        directions: torch.Tensor,
+        gates: torch.Tensor,
+        coefficients: torch.Tensor,
+        metric_diag: torch.Tensor,
+        metric_u: torch.Tensor,
+        global_step: int | None,
+    ) -> torch.Tensor:
+        """Compose a block's directions and metric without duplicating its Gram matrix.
+
+        Shapes are BxNxD for directions, BxN for gates, BxLxN for
+        coefficients, BxD for the diagonal, and BxDxR for the low-rank factor.
+        Both metric-first modes preserve the span of the original directions.
+        """
+
+        active = coefficients * gates.unsqueeze(1)
+        raw = torch.einsum("bln,bnd->bld", active, directions)
+        mode = self.config.directional_metric_composition
+        strength = self._naturalization_strength(global_step)
+        if mode == "post_naturalize":
+            batch, block_len, d_state = raw.shape
+            expanded_diag = (
+                metric_diag.unsqueeze(1)
+                .expand(-1, block_len, -1)
+                .reshape(batch * block_len, d_state)
+            )
+            expanded_u = (
+                metric_u.unsqueeze(1)
+                .expand(-1, block_len, -1, -1)
+                .reshape(
+                    batch * block_len,
+                    d_state,
+                    metric_u.shape[-1],
+                )
+            )
+            naturalized = self.metric.naturalize(
+                raw.reshape(batch * block_len, d_state),
+                expanded_diag,
+                expanded_u,
+                strength=strength,
+                damping=self.config.metric_damping,
+            )
+            return naturalized.reshape(batch, block_len, d_state)
+
+        solve_dtype = (
+            torch.float32
+            if directions.dtype in {torch.float16, torch.bfloat16}
+            else directions.dtype
+        )
+        directions_solve = directions.to(solve_dtype)
+        diag_solve = metric_diag.to(solve_dtype)
+        u_solve = metric_u.to(solve_dtype)
+        active_solve = active.to(solve_dtype)
+        autocast_device = (
+            directions.device.type
+            if directions.device.type in {"cuda", "cpu"}
+            else "cpu"
+        )
+        with torch.autocast(device_type=autocast_device, enabled=False):
+            gv = diag_solve.unsqueeze(1) * directions_solve
+            if u_solve.shape[-1] > 0:
+                projected = torch.bmm(directions_solve, u_solve)
+                gv = gv + torch.bmm(projected, u_solve.transpose(1, 2))
+            gram = torch.bmm(directions_solve, gv.transpose(1, 2))
+            gram = 0.5 * (gram + gram.transpose(1, 2))
+            identity = torch.eye(
+                directions.shape[1],
+                device=directions.device,
+                dtype=solve_dtype,
+            ).unsqueeze(0)
+            damping = max(float(self.config.metric_damping), 1e-6)
+            regularized = gram + damping * identity
+
+            if mode == "metric_subspace":
+                rhs = active_solve.transpose(1, 2)
+                solution, info = torch.linalg.solve_ex(regularized, rhs)
+                if bool((info != 0).any()):
+                    solution = torch.bmm(
+                        torch.linalg.pinv(regularized, hermitian=True),
+                        rhs,
+                    )
+                natural_coefficients = solution.transpose(1, 2)
+                metric_first = torch.einsum(
+                    "bln,bnd->bld",
+                    natural_coefficients,
+                    directions_solve,
+                )
+            else:
+                cholesky, info = torch.linalg.cholesky_ex(regularized)
+                if bool((info != 0).any()):
+                    eigenvalues, eigenvectors = torch.linalg.eigh(regularized)
+                    inverse_sqrt = torch.bmm(
+                        eigenvectors * eigenvalues.clamp_min(damping).rsqrt().unsqueeze(1),
+                        eigenvectors.transpose(1, 2),
+                    )
+                    orthonormal_directions = torch.bmm(
+                        inverse_sqrt,
+                        directions_solve,
+                    )
+                else:
+                    orthonormal_directions = torch.linalg.solve_triangular(
+                        cholesky,
+                        directions_solve,
+                        upper=False,
+                    )
+                metric_first = torch.einsum(
+                    "bln,bnd->bld",
+                    active_solve,
+                    orthonormal_directions,
+                )
+
+        metric_first = metric_first.to(raw.dtype)
+        return (1.0 - strength) * raw + strength * metric_first

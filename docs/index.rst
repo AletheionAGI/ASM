@@ -1,5 +1,5 @@
-DRM Language Emitter
-====================
+ASM — Aletheion State Models
+============================
 
 .. toctree::
    :maxdepth: 2

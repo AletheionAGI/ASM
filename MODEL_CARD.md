@@ -2,11 +2,12 @@
 
 ## Model
 
-DRM Language Emitter, version `0.1.0`.
+ASM — Aletheion State Models, version `0.2.0`.
 
 ## Intended Use
 
-Research experiments on non-Transformer language generation using Directional Relational Manifold dynamics.
+Research on attention-free causal state models, including explicit DRM,
+metric-conditioned, direct-transition, and selective-memory variants.
 
 ## Out-of-Scope Use
 
@@ -14,7 +15,11 @@ Do not use this model for production language generation, safety-critical tasks,
 
 ## Architecture
 
-The model is autoregressive and trained with next-token prediction. It uses learned active directions, a learned relational metric, low-action dynamics, and an MLP emitter. It does not use Transformer blocks or self-attention.
+The family is autoregressive and trained with next-token prediction. All
+current variants use a persistent causal state. Geometry, explicit directions,
+and selective-memory capacity vary by ASM code. ASM-X is the explicit DRM
+variant; ASM-R and ASM-S are the current scaling-law finalists. No current
+variant uses Transformer blocks or self-attention.
 
 ## Training Data
 
@@ -22,7 +27,9 @@ The default script uses a tiny local text file or fallback corpus. This is only 
 
 ## Evaluation
 
-No competitive benchmark is reported. Current tests verify shape, finite losses, generation, metric positivity, diagnostics, and the absence of explicit attention modules.
+Current evidence is experimental and architecture-internal. Tests verify
+shape, finite losses, causality, metric positivity where applicable,
+checkpointing, scaling-law instrumentation, and absence of attention modules.
 
 ## Safety
 

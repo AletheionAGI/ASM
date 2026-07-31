@@ -166,6 +166,34 @@
         "directional_local_mixer_dilation_growth": 2
       }
     },
+    "J_METRIC_SUBSPACE": {
+      "description": "J with metric-first naturalization inside the learned directional subspace.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "directional_metric_composition": "metric_subspace",
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_METRIC_ORTHONORMAL_DIRECTION": {
+      "description": "J with directions orthonormalized in the relational metric before movement.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "directional_metric_composition": "metric_orthonormal",
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
     "SSM_CONTROL": {
       "description": "Parameter-matched selective memory, short causal mixer, and emitter without DRM geometry.",
       "inherit": ["ce_only"],
@@ -208,6 +236,40 @@
         "token_state_residual_scale": 0.1,
         "selective_memory": true,
         "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_DIRECT_CONTROL": {
+      "description": "J direct-transition control without direction field, relational metric, or naturalization.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "use_direction_field": false,
+        "use_relational_metric": false,
+        "use_metric_naturalization": false,
+        "directional_cumsum_step_mode": "velocity",
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_DIRECT_CONTROL_MATCHED": {
+      "description": "Parameter-matched J direct-transition control without direction field, relational metric, or naturalization.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "use_direction_field": false,
+        "use_relational_metric": false,
+        "use_metric_naturalization": false,
+        "directional_cumsum_step_mode": "velocity",
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 7212,
         "selective_memory_scale": 0.1,
         "selective_memory_forget_bias": 2.0
       }

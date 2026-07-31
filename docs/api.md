@@ -2,7 +2,29 @@
 
 This page documents the stable public surface used by scripts and tests. The project is still a research scaffold, so internal module details may change between experiments.
 
-## Configuration
+## ASM family API
+
+The neutral public namespace is `aletheion_state_models`:
+
+```python
+from aletheion_state_models import StateModel
+from aletheion_state_models.variants import (
+    build_direct_state,
+    build_explicit_drm,
+    build_metric_subspace,
+    build_relational_state,
+    build_selective_state,
+)
+```
+
+`StateModel` is currently an alias of `DRMEmitterModel`, not a subclass. This
+preserves exact state-dict keys and checkpoint behavior during migration.
+
+The `drm_language_emitter` namespace remains supported as the legacy,
+checkpoint-compatible implementation. It is not being removed in version
+`0.2.0`.
+
+## Legacy-compatible configuration
 
 `drm_language_emitter.config.DRMConfig`
 

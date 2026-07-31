@@ -1,6 +1,7 @@
 # Scale LM Comparison: DRM vs GPT-2 vs OPT
 
-This benchmark trains DRM Language Emitter, GPT-2-style, and OPT-style causal language models under one local protocol:
+This benchmark trains ASM-X (historically DRM Language Emitter), GPT-2-style,
+and OPT-style causal language models under one local protocol:
 
 - same Wikipedia EN text snapshot/sample;
 - same byte tokenizer by default;

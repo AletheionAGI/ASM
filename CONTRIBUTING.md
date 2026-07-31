@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for considering a contribution to DRM Language Emitter.
+Thank you for considering a contribution to ASM — Aletheion State Models.
 
 ## Scope
 

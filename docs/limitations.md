@@ -6,10 +6,13 @@ experimental protocols must be named explicitly when interpreting a result.
 
 ## Scientific status
 
-DRM Language Emitter is an experimental causal language-model architecture. It
+ASM — Aletheion State Models is an experimental causal state-model family. It
 is not a production model, a validated replacement for Transformers, or a
 demonstration of general superiority over GPT-2, Mamba, or other state-space
 models.
+
+ASM-X is the explicit DRM member. Other ASM variants intentionally remove or
+recompose direction, metric, naturalization, or memory mechanisms.
 
 The previously published 36M and 125M comparisons against GPT-2 are retracted
 as comparative evidence. Their GPT-2 training path applied a target shift
