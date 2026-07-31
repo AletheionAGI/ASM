@@ -24,7 +24,8 @@ Versão principal em inglês: [README.md](README.md).
 
 ## Links rápidos
 
-- [Arquitetura](ARCHITECTURE.md)
+- [Arquitetura em português](ARCHITECTURE_ptbr.md)
+- [Arquitetura em inglês](ARCHITECTURE.md)
 - [Roadmap formal em português](roadmap_ptbr.md)
 - [Roadmap formal em inglês](roadmap.md)
 - [Paper DRM v6](docs/paper/drm_v6.tex)
