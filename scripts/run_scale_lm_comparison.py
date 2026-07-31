@@ -12,6 +12,7 @@ from statistics import mean, pstdev
 from typing import Any
 
 import torch
+from torch.nn import functional as F
 
 from drm_language_emitter.config import DRMConfig
 from drm_language_emitter.data import build_tokenizer, ensure_text, make_lm_batch, split_lm_ids
@@ -136,8 +137,8 @@ def forward_loss(
     if family == "drm":
         out = model(x, y, global_step=global_step, collect_diagnostics=collect_diagnostics)
         return out["loss"], out.get("diagnostics", {})
-    out = model(input_ids=x, labels=y)
-    loss = out.loss
+    logits = model(input_ids=x).logits
+    loss = F.cross_entropy(logits.reshape(-1, logits.shape[-1]), y.reshape(-1))
     return loss, {}
 
 

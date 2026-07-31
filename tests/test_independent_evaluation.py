@@ -11,6 +11,7 @@ from scripts.evaluate_frozen_test import evaluate_sequential
 from scripts.prepare_independent_benchmark import prepare_independent_benchmark
 from scripts.prepare_wikipedia_document_split import prepare_wikipedia_document_split
 from scripts.tokenize_corpus_to_uint8 import tokenize_corpus_to_uint8
+from scripts.train_gpt2_memmap import next_token_ce
 
 
 def make_manifest(tmp_path: Path, name: str, content: str) -> Path:
@@ -57,6 +58,19 @@ def test_frozen_evaluation_is_deterministic_and_respects_token_limit(tmp_path: P
     assert first == pytest.approx(second)
     assert first[1] == 21
     assert first[0] > 0
+
+
+def test_gpt2_training_loss_uses_explicit_next_token_targets() -> None:
+    class ExplicitLogitModel(torch.nn.Module):
+        def forward(self, *, input_ids: torch.Tensor):
+            logits = torch.full((*input_ids.shape, 4), -20.0)
+            targets = (input_ids + 1) % 4
+            logits.scatter_(-1, targets.unsqueeze(-1), 20.0)
+            return type("Output", (), {"logits": logits})()
+
+    x = torch.tensor([[0, 1, 2, 3]])
+    y = torch.tensor([[1, 2, 3, 0]])
+    assert float(next_token_ce(ExplicitLogitModel(), x, y)) < 1e-6
 
 
 def test_prepare_independent_benchmark_deduplicates_before_tokenization(tmp_path: Path) -> None:

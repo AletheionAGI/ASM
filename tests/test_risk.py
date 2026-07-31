@@ -18,3 +18,16 @@ def test_risk_mass_is_clamped_when_enabled():
     out = risk(torch.randn(3, 4))
     assert torch.all(out["risk_mass"] <= 0.05)
     assert torch.all(out["risk_mass_raw"] >= out["risk_mass"])
+
+
+def test_disabled_risk_can_omit_all_parameters():
+    config = DRMConfig(
+        d_state=4,
+        hidden_size=8,
+        use_powerlaw_risk=False,
+        instantiate_disabled_risk=False,
+    )
+    risk = RiskField(config)
+    out = risk(torch.randn(3, 4))
+    assert sum(parameter.numel() for parameter in risk.parameters()) == 0
+    assert torch.count_nonzero(out["risk_mass"]) == 0

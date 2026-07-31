@@ -330,7 +330,52 @@ Major sources include:
 
 ## How does this relate to RNNs, SSMs, Mamba, and Neural ODEs?
 
-DRM is related to recurrent and state-space approaches because it maintains and updates a state. The difference proposed by this implementation is the explicit combination of:
+DRM is related to recurrent and state-space approaches because it maintains
+and updates a state. The central distinction is:
+
+> Mamba is fundamentally a selective linear state-space model; DRM is intended
+> to be a nonlinear dynamics model guided by learned relational geometry.
+
+Approximately, a Mamba transition can be described as:
+
+\[
+h_t = A_t h_{t-1} + B_t x_t,\qquad y_t = C_t h_t
+\]
+
+Input-dependent parameters decide what to preserve, write, and read while
+retaining an SSM structure designed for an efficient selective scan.
+
+The original DRM update is closer to:
+
+\[
+\Delta z_t =
+g(z_t)^{-1}
+\sum_k \alpha_k(z_t,x_t)\,v_k(z_t)
+\]
+
+Here, \(z_t\) is the latent state, \(v_k\) are learned directions,
+\(\alpha_k\) are direction gates, and \(g(z_t)\) is a learned SPD metric that
+preconditions or “naturalizes” the update. Geodesic steps, directional
+candidates, energy, risk, and fixed-point mechanisms can additionally be
+investigated.
+
+In simplified terms, Mamba asks what information should be retained, forgotten,
+and retrieved. DRM asks in which direction the state should move under the
+local relational geometry.
+
+| Aspect | Mamba | DRM |
+|---|---|---|
+| Core | Selective SSM | Directional field and relational metric |
+| State transition | Selective linear recurrence | Nonlinear geometric dynamics |
+| Selection | Token-dependent transition parameters | Gates select movement directions |
+| SPD geometry | Not its central mechanism | Central to the DRM proposal |
+| Geodesics/fixed points | Not part of the core | Investigated by DRM |
+| Forget/write memory | Central | Added experimentally in variant J |
+| Efficient execution | Hardware-aware selective scan | Depends on variant and solver |
+| Maturity | Established architecture | Experimental architecture |
+
+The difference proposed by the DRM implementation is the explicit combination
+of:
 
 - learned directional field;
 - direction gates;
@@ -338,7 +383,32 @@ DRM is related to recurrent and state-space approaches because it maintains and 
 - metric-preconditioned flow;
 - causal language emitter.
 
-Mamba and other modern SSMs are relevant baselines and should be included in future comparisons.
+### Why do variant J and Mamba look more similar?
+
+Variant J adds a selective forget/write memory:
+
+\[
+m_t=f_t\odot m_{t-1}+w_t\odot c_t
+\]
+
+This mechanism is conceptually close to Mamba, although it is not a Mamba
+implementation. J and J_DILATED are hybrids: they combine SSM-like selective
+memory with DRM geometric dynamics. They were introduced because the original
+DRM showed weak sample efficiency and possible associative-recall limitations.
+
+If removing the metric, directions, and flow does not harm CE, that would
+indicate that the selective memory—not DRM geometry—is providing most of the
+useful capacity. The decisive experiment is therefore:
+
+1. complete J;
+2. J without the relational metric;
+3. J without the directional field;
+4. selective memory + mixer + emitter only;
+5. complete J under the same parameter budget.
+
+This ablation is necessary to determine empirically whether DRM geometry adds
+capability beyond the Mamba-inspired mechanism. Mamba and other modern SSMs
+also remain necessary external baselines.
 
 DRM is also conceptually close to Neural ODEs because it describes state evolution, but the current implementation uses a discrete update:
 

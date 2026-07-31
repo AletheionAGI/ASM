@@ -24,8 +24,22 @@ from .losses import (
     stability_proxy,
 )
 from .metric import RelationalMetric
-from .model_components import CausalLocalMixer, DRMStateInitializer
+from .model_components import (
+    CausalLocalMixer,
+    DRMRefinementLayer,
+    DRMStateInitializer,
+    SelectiveStateMemory,
+    TokenStateResidual,
+)
 from .risk import RiskField
+from .selective_control import SelectiveControlMixin
+
+
+def _seeded_module(config: DRMConfig, offset: int, factory):
+    """Initialize a component from a stable stream independent of optional peers."""
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(int(config.seed) + offset)
+        return factory()
 
 
 class DRMEmitterModel(
@@ -33,20 +47,58 @@ class DRMEmitterModel(
     DirectionalBlocksMixin,
     DirectionalSolversMixin,
     GeometricStepsMixin,
+    SelectiveControlMixin,
     nn.Module,
 ):
     def __init__(self, config: DRMConfig):
         super().__init__()
         self.config = config
-        self.token_embedding = TokenEmbedding(config)
-        self.initializer = DRMStateInitializer(config)
-        self.direction_field = DirectionField(config)
-        self.metric = RelationalMetric(config)
-        self.flow = DRMFlow(config)
+        self.token_embedding = _seeded_module(config, 101, lambda: TokenEmbedding(config))
+        self.initializer = _seeded_module(config, 102, lambda: DRMStateInitializer(config))
+        self.direction_field = (
+            _seeded_module(config, 103, lambda: DirectionField(config))
+            if config.use_drm_geometry
+            else None
+        )
+        self.metric = (
+            _seeded_module(config, 104, lambda: RelationalMetric(config))
+            if config.use_drm_geometry
+            else None
+        )
+        self.flow = (
+            _seeded_module(config, 105, lambda: DRMFlow(config))
+            if config.use_drm_geometry
+            else None
+        )
         self.updater = StateUpdater(config)
-        self.risk = RiskField(config)
-        self.emitter = LanguageEmitter(config)
-        self.local_mixer = CausalLocalMixer(config) if config.directional_local_mixer != "none" else None
+        self.risk = (
+            _seeded_module(config, 106, lambda: RiskField(config))
+            if config.use_drm_geometry
+            else None
+        )
+        self.emitter = _seeded_module(config, 107, lambda: LanguageEmitter(config))
+        self.local_mixer = (
+            _seeded_module(config, 108, lambda: CausalLocalMixer(config))
+            if config.directional_local_mixer != "none"
+            else None
+        )
+        self.token_state_residual = (
+            _seeded_module(config, 109, lambda: TokenStateResidual(config))
+            if config.token_state_residual
+            else None
+        )
+        self.selective_memory = (
+            _seeded_module(config, 110, lambda: SelectiveStateMemory(config))
+            if config.selective_memory
+            else None
+        )
+        self.refinement_layers = _seeded_module(
+            config,
+            111,
+            lambda: nn.ModuleList(
+                DRMRefinementLayer(config) for _ in range(config.directional_refinement_layers)
+            ),
+        )
         self._compiled_forward = None
         if config.use_torch_compile and hasattr(torch, "compile"):
             try:
@@ -70,6 +122,14 @@ class DRMEmitterModel(
         batch, seq_len = input_ids.shape
         z = self.initializer(batch, input_ids.device)
         token_embeddings = self.token_embedding(input_ids)
+        if not self.config.use_drm_geometry:
+            return self._forward_selective_control(
+                z,
+                token_embeddings,
+                targets,
+                return_states,
+                collect_diagnostics,
+            )
         if self.config.sequence_mode in {
             "directional_cumsum",
             "directional_block_cumsum",

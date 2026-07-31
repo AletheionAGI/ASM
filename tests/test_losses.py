@@ -1,7 +1,13 @@
+import pytest
 import torch
 
 from drm_language_emitter.config import DRMConfig
-from drm_language_emitter.losses import combine_losses, dimension_entropy, next_token_cross_entropy
+from drm_language_emitter.losses import (
+    active_fraction_loss,
+    combine_losses,
+    dimension_entropy,
+    next_token_cross_entropy,
+)
 
 
 def test_losses_finite():
@@ -24,3 +30,10 @@ def test_losses_finite():
     )
     assert torch.isfinite(total)
     assert set(["ce", "action", "total"]).issubset(losses)
+
+
+def test_active_fraction_target_mode_penalizes_both_sides():
+    below = active_fraction_loss(torch.tensor(0.2), 0.5, "target")
+    above = active_fraction_loss(torch.tensor(0.8), 0.5, "target")
+    assert below.item() == pytest.approx(above.item())
+    assert below.item() > 0

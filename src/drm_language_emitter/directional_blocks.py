@@ -208,6 +208,21 @@ class DirectionalBlocksMixin:
         risk_mass = risk_mass_flat.reshape(batch, block_len)
         if self.local_mixer is not None:
             states = self._bound_state(self.local_mixer(z_start, states, token_embeddings, local_delta, dim, risk_mass))
+        if self.token_state_residual is not None:
+            states = self._bound_state(self.token_state_residual(states, token_embeddings))
+        if self.selective_memory is not None:
+            states = self._bound_state(
+                self.selective_memory(z_start, states, token_embeddings)
+            )
+        for refinement_layer in self.refinement_layers:
+            states = self._bound_state(
+                refinement_layer(
+                    z_start,
+                    states,
+                    token_embeddings,
+                    self._naturalization_strength(global_step),
+                )
+            )
         consistency = self._block_consistency(z_start, token_embeddings, states, global_step)
         sampled_consistency = self._sampled_block_consistency(
             z_start,

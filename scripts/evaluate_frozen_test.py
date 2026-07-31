@@ -76,25 +76,35 @@ def evaluate_sequential(
     if seq_len <= 0 or batch_size <= 0 or max_tokens <= 0:
         raise ValueError("seq_len, batch_size, and max_tokens must be positive")
     token_limit = min(len(dataset) - 1, max_tokens)
-    starts = list(range(0, token_limit, seq_len))
+    windows = [
+        (start, min(seq_len, len(dataset) - start - 1, token_limit - start))
+        for start in range(0, token_limit, seq_len)
+    ]
     total_loss = 0.0
     total_tokens = 0
     batches = 0
-    for batch_start in range(0, len(starts), batch_size):
-        rows = [
-            dataset.window(start, min(seq_len, len(dataset) - start - 1, token_limit - start))
-            for start in starts[batch_start : batch_start + batch_size]
-        ]
-        length = min(row[0].numel() for row in rows)
-        x = torch.stack([row[0][:length] for row in rows]).to(device)
-        y = torch.stack([row[1][:length] for row in rows]).to(device)
-        if family == "drm":
-            logits = model(x, collect_diagnostics=False)["logits"]
-        else:
-            logits = model(input_ids=x).logits
-        total_loss += float(F.cross_entropy(logits.reshape(-1, logits.shape[-1]), y.reshape(-1), reduction="sum"))
-        total_tokens += y.numel()
-        batches += 1
+    for length in sorted({length for _, length in windows}, reverse=True):
+        equal_length_starts = [start for start, window_length in windows if window_length == length]
+        for batch_start in range(0, len(equal_length_starts), batch_size):
+            rows = [
+                dataset.window(start, length)
+                for start in equal_length_starts[batch_start : batch_start + batch_size]
+            ]
+            x = torch.stack([row[0] for row in rows]).to(device)
+            y = torch.stack([row[1] for row in rows]).to(device)
+            if family == "drm":
+                logits = model(x, collect_diagnostics=False)["logits"]
+            else:
+                logits = model(input_ids=x).logits
+            total_loss += float(
+                F.cross_entropy(
+                    logits.reshape(-1, logits.shape[-1]),
+                    y.reshape(-1),
+                    reduction="sum",
+                )
+            )
+            total_tokens += y.numel()
+            batches += 1
     return total_loss / total_tokens, total_tokens, batches
 
 

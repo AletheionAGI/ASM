@@ -6,7 +6,7 @@ Separate commercial licensing may be available under a written agreement.
 
 For commercial licensing, private deployment, proprietary integration, SaaS use, dual licensing, or other non-AGPL terms, contact:
 
-    felupe@truthagi.ai
+    felipe@truthagi.ai
 
 No commercial licence is granted by this file alone. Commercial rights are granted only through a separate written agreement signed by the copyright holder or an authorized representative.
 

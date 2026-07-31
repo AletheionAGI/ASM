@@ -237,6 +237,7 @@ def main() -> None:
     config = DRMConfig.from_dict(load_yaml_or_json(args.config))
     config.max_seq_len = args.seq_len
     config.vocab_size = 256
+    config.seed = args.seed
     if args.sequence_mode is not None:
         config.sequence_mode = args.sequence_mode
     if args.geodesic_solver_steps is not None:

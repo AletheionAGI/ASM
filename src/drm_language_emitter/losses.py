@@ -28,8 +28,16 @@ def stability_proxy(logits: torch.Tensor) -> torch.Tensor:
     return (logits[:, 1:] - logits[:, :-1]).pow(2).mean()
 
 
-def active_fraction_loss(active_fraction: torch.Tensor, target: float) -> torch.Tensor:
-    return (active_fraction - target).clamp_min(0.0).pow(2)
+def active_fraction_loss(
+    active_fraction: torch.Tensor,
+    target: float,
+    mode: str = "upper_bound",
+) -> torch.Tensor:
+    if mode == "target":
+        return (active_fraction - target).pow(2)
+    if mode == "upper_bound":
+        return (active_fraction - target).clamp_min(0.0).pow(2)
+    raise ValueError(f"unknown active fraction loss mode: {mode!r}")
 
 
 def dim_variance_loss(dim_std: torch.Tensor, target: float) -> torch.Tensor:
@@ -83,7 +91,11 @@ def combine_losses(
         losses[name] = value
         total = total + weight * value
     if active_fraction_value is not None:
-        active_loss = active_fraction_loss(active_fraction_value, config.target_active_fraction)
+        active_loss = active_fraction_loss(
+            active_fraction_value,
+            config.target_active_fraction,
+            config.active_fraction_loss_mode,
+        )
         losses["active_fraction"] = active_loss
         total = total + config.lambda_active_fraction * active_loss
     if dim_std_value is not None:
