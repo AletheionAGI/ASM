@@ -26,6 +26,7 @@ from .losses import (
 from .metric import RelationalMetric
 from .model_components import (
     CausalLocalMixer,
+    DirectStateTransition,
     DRMRefinementLayer,
     DRMStateInitializer,
     SelectiveStateMemory,
@@ -57,17 +58,22 @@ class DRMEmitterModel(
         self.initializer = _seeded_module(config, 102, lambda: DRMStateInitializer(config))
         self.direction_field = (
             _seeded_module(config, 103, lambda: DirectionField(config))
-            if config.use_drm_geometry
+            if config.use_drm_geometry and config.use_direction_field
             else None
         )
         self.metric = (
             _seeded_module(config, 104, lambda: RelationalMetric(config))
-            if config.use_drm_geometry
+            if config.use_drm_geometry and config.use_relational_metric
             else None
         )
         self.flow = (
             _seeded_module(config, 105, lambda: DRMFlow(config))
-            if config.use_drm_geometry
+            if config.use_drm_geometry and config.use_direction_field
+            else None
+        )
+        self.direct_transition = (
+            _seeded_module(config, 112, lambda: DirectStateTransition(config))
+            if config.use_drm_geometry and not config.use_direction_field
             else None
         )
         self.updater = StateUpdater(config)

@@ -417,3 +417,27 @@ OUTPUT_ROOT=runs/drm_vs_ssm_control_paired_5m \
 Como os parâmetros removidos da geometria foram transferidos para a memória
 seletiva, esse é um controle de orçamento, não de compute. Throughput, uso de
 VRAM e CE devem ser reportados conjuntamente.
+
+## 11. Resultado do controle e próximo estágio
+
+O rescoring contínuo em três seeds confirmou:
+
+| Variante | CE médio | Desvio-padrão |
+|---|---:|---:|
+| J | **1,760581** | **0,003057** |
+| SSM_CONTROL | 1,806518 | 0,006191 |
+
+J venceu as três seeds, com ganho médio de 0,045937 CE e sem sobreposição entre
+as faixas observadas. Isso demonstra que, neste controle, a geometria DRM como
+conjunto acrescenta capacidade além da memória seletiva.
+
+O próximo estágio decompõe essa contribuição em:
+
+1. J sem métrica;
+2. J sem campo direcional;
+3. J sem naturalização;
+4. J sem RiskField — já representada pela J atual;
+5. J completa.
+
+O desenho causal, critérios e resultados completos estão em
+`docs/report/027_Contribuicao_Geometrica_J_vs_SSM_Control_e_Proximas_Ablacoes_2026_07_31.md`.

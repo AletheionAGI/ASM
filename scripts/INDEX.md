@@ -205,6 +205,7 @@ Commit: pending
 7. `run_drm_fix_paired_5m.sh`
 8. `run_mqar_architecture_probe.py`
 9. `check_drm_fix_promotion.py`
+10. `run_drm_geometry_component_suite.sh`
 
 ## Naming guidance
 

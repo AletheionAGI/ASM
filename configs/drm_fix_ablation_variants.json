@@ -171,11 +171,57 @@
       "inherit": ["ce_only"],
       "overrides": {
         "use_drm_geometry": false,
+        "use_direction_field": false,
+        "use_relational_metric": false,
         "instantiate_disabled_risk": false,
         "token_state_residual": true,
         "token_state_residual_scale": 0.1,
         "selective_memory": true,
         "selective_memory_hidden_size": 14944,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_NO_METRIC": {
+      "description": "J with identity geometry and no RelationalMetric module.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "use_relational_metric": false,
+        "use_metric_naturalization": false,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_NO_DIRECTION": {
+      "description": "J with its directional field and constrained flow replaced by a direct causal transition.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "use_direction_field": false,
+        "directional_cumsum_step_mode": "velocity",
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
+        "selective_memory_scale": 0.1,
+        "selective_memory_forget_bias": 2.0
+      }
+    },
+    "J_NO_NATURALIZATION": {
+      "description": "J with the relational metric retained but prevented from preconditioning the flow.",
+      "inherit": ["ce_only"],
+      "overrides": {
+        "instantiate_disabled_risk": false,
+        "use_metric_naturalization": false,
+        "token_state_residual": true,
+        "token_state_residual_scale": 0.1,
+        "selective_memory": true,
+        "selective_memory_hidden_size": 256,
         "selective_memory_scale": 0.1,
         "selective_memory_forget_bias": 2.0
       }

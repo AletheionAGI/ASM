@@ -161,38 +161,80 @@ class DirectionalBlocksMixin:
         batch, block_len, d_token = token_embeddings.shape
         flat_z = z_start.unsqueeze(1).expand(-1, block_len, -1).reshape(batch * block_len, z_start.shape[-1])
         flat_tokens = token_embeddings.reshape(batch * block_len, d_token)
-        base_directions, base_gates = self.direction_field(z_start)
-        base_metric_diag, base_metric_u = self.metric(z_start)
+        if self.direction_field is not None:
+            base_directions, base_gates = self.direction_field(z_start)
+            directions = (
+                base_directions.unsqueeze(1)
+                .expand(-1, block_len, -1, -1)
+                .reshape(
+                    batch * block_len,
+                    self.config.n_directions,
+                    self.config.d_state,
+                )
+            )
+            gates = (
+                base_gates.unsqueeze(1)
+                .expand(-1, block_len, -1)
+                .reshape(batch * block_len, self.config.n_directions)
+            )
+            assert self.flow is not None
+            dz_raw, _coefficients = self.flow(
+                flat_z,
+                flat_tokens,
+                directions,
+                gates,
+            )
+        else:
+            assert self.direct_transition is not None
+            directions = flat_z.new_empty(
+                batch * block_len,
+                0,
+                self.config.d_state,
+            )
+            gates = flat_z.new_zeros(
+                batch * block_len,
+                self.config.n_directions,
+            )
+            dz_raw = self.direct_transition(flat_z, flat_tokens)
+
+        if self.metric is not None:
+            base_metric_diag, base_metric_u = self.metric(z_start)
+            metric_diag = (
+                base_metric_diag.unsqueeze(1)
+                .expand(-1, block_len, -1)
+                .reshape(batch * block_len, self.config.d_state)
+            )
+            metric_u = (
+                base_metric_u.unsqueeze(1)
+                .expand(-1, block_len, -1, -1)
+                .reshape(
+                    batch * block_len,
+                    self.config.d_state,
+                    self.config.metric_rank,
+                )
+            )
+            dz = self.metric.naturalize(
+                dz_raw,
+                metric_diag,
+                metric_u,
+                strength=self._naturalization_strength(global_step),
+                damping=self.config.metric_damping,
+            )
+        else:
+            metric_diag = flat_z.new_ones(
+                batch * block_len,
+                self.config.d_state,
+            )
+            metric_u = flat_z.new_zeros(
+                batch * block_len,
+                self.config.d_state,
+                0,
+            )
+            dz = dz_raw
+
+        assert self.risk is not None
         base_risk = self.risk(z_start)
-        directions = (
-            base_directions.unsqueeze(1)
-            .expand(-1, block_len, -1, -1)
-            .reshape(batch * block_len, self.config.n_directions, self.config.d_state)
-        )
-        gates = (
-            base_gates.unsqueeze(1)
-            .expand(-1, block_len, -1)
-            .reshape(batch * block_len, self.config.n_directions)
-        )
-        metric_diag = (
-            base_metric_diag.unsqueeze(1)
-            .expand(-1, block_len, -1)
-            .reshape(batch * block_len, self.config.d_state)
-        )
-        metric_u = (
-            base_metric_u.unsqueeze(1)
-            .expand(-1, block_len, -1, -1)
-            .reshape(batch * block_len, self.config.d_state, self.config.metric_rank)
-        )
         risk_mass_flat = base_risk["risk_mass"].unsqueeze(1).expand(-1, block_len).reshape(batch * block_len)
-        dz_raw, _coefficients = self.flow(flat_z, flat_tokens, directions, gates)
-        dz = self.metric.naturalize(
-            dz_raw,
-            metric_diag,
-            metric_u,
-            strength=self._naturalization_strength(global_step),
-            damping=self.config.metric_damping,
-        )
         if self.config.directional_cumsum_step_mode == "velocity":
             flat_next = self.updater(flat_z, dz)
         else:
@@ -203,7 +245,16 @@ class DirectionalBlocksMixin:
         states = self._apply_block_fixed_point(z_start, token_embeddings, states, global_step)
         states = self._apply_block_anderson(z_start, token_embeddings, states, global_step, block_index)
         velocity = (flat_next - flat_z) / max(self.config.dt, 1e-8)
-        action = self.metric.metric_energy(flat_z, velocity, metric_diag, metric_u, risk_mass=risk_mass_flat).reshape(batch, block_len)
+        if self.metric is not None:
+            action = self.metric.metric_energy(
+                flat_z,
+                velocity,
+                metric_diag,
+                metric_u,
+                risk_mass=risk_mass_flat,
+            ).reshape(batch, block_len)
+        else:
+            action = velocity.pow(2).sum(dim=-1).reshape(batch, block_len)
         dim = gates.sum(dim=-1).reshape(batch, block_len)
         risk_mass = risk_mass_flat.reshape(batch, block_len)
         if self.local_mixer is not None:
@@ -232,9 +283,20 @@ class DirectionalBlocksMixin:
             block_index,
         )
         entropy = dimension_entropy(gates)
-        metric_reg = metric_diag.pow(2).mean() + metric_u.pow(2).mean()
+        metric_reg = (
+            metric_diag.pow(2).mean() + metric_u.pow(2).mean()
+            if self.metric is not None
+            else metric_diag.new_tensor(0.0)
+        )
         metric_diag_step = metric_diag.reshape(batch, block_len, -1)
-        condition = self.metric.condition_proxy(metric_diag, metric_u).reshape(batch, block_len)
+        condition = (
+            self.metric.condition_proxy(metric_diag, metric_u).reshape(
+                batch,
+                block_len,
+            )
+            if self.metric is not None
+            else metric_diag.new_ones(batch, block_len)
+        )
         active_050 = (gates > 0.50).float().mean(dim=-1).reshape(batch, block_len)
         u_norm = (
             metric_u.norm(dim=(1, 2)).reshape(batch, block_len)

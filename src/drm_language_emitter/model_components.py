@@ -91,6 +91,27 @@ class TokenStateResidual(nn.Module):
         return states + self.scale * self.projection(token_embeddings)
 
 
+class DirectStateTransition(nn.Module):
+    """Unconstrained causal transition used when the directional field is ablated."""
+
+    def __init__(self, config: DRMConfig):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(config.d_state + config.d_token, config.hidden_size),
+            nn.GELU(),
+            nn.Dropout(config.dropout),
+            nn.Linear(config.hidden_size, config.d_state),
+            nn.Tanh(),
+        )
+
+    def forward(
+        self,
+        state: torch.Tensor,
+        token_embedding: torch.Tensor,
+    ) -> torch.Tensor:
+        return self.net(torch.cat([state, token_embedding], dim=-1))
+
+
 class SelectiveStateMemory(nn.Module):
     """Content-dependent forget/write memory with a parallel affine scan."""
 

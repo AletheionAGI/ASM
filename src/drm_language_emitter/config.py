@@ -21,6 +21,8 @@ class DRMConfig:
     use_powerlaw_risk: bool = False
     instantiate_disabled_risk: bool = True
     use_drm_geometry: bool = True
+    use_direction_field: bool = True
+    use_relational_metric: bool = True
     lambda_action: float = 0.01
     lambda_dim_sparsity: float = 0.001
     lambda_dim_entropy: float = 0.001
@@ -241,6 +243,9 @@ class DRMConfig:
             "use_toroidal_state",
             "use_powerlaw_risk",
             "instantiate_disabled_risk",
+            "use_drm_geometry",
+            "use_direction_field",
+            "use_relational_metric",
             "direction_norm",
             "tie_embeddings",
             "use_metric_naturalization",
@@ -282,6 +287,18 @@ class DRMConfig:
             raise ValueError("'active_fraction_loss_mode' must be one of: upper_bound, target")
         if self.sampled_block_consistency_teacher_mode not in {"candidate", "velocity"}:
             raise ValueError("'sampled_block_consistency_teacher_mode' must be one of: candidate, velocity")
+        if not self.use_drm_geometry and (
+            self.use_direction_field or self.use_relational_metric
+        ):
+            raise ValueError(
+                "geometry-free models must disable use_direction_field and "
+                "use_relational_metric"
+            )
+        if not self.use_direction_field and self.directional_cumsum_step_mode != "velocity":
+            raise ValueError(
+                "models without a direction field require "
+                "directional_cumsum_step_mode='velocity'"
+            )
 
     def __post_init__(self) -> None:  # pragma: no cover
         """Automatically validate configuration on instantiation."""

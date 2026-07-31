@@ -62,10 +62,10 @@ token e_t
   → logits
 ```
 
-O caminho 125M atualmente mais forte usa blocos causais de 64 tokens. Deltas
-direcionais de velocidade são calculados em paralelo, prefixos são
-reconstruídos com soma cumulativa e um mixer convolucional causal aplica uma
-correção local barata.
+O candidato 125M atual é a variante J. Ela usa blocos causais de 64 tokens,
+deltas direcionais, naturalização métrica, mixer causal curto, residual
+token→estado e memória seletiva forget/write. A memória seletiva é uma adição
+posterior inspirada pela literatura de SSMs, não parte do DRM original.
 
 ```text
 input_ids
@@ -74,6 +74,8 @@ input_ids
   → deltas direcionais paralelos
   → prefix cumsum
   → causal local mixer
+  → residual token→estado
+  → memória seletiva forget/write
   → LanguageEmitter
   → logits
 ```
@@ -126,7 +128,9 @@ O tokenizer padrão opera sobre bytes UTF-8.
 
 - `src/drm_language_emitter/config.py`: schema validado do `DRMConfig`.
 - `src/drm_language_emitter/model.py`: montagem do modelo e forward recorrente principal.
-- `src/drm_language_emitter/model_components.py`: inicializador de estado e mixer causal local.
+- `src/drm_language_emitter/model_components.py`: inicializador, mixer causal, transição direta de controle e memória seletiva.
+- `src/drm_language_emitter/selective_control.py`: controle de memória seletiva sem geometria.
+- `src/drm_language_emitter/mqar.py`: dados sintéticos de associative recall.
 - `src/drm_language_emitter/direction_field.py`: campos direcionais ativos e gates.
 - `src/drm_language_emitter/metric.py`: métrica relacional `diag + U Uᵀ` e naturalização.
 - `src/drm_language_emitter/dynamics.py`: fluxo direcional e atualização de estado.
@@ -163,27 +167,53 @@ Ressalvas:
 - a geração atual ainda precisa alcançar paridade completa com o caminho
   block-cumsum/local-mixer usado no treinamento 125M.
 
-## Benchmark 125M versionado
+## Comparações GPT-2 retratadas
 
-O benchmark já publicado contém três seeds por modelo e 150 milhões de tokens
-por seed:
+As comparações anteriormente publicadas de 125M/150M tokens e time-to-quality
+36M contra GPT-2 estão **deprecated e retratadas como evidência comparativa**.
 
-| Modelo | Parâmetros | Melhor CE de validação, média | Desvio | Tokens/s |
-|---|---:|---:|---:|---:|
-| DRM block64 + mixer causal | 127,27M | 1,3116 | 0,0019 | 10.678,7 |
-| GPT-2 real | 126,08M | 1,7305 | 0,0259 | 41.224,4 |
+O treinamento histórico deslocava os targets antes de fornecê-los à
+implementação causal da Hugging Face, que já realiza seu próprio shift interno.
+Assim, o GPT-2 foi treinado para prever \(x_{t+2}\), não \(x_{t+1}\). Esse
+double-shift piorou artificialmente seu CE. O bug foi corrigido em
+`scripts/train_gpt2_memmap.py` e possui testes de regressão.
 
-Artefatos:
+Consequências:
+
+- as alegações antigas de vitória do DRM sobre GPT-2 36M ou 125M foram
+  retiradas;
+- conclusões antigas de target e time-to-quality são inválidas;
+- os artefatos permanecem apenas para auditoria e histórico;
+- curvas DRM podem descrever aqueles runs, mas não sustentam a comparação;
+- este README não afirma superioridade sobre GPT-2.
+
+Artefatos históricos, inválidos para comparação:
 
 ```text
 docs/benchmarks/competition_125m_local_mixer_h256_l2_s02_150m/
+docs/benchmarks/tta/
 ```
 
-Esse resultado demonstra um sinal experimental sob o protocolo antigo, mas
-não constitui superioridade geral. Os melhores checkpoints DRM exatos não
-foram preservados naquele experimento.
+## Evidência interna atual
 
-## Validação independente 125M
+O resultado controlado atual usa 5M tokens, três seeds e validação contínua
+determinística sobre 4.834.787 targets:
+
+| Variante | Parâmetros | CE médio | Desvio | Interpretação |
+|---|---:|---:|---:|---|
+| I | 127,01M | 1,878244 | 0,000647 | baseline geométrico |
+| J | 126,08M | **1,760581** | 0,003057 | geometria + memória seletiva |
+| SSM_CONTROL | 126,08M | 1,806518 | 0,006191 | memória sem geometria |
+
+J venceu SSM_CONTROL nas três seeds por 0,045937 CE em média, enquanto o
+controle treinou aproximadamente 2,5 vezes mais rápido. Isso sustenta uma
+contribuição do sistema geométrico nesse controle interno; não é comparação
+com Mamba ou GPT-2.
+
+Veja o
+[relatório 027](docs/report/027_Contribuicao_Geometrica_J_vs_SSM_Control_e_Proximas_Ablacoes_2026_07_31.md).
+
+## Pipeline independente 125M
 
 O protocolo atual usa:
 
@@ -212,7 +242,9 @@ Executar o smoke test:
 ./scripts/run_independent_125m_smoke.sh
 ```
 
-Executar ou retomar os seis treinamentos:
+Executar ou retomar os treinamentos. Os baselines corrigidos usam diretórios
+`gpt2_125m_real_next_token_seed_*`; checkpoints antigos
+`gpt2_125m_real_seed_*` não devem ser retomados:
 
 ```bash
 ./scripts/run_independent_125m_benchmark.sh
@@ -227,16 +259,6 @@ comparados sobre uma varredura determinística e idêntica da validação para
 DRM e GPT-2. Qualquer ajuste ao protocolo congelado deve ser documentado.
 
 ## Outros benchmarks
-
-### Time-to-quality 37M
-
-No experimento versionado de aproximadamente 37M parâmetros, DRM causal
-Anderson b8 atingiu o target nas três seeds; o GPT-2 36M não o atingiu dentro
-do piso de tokens testado.
-
-```text
-docs/benchmarks/tta/
-```
 
 ### DRM versus Transformer pequeno
 
@@ -296,12 +318,13 @@ Afirmações permitidas:
 - o projeto implementa um protótipo funcional de LM não Transformer;
 - a geometria neural é explícita, mensurável e treinável;
 - o caminho blockwise causal preserva causalidade de prefixo;
-- os benchmarks versionados mostram vantagem de CE do DRM nos protocolos
-  específicos testados.
+- as comparações antigas com GPT-2 estão retratadas por double-shift;
+- J venceu SSM_CONTROL nas três seeds do controle interno de 5M tokens.
 
 Afirmações não permitidas:
 
 - DRM é superior a Transformers em geral;
+- os benchmarks GPT-2 retratados demonstram superioridade do DRM;
 - `dimD` atual é igual ao rank formal `rank(g)` do paper;
 - o modelo implementa kernel, estratos, anchor, conexão ou holonomia formal;
 - baixa ação prova geodésicas emergentes;
@@ -312,7 +335,8 @@ Afirmações não permitidas:
 ## Limitações
 
 - o caminho recorrente básico é lento frente a kernels Transformer otimizados;
-- o DRM 125M ainda é mais lento que GPT-2 em tokens por segundo;
+- ainda não existe comparação multiseed corrigida e concluída que estabeleça
+  vantagem do DRM sobre GPT-2;
 - benchmarks dependem do corpus, tokenizer, hardware e protocolo;
 - geração e forward do local mixer ainda precisam de uma API unificada;
 - a métrica atual é SPD e não possui kernel formal;

@@ -1,6 +1,24 @@
 # Architecture
 
-DRM Language Emitter is a causal language model built around a latent state `z_t`. It emits tokens sequentially, but the mechanism is not sequence attention. The central computation is a learned dynamical system over a Directional Relational Manifold.
+DRM Language Emitter is a causal language model built around a latent state
+`z_t`. It does not use sequence attention. The repository now contains the
+original recurrent DRM, blockwise approximations, selective-memory hybrids, and
+geometry-free controls. These paths must be distinguished when reporting a
+result.
+
+## Current Architecture Families
+
+| Family | Geometry | Selective memory | Purpose |
+|---|---|---|---|
+| Original DRM | direction field + metric + flow | no | reference implementation |
+| Block-cumsum DRM | blockwise directional deltas | optional | scalable causal approximation |
+| J | block-cumsum DRM | forget/write | current CE-leading candidate |
+| J_NO_* | component removed or bypassed | forget/write | causal geometry ablations |
+| SSM_CONTROL | none | widened forget/write | parameter-matched control |
+
+Variant J is a hybrid. Its selective memory was added after the original DRM
+showed weak sample efficiency; it must not be presented as part of the original
+independent DRM conception.
 
 ## Latent State
 
@@ -87,8 +105,67 @@ The naturalization strength is scheduled during training. This makes the metric 
 The state update is:
 
 ```math
-z_{t+1} = z_t + \Delta z_t
+z_{t+1} = z_t + dt\,\Delta z_t
 ```
+
+## Blockwise Causal Path
+
+At the 125M scale, `directional_block_cumsum` divides the sequence into causal
+blocks. Geometry is evaluated from the state at the beginning of each block,
+token-conditioned local velocities are evaluated in parallel, and prefix
+states are approximated by a cumulative sum:
+
+```math
+\tilde z_{b,t}
+= z_b + \sum_{j \le t} dt\,\Delta z_{b,j}
+```
+
+Blocks remain sequential because the final state of block \(b\) initializes
+block \(b+1\). Positions inside a block remain prefix-causal. An optional
+depthwise causal convolutional mixer corrects the approximate states using only
+left context.
+
+This is an engineering approximation to the recurrent trajectory, not an exact
+parallel solution of the nonlinear recurrence.
+
+## Selective Memory in Variant J
+
+J applies a content-dependent affine recurrence after the token residual:
+
+```math
+m_t = f_t \odot m_{t-1} + w_t \odot c_t
+```
+
+where forget, write, and candidate values depend on the previous causal state
+and current token. The recurrence is evaluated with an associative affine scan
+that avoids division by vanishing cumulative products.
+
+The current J path is:
+
+```text
+blockwise directional flow
+-> metric naturalization
+-> causal local mixer
+-> token-to-state residual
+-> selective forget/write memory
+-> language emitter
+```
+
+J does not instantiate `RiskField` in the current CE-only experiments.
+
+## Geometry Ablations and Control
+
+- `J_NO_METRIC` removes `RelationalMetric` and uses identity geometry.
+- `J_NO_NATURALIZATION` retains the metric parameters and diagnostics but does
+  not apply the metric inverse to the flow.
+- `J_NO_DIRECTION` replaces the direction field and direction-constrained flow
+  with a direct causal neural transition.
+- `SSM_CONTROL` removes direction, metric, flow, and risk while retaining the
+  mixer, token residual, selective memory, and emitter.
+
+`J_NO_METRIC` and `J_NO_DIRECTION` are structural ablations and have fewer
+parameters than J. `SSM_CONTROL` widens selective memory to match J's parameter
+budget; it is not compute-matched and is not an implementation of Mamba.
 
 ## Action Loss
 
@@ -117,7 +194,8 @@ For supervised language modeling, the primary loss is token cross entropy:
 = -\frac{1}{T}\sum_{t=1}^{T}\log p(x_{t+1} \mid x_{\le t})
 ```
 
-The training objective combines token prediction with geometric regularization:
+The training objective can combine token prediction with geometric
+regularization:
 
 ```math
 \mathcal{L}
@@ -126,11 +204,16 @@ The training objective combines token prediction with geometric regularization:
 + \sum_k \lambda_k \mathcal{R}_k
 ```
 
-The regularizers `R_k` include the active-fraction target, dimension variance, metric conditioning/diversity terms, recurrence/stability proxies, and optional risk/metric-floor penalties when enabled by config.
+The regularizers `R_k` include the active-fraction target, dimension variance,
+metric conditioning/diversity terms, recurrence/stability proxies, and optional
+risk/metric-floor penalties when enabled by config. Variant J and its current
+component ablations set the geometric auxiliary weights to zero, so those runs
+optimize next-token CE only.
 
 ## Generation
 
-Generation warms `z` with prompt tokens. Then it repeatedly:
+The current `generation.py` helper warms `z` with prompt tokens through the
+original recurrent geometry. Then it repeatedly:
 
 1. emits logits from `z`,
 2. samples the next token,
@@ -138,6 +221,11 @@ Generation warms `z` with prompt tokens. Then it repeatedly:
 4. updates `z` through `DirectionField`, `RelationalMetric`, and `DRMFlow`.
 
 There is no attention cache.
+
+This helper does **not** yet reproduce block-cumsum, local-mixer, selective
+memory, component-ablation, or SSM_CONTROL semantics. Generation from J-family
+checkpoints must not be presented as faithful until the helper is unified with
+the training forward path.
 
 ## Why It Is Not A Transformer
 
