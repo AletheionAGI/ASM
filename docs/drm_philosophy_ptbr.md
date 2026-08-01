@@ -47,13 +47,13 @@ entrada
   → saída
 ```
 
-Se $z$ é o estado, $V_i(z)$ são direções locais e $a_i(z,x)$ são coeficientes
+Se $z$ é o estado, $V_{i}(z)$ são direções locais e $a_{i}(z,x)$ são coeficientes
 dependentes do estado e da entrada, o movimento bruto pode ser escrito como:
 
 $$
 v_{\mathrm{raw}}(z,x)
 =
-\sum_i a_i(z,x)V_i(z).
+\sum_{i} a_{i}(z,x)V_{i}(z)
 $$
 
 Uma métrica relacional $G(z)$ pode transformar ou naturalizar esse movimento:
@@ -69,7 +69,7 @@ Uma atualização local seria então:
 $$
 z_{t+1}
 =
-z_t+\Delta t\,v(z_t,x_t).
+z_{t}+\Delta t\,v(z_{t},x_{t})
 $$
 
 Essa formulação separa duas perguntas:
@@ -275,8 +275,8 @@ implementada atualmente no DRM Language Emitter é:
 $$
 G(z)
 =
-\mathrm{diag}\bigl(\mathrm{softplus}(d(z))+\epsilon\bigr)
-+U(z)U(z)^\top.
+\mathrm{diag}\!\left(\mathrm{softplus}(d(z))+\varepsilon\right)
++U(z)U(z)^{\mathsf T}
 $$
 
 Como a diagonal possui piso estritamente positivo, $G(z)$ é SPD e seu posto
@@ -304,7 +304,7 @@ Ela substitui:
 $$
 v_{\mathrm{raw}}
 =
-\sum_i a_i(z,x)V_i(z)
+\sum_{i} a_{i}(z,x)V_{i}(z)
 $$
 
 por uma transição neural direta:
@@ -357,7 +357,7 @@ espaço gerado por elas:
 $$
 v_{\mathrm{raw}}
 \in
-\mathrm{span}\{V_1,\ldots,V_n\}.
+\mathrm{span}\!\left\{V_{1},\ldots,V_{n}\right\}
 $$
 
 Uma transição direta pode produzir qualquer vetor do espaço de estados. A
@@ -545,9 +545,9 @@ Simplesmente aplicar $G^{-1}$ a cada direção antes de somá-las não altera o
 resultado, pois a transformação é linear:
 
 $$
-G^{-1}\sum_i c_iV_i
+G^{-1}\sum_{i} c_{i}V_{i}
 =
-\sum_i c_iG^{-1}V_i.
+\sum_{i} c_{i}G^{-1}V_{i}
 $$
 
 A ordem somente muda efetivamente quando a métrica participa da construção,
@@ -558,17 +558,17 @@ normalização, seleção ou combinação das direções.
 A métrica induzida no espaço direcional é:
 
 $$
-C=V^\top GV.
+C=V^{\mathsf T}GV
 $$
 
 Se $q$ representa a intenção de movimento, uma composição restrita é:
 
 $$
-c=(V^\top GV+\lambda I)^{-1}q,
+c=\left(V^{\mathsf T}GV+\lambda I\right)^{-1}q
 $$
 
 $$
-v=V(V^\top GV+\lambda I)^{-1}q.
+v=V\left(V^{\mathsf T}GV+\lambda I\right)^{-1}q
 $$
 
 Agora:
@@ -585,7 +585,7 @@ possibilidades declarado pelo campo.
 Outra possibilidade é transformar as direções em uma base $Q$ tal que:
 
 $$
-Q^\top GQ\approx I.
+Q^{\mathsf T}GQ\approx I
 $$
 
 Gates e coeficientes passam então a operar sobre direções normalizadas segundo
@@ -596,7 +596,7 @@ a geometria relacional, e não apenas segundo a norma euclidiana.
 Foram definidas duas variantes:
 
 - `J_METRIC_SUBSPACE`: resolve os coeficientes dentro da métrica induzida
-  $V^\top GV$;
+  $V^{\mathsf T}GV$;
 - `J_METRIC_ORTHONORMAL_DIRECTION`: ortonormaliza as direções na métrica antes
   de compor o movimento.
 

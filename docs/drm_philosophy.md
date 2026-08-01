@@ -47,13 +47,13 @@ input
   → output
 ```
 
-If $z$ is the state, $V_i(z)$ are local directions, and $a_i(z,x)$ are
+If $z$ is the state, $V_{i}(z)$ are local directions, and $a_{i}(z,x)$ are
 state- and input-dependent coefficients, raw movement may be written as:
 
 $$
 v_{\mathrm{raw}}(z,x)
 =
-\sum_i a_i(z,x)V_i(z).
+\sum_{i} a_{i}(z,x)V_{i}(z)
 $$
 
 A relational metric $G(z)$ may transform or naturalize this movement:
@@ -69,7 +69,7 @@ A local update would then be:
 $$
 z_{t+1}
 =
-z_t+\Delta t\,v(z_t,x_t).
+z_{t}+\Delta t\,v(z_{t},x_{t})
 $$
 
 This formulation separates two questions:
@@ -272,8 +272,8 @@ metric currently implemented by DRM Language Emitter is:
 $$
 G(z)
 =
-\mathrm{diag}\bigl(\mathrm{softplus}(d(z))+\epsilon\bigr)
-+U(z)U(z)^\top.
+\mathrm{diag}\!\left(\mathrm{softplus}(d(z))+\varepsilon\right)
++U(z)U(z)^{\mathsf T}
 $$
 
 Because its diagonal has a strictly positive floor, $G(z)$ is SPD and its exact
@@ -301,7 +301,7 @@ It replaces:
 $$
 v_{\mathrm{raw}}
 =
-\sum_i a_i(z,x)V_i(z)
+\sum_{i} a_{i}(z,x)V_{i}(z)
 $$
 
 with a direct neural transition:
@@ -355,7 +355,7 @@ to their span:
 $$
 v_{\mathrm{raw}}
 \in
-\mathrm{span}\{V_1,\ldots,V_n\}.
+\mathrm{span}\!\left\{V_{1},\ldots,V_{n}\right\}
 $$
 
 A direct transition may produce any vector in state space. A restriction
@@ -540,9 +540,9 @@ Merely applying $G^{-1}$ to each direction before adding them does not change
 the result because the transformation is linear:
 
 $$
-G^{-1}\sum_i c_iV_i
+G^{-1}\sum_{i} c_{i}V_{i}
 =
-\sum_i c_iG^{-1}V_i.
+\sum_{i} c_{i}G^{-1}V_{i}
 $$
 
 Order changes effectively only when the metric participates in constructing,
@@ -553,17 +553,17 @@ normalizing, selecting, or combining directions.
 The metric induced in directional space is:
 
 $$
-C=V^\top GV.
+C=V^{\mathsf T}GV
 $$
 
 If $q$ represents movement intent, a constrained composition is:
 
 $$
-c=(V^\top GV+\lambda I)^{-1}q,
+c=\left(V^{\mathsf T}GV+\lambda I\right)^{-1}q
 $$
 
 $$
-v=V(V^\top GV+\lambda I)^{-1}q.
+v=V\left(V^{\mathsf T}GV+\lambda I\right)^{-1}q
 $$
 
 Now:
@@ -580,7 +580,7 @@ the possibility space declared by the field.
 Another possibility transforms directions into a basis $Q$ satisfying:
 
 $$
-Q^\top GQ\approx I.
+Q^{\mathsf T}GQ\approx I
 $$
 
 Gates and coefficients then operate on directions normalized under relational
@@ -591,7 +591,7 @@ geometry rather than only under a Euclidean norm.
 Two variants have been defined:
 
 - `J_METRIC_SUBSPACE`: solves coefficients inside the induced metric
-  $V^\top GV$;
+  $V^{\mathsf T}GV$;
 - `J_METRIC_ORTHONORMAL_DIRECTION`: orthonormalizes directions under the metric
   before composing movement.
 
