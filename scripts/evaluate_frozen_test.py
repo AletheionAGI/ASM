@@ -54,11 +54,17 @@ def load_gpt2(checkpoint: Path) -> torch.nn.Module:
 
 def current_commit() -> str | None:
     try:
-        return subprocess.check_output(
+        commit = subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
+        dirty = subprocess.check_output(
+            ["git", "status", "--porcelain"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        return f"{commit}-dirty" if dirty else commit
     except (OSError, subprocess.CalledProcessError):
         return None
 

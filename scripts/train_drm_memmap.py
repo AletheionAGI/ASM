@@ -431,7 +431,11 @@ def main() -> None:
                 loss = out["loss"] / args.grad_accum_steps
             loss.backward()
             step_loss += float(out["aux_losses"].get("ce", out["loss"]).detach().cpu())
-        torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
+        torch.nn.utils.clip_grad_norm_(
+            model.parameters(),
+            args.max_grad_norm,
+            error_if_nonfinite=True,
+        )
         optimizer.step()
         optimizer.zero_grad(set_to_none=True)
         tokens_seen += tokens_per_step

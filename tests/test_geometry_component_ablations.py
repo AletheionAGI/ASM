@@ -189,3 +189,21 @@ def test_metric_orthonormal_direction_handles_degenerate_basis():
     )
 
     assert torch.isfinite(movement).all()
+
+
+def test_metric_frame_recovers_per_sample_from_failed_factorization():
+    directions = torch.randn(2, 4, 8)
+    regularized = torch.eye(4).repeat(2, 1, 1)
+    regularized[0, 0, 0] = -1.0
+    regularized[1, 0, 0] = float("nan")
+    identity = torch.eye(4).unsqueeze(0)
+
+    frames = DRMEmitterModel._stable_metric_frame(
+        directions,
+        regularized,
+        identity,
+        damping=0.1,
+    )
+
+    assert torch.isfinite(frames).all()
+    assert torch.equal(frames[1], directions[1])

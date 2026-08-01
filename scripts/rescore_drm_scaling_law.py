@@ -102,6 +102,45 @@ def observed_crossovers(rows: list[dict[str, Any]], variants: list[str]) -> list
     return results
 
 
+def nonfinite_parameter_summary(model: torch.nn.Module) -> tuple[int, int]:
+    tensors = 0
+    values = 0
+    for parameter in model.state_dict().values():
+        if not torch.is_tensor(parameter):
+            continue
+        invalid = ~torch.isfinite(parameter)
+        if bool(invalid.any()):
+            tensors += 1
+            values += int(invalid.sum())
+    return tensors, values
+
+
+def build_summary(
+    args: argparse.Namespace,
+    variants: list[str],
+    rows: list[dict[str, Any]],
+    device: torch.device,
+) -> dict[str, Any]:
+    fits = {
+        variant: fit_power_law(
+            [row for row in rows if row["variant"] == variant]
+        )
+        for variant in variants
+    }
+    return {
+        "manifest": str(args.manifest),
+        "manifest_sha256": sha256_file(args.manifest),
+        "commit": current_commit(),
+        "python_version": platform.python_version(),
+        "torch_version": torch.__version__,
+        "cuda_version": torch.version.cuda,
+        "device": str(device),
+        "rows": rows,
+        "power_law_fits": fits,
+        "observed_crossovers": observed_crossovers(rows, variants),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Frozen rescoring and curve fitting for DRM scaling runs.")
     parser.add_argument("--root", type=Path, required=True)
@@ -113,6 +152,12 @@ def main() -> None:
     parser.add_argument("--max-tokens", type=int, default=10_000_000)
     parser.add_argument("--batch-size", type=int, default=4)
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("scaling_law_summary.json"),
+        help="Summary filename relative to --root, or an absolute path.",
+    )
     args = parser.parse_args()
 
     variants = [item.upper() for item in parse_csv(args.variants)]
@@ -121,6 +166,10 @@ def main() -> None:
     if device_name == "auto":
         device_name = "cpu"
     device = torch.device(device_name)
+    output_path = args.output if args.output.is_absolute() else args.root / args.output
+    partial_path = output_path.with_name(
+        f"{output_path.stem}.partial{output_path.suffix}"
+    )
     rows: list[dict[str, Any]] = []
 
     with MemmapTokenDataset(args.manifest, split="validation") as dataset:
@@ -132,6 +181,12 @@ def main() -> None:
                     raise FileNotFoundError(checkpoint)
                 print(f"rescoring variant={variant} milestone={milestone}", flush=True)
                 model = load_model(checkpoint).to(device).eval()
+                invalid_tensors, invalid_values = nonfinite_parameter_summary(model)
+                if invalid_tensors:
+                    raise ValueError(
+                        f"checkpoint contains {invalid_values} non-finite values "
+                        f"across {invalid_tensors} tensors: {checkpoint}"
+                    )
                 ce, tokens, batches = evaluate_sequential(
                     model,
                     dataset,
@@ -157,26 +212,17 @@ def main() -> None:
                 }
                 rows.append(row)
                 print(json.dumps(row, indent=2), flush=True)
+                save_json(
+                    partial_path,
+                    build_summary(args, variants, rows, device),
+                )
                 del model
                 if device.type == "cuda":
                     torch.cuda.empty_cache()
 
-    fits = {}
-    for variant in variants:
-        fits[variant] = fit_power_law([row for row in rows if row["variant"] == variant])
-    result = {
-        "manifest": str(args.manifest),
-        "manifest_sha256": sha256_file(args.manifest),
-        "commit": current_commit(),
-        "python_version": platform.python_version(),
-        "torch_version": torch.__version__,
-        "cuda_version": torch.version.cuda,
-        "device": str(device),
-        "rows": rows,
-        "power_law_fits": fits,
-        "observed_crossovers": observed_crossovers(rows, variants),
-    }
-    save_json(args.root / "scaling_law_summary.json", result)
+    result = build_summary(args, variants, rows, device)
+    fits = result["power_law_fits"]
+    save_json(output_path, result)
     print(json.dumps({"power_law_fits": fits, "observed_crossovers": result["observed_crossovers"]}, indent=2))
 
 

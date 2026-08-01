@@ -4,6 +4,71 @@ import torch
 
 
 class GeometricStepsMixin:
+    @staticmethod
+    def _stable_metric_frame(
+        directions: torch.Tensor,
+        regularized: torch.Tensor,
+        identity: torch.Tensor,
+        damping: float,
+    ) -> torch.Tensor:
+        """Solve metric frames per sample with adaptive Cholesky jitter.
+
+        A batched spectral fallback lets one ill-conditioned sample abort the
+        entire batch. Retrying only failed samples is both safer and keeps the
+        primary lower-triangular frame convention used during training.
+        """
+
+        cholesky, info = torch.linalg.cholesky_ex(
+            regularized,
+            check_errors=False,
+        )
+        if bool((info == 0).all()):
+            return torch.linalg.solve_triangular(
+                cholesky,
+                directions,
+                upper=False,
+            )
+
+        frames = []
+        eye = identity[0]
+        for batch_index in range(regularized.shape[0]):
+            matrix = regularized[batch_index]
+            vectors = directions[batch_index]
+            if int(info[batch_index]) == 0:
+                factor = cholesky[batch_index]
+                frame = torch.linalg.solve_triangular(
+                    factor,
+                    vectors,
+                    upper=False,
+                )
+                frames.append(frame)
+                continue
+
+            frame = None
+            if bool(torch.isfinite(matrix).all()) and bool(
+                torch.isfinite(vectors).all()
+            ):
+                for multiplier in (1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0):
+                    retry = matrix + (damping * multiplier) * eye
+                    factor, retry_info = torch.linalg.cholesky_ex(
+                        retry,
+                        check_errors=False,
+                    )
+                    if int(retry_info) == 0:
+                        frame = torch.linalg.solve_triangular(
+                            factor,
+                            vectors,
+                            upper=False,
+                        )
+                        break
+            if frame is None:
+                # A non-finite or irrecoverable sample must not terminate a long
+                # frozen rescore. Falling back to its finite Euclidean directions
+                # is conservative and affects only that pathological sample.
+                frame = torch.nan_to_num(vectors)
+            frames.append(frame)
+        return torch.stack(frames)
+
     def _bound_state(self, z: torch.Tensor) -> torch.Tensor:
         if not self.config.bounded_state:
             return z
@@ -188,23 +253,12 @@ class GeometricStepsMixin:
                     directions_solve,
                 )
             else:
-                cholesky, info = torch.linalg.cholesky_ex(regularized)
-                if bool((info != 0).any()):
-                    eigenvalues, eigenvectors = torch.linalg.eigh(regularized)
-                    inverse_sqrt = torch.bmm(
-                        eigenvectors * eigenvalues.clamp_min(damping).rsqrt().unsqueeze(1),
-                        eigenvectors.transpose(1, 2),
-                    )
-                    orthonormal_directions = torch.bmm(
-                        inverse_sqrt,
-                        directions_solve,
-                    )
-                else:
-                    orthonormal_directions = torch.linalg.solve_triangular(
-                        cholesky,
-                        directions_solve,
-                        upper=False,
-                    )
+                orthonormal_directions = self._stable_metric_frame(
+                    directions_solve,
+                    regularized,
+                    identity,
+                    damping,
+                )
                 metric_first = torch.einsum(
                     "bln,bnd->bld",
                     active_solve,
