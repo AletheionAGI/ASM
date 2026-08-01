@@ -1,0 +1,41 @@
+{
+  "benchmark": "asm_r_confirmation_100m_multiseed",
+  "status": "completed",
+  "promoted_architecture": "ASM-R",
+  "experimental_variant": "J_NO_DIRECTION",
+  "validation_manifest": "data/benchmark_125m_wikipedia/validation/manifest.json",
+  "validation_manifest_sha256": "4adabd5a6a64c30bda37ec23fd2db0341421995f6cdf516f46757e49c1948c07",
+  "validation_tokens_per_checkpoint": 4834787,
+  "seeds": [1, 2, 3],
+  "milestones": [
+    {"tokens": 1000000, "validation_ce": [2.231451629, 2.230332954, 2.235966347], "mean": 2.232583643, "std_population": 0.002435142},
+    {"tokens": 2000000, "validation_ce": [2.010348032, 2.009561877, 2.023645773], "mean": 2.014518561, "std_population": 0.006461889},
+    {"tokens": 5000000, "validation_ce": [1.750542184, 1.751412244, 1.750821973], "mean": 1.750925467, "std_population": 0.000362661},
+    {"tokens": 10000000, "validation_ce": [1.612410135, 1.611031245, 1.611040794], "mean": 1.611494058, "std_population": 0.000647776},
+    {"tokens": 20000000, "validation_ce": [1.513505657, 1.509660746, 1.511408185], "mean": 1.511524863, "std_population": 0.001571845},
+    {"tokens": 30000000, "validation_ce": [1.465237312, 1.465593675, 1.467070411], "mean": 1.465967132, "std_population": 0.000793585},
+    {"tokens": 50000000, "validation_ce": [1.413746610, 1.410157114, 1.410313607], "mean": 1.411405777, "std_population": 0.001656451},
+    {"tokens": 100000000, "validation_ce": [1.344848597, 1.343751062, 1.345015737], "mean": 1.344538465, "std_population": 0.000560944}
+  ],
+  "final_per_seed": [
+    {"seed": 1, "validation_ce": 1.344848597262847, "validation_ppl": 3.837605472640744, "training_elapsed_sec": 6034.379833049999},
+    {"seed": 2, "validation_ce": 1.3437510615282915, "validation_ppl": 3.8333958740144234, "training_elapsed_sec": 4736.706930353001},
+    {"seed": 3, "validation_ce": 1.3450157366073274, "validation_ppl": 3.838246941109632, "training_elapsed_sec": 4725.338828894004}
+  ],
+  "asm_f_generation_1": {
+    "status": "invalid_at_100m_multiseed",
+    "seed_1_100m_validation_ce": 1.3460455985530497,
+    "seed_2_first_nonfinite_training_tokens_approx": 69390000,
+    "seed_3_first_nonfinite_training_tokens_approx": 62180000,
+    "seed_2_100m_nonfinite_parameters": 126080896,
+    "seed_3_100m_nonfinite_parameters": 126080896,
+    "classification": "second-generation experiment after numerical stabilization"
+  },
+  "source_summaries": [
+    {"path": "runs/asm_scaling_law_100m_seed1/scaling_law_summary.json", "sha256": "375e75f080c48cfc44b1aca88a6cad4539b182ce32e3ae7aa8b9bdaa1a751944"},
+    {"path": "runs/asm_confirmation_100m_seed2/scaling_law_summary_asm_r.json", "sha256": "4b1e7ae06d2f601d84ea38a65b28341e44700cd0af04d90fd7e8c5bda877a4cb"},
+    {"path": "runs/asm_confirmation_100m_seed3/scaling_law_summary_asm_r.json", "sha256": "2a9e5fbf7f077de7e8b3ee35e5f500c13fce626bd34d9eb25e04d714ac6eea83"},
+    {"path": "runs/asm_confirmation_100m_seed2/scaling_law_summary_asm_f_through_50m.json", "sha256": "cfca353eb6b03e21ac6e6fc1cdcef8749987ce14466f0d2cc812e5b17450406a"},
+    {"path": "runs/asm_confirmation_100m_seed3/scaling_law_summary_asm_f_through_50m.json", "sha256": "3d1e7e5d2108871d267361b40677d38582dbf7c093ab9b9963ab5b17bb16a792"}
+  ]
+}

@@ -70,11 +70,12 @@ token e_t
   → logits
 ```
 
-O candidato atual é **ASM-R**, representado por `J_NO_DIRECTION`: transição
+O modelo promovido é **ASM-R**, representado por `J_NO_DIRECTION`: transição
 contextual direta, naturalização por métrica relacional, mixer causal,
-residual token→estado e memória seletiva forget/write. ASM-S aprende mais
-rapidamente em 5M tokens, mas ASM-R o ultrapassou em 30M; a scaling law contínua
-foi criada para resolver esse crossover.
+residual token→estado e memória seletiva forget/write. Ele completou três runs
+independentes de 100M tokens com CE médio congelado de **1,344538** e
+desvio-padrão populacional de **0,000561**. ASM-S permanece como variante de
+maior eficiência por tempo.
 
 ```text
 input_ids
@@ -245,7 +246,23 @@ Veja o
 Em 30M tokens e três seeds pareadas, ASM-R (`J_NO_DIRECTION`) obteve CE médio
 `1,477576`, enquanto ASM-S pareado por parâmetros
 (`J_DIRECT_CONTROL_MATCHED`) obteve `1,487258`. Em 5M a ordem era inversa. Esse
-crossover motivou o protocolo contínuo de scaling law entre 1M e 100M.
+crossover motivou o protocolo contínuo. A confirmação levou o ASM-R até 100M
+em três seeds:
+
+| Tokens | CE médio ASM-R | Desvio-padrão populacional |
+|---:|---:|---:|
+| 5M | 1,750925 | 0,000363 |
+| 30M | 1,465967 | 0,000794 |
+| 50M | 1,411406 | 0,001656 |
+| 100M | **1,344538** | **0,000561** |
+
+ASM-R está promovido como arquitetura principal por qualidade por token. O
+ASM-F geração 1 não é um concorrente multiseed válido em 100M: as seeds 2 e 3
+divergiram antes de 70M e produziram checkpoints finais totalmente não finitos.
+Uma nova execução ASM-F estabilizada será um experimento de segunda geração.
+
+Veja o [benchmark multiseed](docs/benchmarks/asm_r_confirmation_100m_multiseed/README.md)
+e o [relatório 037](docs/report/037_Confirmacao_Multiseed_100M_e_Promocao_ASM_R_2026_08_01.md).
 
 ## Pipeline independente 125M
 
@@ -352,7 +369,11 @@ Afirmações permitidas:
 
 - ASM implementa uma família experimental funcional de modelos causais sem attention;
 - ASM-X preserva a arquitetura DRM explícita dentro da família;
+- ASM-R é a arquitetura promovida por qualidade por token após três seeds
+  estáveis de 100M, com CE congelado `1,344538 ± 0,000561`;
 - ASM-R e ASM-S apresentam crossover medido entre 5M e 30M tokens;
+- ASM-F geração 1 divergiu antes de 70M nas duas seeds adicionais; sua versão
+  estabilizada constitui um experimento separado de segunda geração;
 - a geometria neural é explícita, mensurável e treinável;
 - o caminho blockwise causal preserva causalidade de prefixo;
 - as comparações antigas com GPT-2 estão retratadas por double-shift;
@@ -375,7 +396,8 @@ Afirmações não permitidas:
 - ainda não existe comparação multiseed corrigida e concluída que estabeleça
   vantagem do DRM sobre GPT-2;
 - benchmarks dependem do corpus, tokenizer, hardware e protocolo;
-- geração e forward do local mixer ainda precisam de uma API unificada;
+- prefill e decode compartilham a API coberta por testes de paridade; o decode
+  incremental ainda possui limitações de desempenho documentadas;
 - a métrica atual é SPD e não possui kernel formal;
 - não há SFT, RLHF, alignment ou safety evaluation;
 - as Fases 1–6 do paper ainda não estão implementadas.

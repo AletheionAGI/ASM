@@ -160,6 +160,23 @@ The model reports operational diagnostics including:
 
 These diagnostics are not psychological or semantic measurements. Their technical value must be tested through stability analysis, correlation, interventions, and ablations.
 
+## Which ASM architecture is currently promoted?
+
+ASM-R (`J_NO_DIRECTION`) is promoted for quality per training token under the
+current Wikipedia byte-level protocol. It completed three independent runs to
+100M tokens with frozen-validation CE `1.344538 ± 0.000561` (population
+standard deviation over seeds 1, 2, and 3).
+
+ASM-R uses a direct contextual transition, relational metric naturalization,
+causal mixer, token-to-state residual, and selective forget/write memory. It
+removes the explicit directional catalogue but retains learned relational
+geometry.
+
+ASM-F generation 1 is not a valid 100M multiseed competitor: both additional
+seeds diverged before 70M and produced non-finite final checkpoints. Its
+stabilized factorization is treated as a second-generation experiment. See the
+[versioned benchmark](benchmarks/asm_r_confirmation_100m_multiseed/README.md).
+
 ## What is the historical 36M/37M benchmark?
 
 The historical public artifact is:
@@ -509,16 +526,17 @@ that this estimate is noisy. Before PG-19 is accessed, candidate checkpoints
 should be rescored on a larger deterministic validation traversal using
 identical tokens for DRM and GPT-2. This protocol deviation must be disclosed.
 
-## Does generation reproduce the trained local-mixer forward path?
+## Does generation reproduce the trained forward path?
 
-Not yet. `generation.py` currently advances the state through the basic
-recurrent transition and does not reproduce the block-cumsum/local-mixer
-forward path used by the leading 125M model.
+Yes for the supported ASM paths. Prefill and incremental decode now share the
+model sequence engine and are covered by full-forward parity tests, including
+BF16-sensitive behavior. This fixes the earlier mismatch in which generation
+advanced only the basic recurrent transition.
 
-This does not invalidate training or CE evaluation, which call
-`DRMEmitterModel.forward`. It does mean that chat or samples from those
-checkpoints should not yet be treated as faithful inference from the trained
-sequence engine. A shared prefill/decode API and parity tests are required.
+The remaining limitations are performance-related: some modes preserve a full
+prefix or emitter history, and modes without a fixed block can still fall back
+to full recomposition. Generated samples must also be identified by the exact
+variant and checkpoint used.
 
 ## How can the historical 36M benchmark be reproduced?
 

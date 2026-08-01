@@ -1,5 +1,9 @@
 # Resultado da scaling law ASM até 100M tokens
 
+> **Estado histórico:** este relatório registra a triagem inicial com seed 1.
+> A decisão provisória foi substituída pela confirmação multiseed e promoção
+> documentadas no relatório 037.
+
 **Data:** 31 de julho de 2026
 **Execução:** `runs/asm_scaling_law_100m_seed1`
 **Artefatos versionados:** `docs/benchmarks/asm_scaling_law_100m_seed1/`

@@ -72,11 +72,12 @@ token e_t
 
 The current experimental high-quality path can also solve short causal trajectory blocks without a Python loop over every token. In `directional_block_cumsum`, local directional deltas are evaluated in parallel inside blocks, prefix states are recovered with `torch.cumsum`, and optional causal Anderson refinement computes prefix-only coefficients with cumulative Gram matrices plus batched small linear solves. This keeps autoregressive prefix causality while replacing the strict one-step-at-a-time loop with a blockwise solver.
 
-The current leading candidate is **ASM-R**, represented experimentally by
+The promoted architecture is **ASM-R**, represented experimentally by
 `J_NO_DIRECTION`: a direct contextual transition, relational metric
 naturalization, causal mixer, token-to-state residual, and selective
-forget/write memory. ASM-S learns faster at 5M tokens, while ASM-R overtook it
-at 30M; a continuous scaling-law run is designed to resolve that crossover.
+forget/write memory. It completed three independent 100M-token runs with mean
+frozen-validation CE **1.344538** and population standard deviation
+**0.000561**. ASM-S remains the faster efficiency-oriented variant.
 
 The working hypothesis is that language generation can be modeled as motion through a relational state space, where geometry is measurable through action, condition, active dimension, recurrence, stability, and low-action path diagnostics.
 
@@ -119,7 +120,7 @@ If `data/tiny.txt` is missing, the training script creates a tiny fallback corpu
 
 ## Architecture Family
 
-The provisional family taxonomy is:
+The family taxonomy is:
 
 | Code | Architecture | Experimental variant |
 |---|---|---|
@@ -296,8 +297,22 @@ the decomposed ASM family; it is not a comparison with Mamba or GPT-2.
 At 30M tokens and three paired seeds, ASM-R (`J_NO_DIRECTION`) achieved mean
 validation CE `1.477576`, while parameter-matched ASM-S
 (`J_DIRECT_CONTROL_MATCHED`) achieved `1.487258`. At 5M the order was reversed.
-This crossover motivates the continuous 1M–100M scaling-law protocol rather
-than selection from a single early budget.
+The continuous confirmation then took ASM-R to 100M across three seeds:
+
+| Tokens | ASM-R validation CE mean | Population std |
+|---:|---:|---:|
+| 5M | 1.750925 | 0.000363 |
+| 30M | 1.465967 | 0.000794 |
+| 50M | 1.411406 | 0.001656 |
+| 100M | **1.344538** | **0.000561** |
+
+ASM-R is therefore promoted as the main quality-per-token architecture. ASM-F
+generation 1 is not a valid 100M multiseed competitor: seeds 2 and 3 diverged
+before 70M and produced fully non-finite 100M checkpoints. A numerically
+stabilized ASM-F rerun is classified as a second-generation experiment.
+
+See the [multiseed benchmark](docs/benchmarks/asm_r_confirmation_100m_multiseed/README.md)
+and [report 037](docs/report/037_Confirmacao_Multiseed_100M_e_Promocao_ASM_R_2026_08_01.md).
 
 See [report 027](docs/report/027_Contribuicao_Geometrica_J_vs_SSM_Control_e_Proximas_Ablacoes_2026_07_31.md).
 
@@ -410,7 +425,11 @@ Allowed claims:
 
 - ASM is a functional attention-free causal state-model research family.
 - ASM-X preserves the explicit DRM architecture inside the family.
+- ASM-R is the promoted quality-per-token architecture after three stable
+  100M-token seeds with frozen-validation CE `1.344538 ± 0.000561`.
 - ASM-R and ASM-S exhibit a measured ranking crossover between 5M and 30M tokens.
+- ASM-F generation 1 diverged before 70M in both additional seeds; a stabilized
+  ASM-F is a separate second-generation experiment.
 - Its geometry is explicit, measurable, and trainable in small experiments.
 - The repository includes controlled tiny comparisons against Transformer and a tiny symbolic world model.
 - The repository includes an experimental causal blockwise trajectory solver using prefix cumsum and causal Anderson refinement.
@@ -438,8 +457,8 @@ Not allowed:
 - Benchmarks are diagnostic and tied to the exact dataset, tokenizer, optimizer, hardware, and run scripts in this repository.
 - Historical GPT-2 dashboards remain for audit but are invalid for comparative
   conclusions.
-- The generation helper does not yet reproduce the J/block-cumsum/mixer/
-  selective-memory training path.
+- The shared prefill/decode path has parity coverage; incremental decoding
+  still has performance limitations documented in the inference reports.
 - Low-action path evaluation is not a formal geodesic solver.
 - Symbolic world-modeling exact match is still low.
 - No RLHF, alignment evaluation, instruction tuning, or safety validation is included.

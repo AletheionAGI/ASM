@@ -197,8 +197,10 @@ Subtítulo técnico:
 
 > A metric-conditioned causal state model derived from DRM research.
 
-Pelos resultados atualmente disponíveis, `ASM-R` é o principal candidato: ele
-perde para o controle seletivo em 5M, mas o ultrapassa em 30M.
+`ASM-R` é a arquitetura promovida por qualidade por token. Em três runs
+independentes de 100M tokens, seu CE congelado de validação foi `1,344538 ±
+0,000561` (desvio-padrão populacional). Ele perde para o controle seletivo em
+5M, ultrapassa-o até 30M e mantém trajetória reproduzível até 100M.
 
 ## 8. ASM-D — Direct State Model
 
@@ -345,10 +347,10 @@ src/aletheion_state_models/
     └── selective_state.py
 ```
 
-Enquanto a scaling law não promove `ASM-F`, o modo de frame métrica permanece
-na implementação geométrica compartilhada e na matriz experimental. Um módulo
-`relational_frame.py` dedicado só deve ser criado se essa arquitetura for
-promovida ou exigir lógica independente.
+ASM-F geração 1 permanece na implementação geométrica compartilhada e na
+matriz experimental. Ela divergiu antes de 70M tokens nas duas seeds
+adicionais; sua fatorização estabilizada é, portanto, uma linha de pesquisa de
+segunda geração, não uma concorrente validada do ASM-R promovido.
 
 Interfaces neutras recomendadas:
 
@@ -373,16 +375,13 @@ Depois da promoção, a documentação deve ser separada em:
 - `ARCHITECTURE.md`: somente a arquitetura promovida;
 - `HISTORY.md`: origem DRM e evolução baseada nas ablações.
 
-## 16. Estado provisório
+## 16. Estado atual
 
-Nenhuma mudança pública de nome está aprovada neste momento.
+A confirmação multiseed até 100M foi concluída. A nomenclatura ASM impede que o
+nome histórico pressione a decisão científica, enquanto `ASM-X` preserva
+explicitamente o DRM dentro da família.
 
-A nomenclatura ASM serve para impedir que o nome histórico pressione a decisão
-científica. `ASM-X` preserva explicitamente o DRM dentro da família, mesmo que
-outra variante seja promovida.
-
-O modelo atualmente mais plausível, sujeito à scaling law até 100M e à
-confirmação multiseed, é:
+A arquitetura promovida é:
 
 > **ASM-R — Aletheion Relational State Model**
 
@@ -390,5 +389,7 @@ com a arquitetura pública:
 
 > **Relational State Emitter**
 
-Se os resultados mudarem, a taxonomia já oferece uma identidade honesta para a
-variante que realmente vencer.
+A promoção vale para qualidade por token no protocolo Wikipedia byte-level
+atual. ASM-S permanece como opção orientada à eficiência, e o ASM-F estabilizado
+permanece como experimento geométrico de segunda geração. Veja o
+[relatório 037](report/037_Confirmacao_Multiseed_100M_e_Promocao_ASM_R_2026_08_01.md).

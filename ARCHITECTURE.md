@@ -11,13 +11,32 @@ live in `src/aletheion_state_models/`; `src/drm_language_emitter/` remains the
 checkpoint-compatible implementation during migration. See
 [docs/MODEL_FAMILY.md](docs/MODEL_FAMILY.md).
 
+## Promoted Architecture: ASM-R
+
+ASM-R — Aletheion Relational State Model — is the promoted architecture for
+quality per training token. It completed three independent 100M-token runs
+with frozen-validation CE `1.344538 ± 0.000561` (population standard
+deviation). Its transition path is:
+
+```text
+token -> causal state -> direct contextual transition
+      -> relational metric naturalization
+      -> causal mixer + token residual + selective memory
+      -> emitter
+```
+
+ASM-R retains relational metric conditioning but removes the explicit
+direction catalogue. ASM-F remains experimental after its generation-1 runs
+diverged in both additional seeds before 70M tokens. See
+[the confirmation report](docs/report/037_Confirmacao_Multiseed_100M_e_Promocao_ASM_R_2026_08_01.md).
+
 ## Current Architecture Families
 
 | Family | Geometry | Selective memory | Purpose |
 |---|---|---|---|
 | Original DRM | direction field + metric + flow | no | reference implementation |
 | Block-cumsum DRM | blockwise directional deltas | optional | scalable causal approximation |
-| J | block-cumsum DRM | forget/write | current CE-leading candidate |
+| J | block-cumsum DRM | forget/write | explicit DRM reference (ASM-X) |
 | J_NO_* | component removed or bypassed | forget/write | causal geometry ablations |
 | SSM_CONTROL | none | widened forget/write | parameter-matched control |
 

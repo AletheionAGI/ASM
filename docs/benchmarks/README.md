@@ -6,9 +6,16 @@ Generated training directories under `runs/` remain local working artifacts and 
 
 ## Available Benchmarks
 
+- `asm_r_confirmation_100m_multiseed/`
+  - Promoted ASM-R result at 100M tokens with seeds 1, 2, and 3, using the
+    same frozen continuous validation traversal at every milestone.
+  - Final CE: `1.344538 ± 0.000561` (population standard deviation).
+  - Records the invalid ASM-F generation-1 multiseed outcome separately.
+  - Main entry: `asm_r_confirmation_100m_multiseed/README.md`
+
 - `asm_scaling_law_100m_seed1/`
-  - Frozen continuous-validation scaling-law comparison of ASM-R, ASM-X, ASM-F,
-    and ASM-S from 1M through 100M training tokens using seed 1.
+  - Exploratory seed-1 scaling-law comparison of ASM-R, ASM-X, ASM-F, and
+    ASM-S from 1M through 100M training tokens.
   - Main entry: `asm_scaling_law_100m_seed1/README.md`
 
 - `drm_transformer_full_1k_3k/`

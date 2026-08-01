@@ -5,6 +5,10 @@
 **Seeds afetadas:** 2 e 3
 **Estado:** causa confirmada; proteção implementada; checkpoints ASM-F de 100M inválidos
 
+Este diagnóstico deve ser lido em conjunto com o
+[relatório 037](037_Confirmacao_Multiseed_100M_e_Promocao_ASM_R_2026_08_01.md),
+que consolida a curva ASM-R em três seeds e formaliza sua promoção.
+
 ## Sintoma inicial
 
 O rescoring do checkpoint ASM-F em 100M falhou em:

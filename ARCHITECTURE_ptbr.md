@@ -11,13 +11,32 @@ família ficam em `src/aletheion_state_models/`; `src/drm_language_emitter/`
 permanece como implementação compatível com checkpoints durante a migração.
 Consulte [docs/MODEL_FAMILY_ptbr.md](docs/MODEL_FAMILY_ptbr.md).
 
+## Arquitetura promovida: ASM-R
+
+ASM-R — Aletheion Relational State Model — é a arquitetura promovida para
+qualidade por token de treinamento. Ela completou três runs independentes de
+100M tokens com CE congelado de validação `1,344538 ± 0,000561` (desvio-padrão
+populacional). Seu caminho é:
+
+```text
+token → estado causal → transição contextual direta
+      → naturalização pela métrica relacional
+      → mixer causal + residual do token + memória seletiva
+      → emitter
+```
+
+ASM-R preserva o condicionamento pela métrica relacional, mas remove o catálogo
+explícito de direções. ASM-F permanece experimental após sua geração 1 divergir
+nas duas seeds adicionais antes de 70M tokens. Consulte o
+[relatório de confirmação](docs/report/037_Confirmacao_Multiseed_100M_e_Promocao_ASM_R_2026_08_01.md).
+
 ## Famílias de arquitetura atuais
 
 | Família | Geometria | Memória seletiva | Finalidade |
 |---|---|---|---|
 | DRM original | campo direcional + métrica + fluxo | não | implementação de referência |
 | DRM block-cumsum | deltas direcionais em blocos | opcional | aproximação causal escalável |
-| J | DRM block-cumsum | forget/write | candidata atual líder em CE |
+| J | DRM block-cumsum | forget/write | referência DRM explícita (ASM-X) |
 | J_NO_* | componente removido ou contornado | forget/write | ablações causais da geometria |
 | SSM_CONTROL | nenhuma | forget/write ampliada | controle pareado por parâmetros |
 

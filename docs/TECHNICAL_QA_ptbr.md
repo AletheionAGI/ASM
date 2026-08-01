@@ -173,6 +173,22 @@ da atualização neural.
 Esses valores não são medições psicológicas ou semânticas. Sua utilidade exige
 análises de estabilidade, correlação, intervenção e ablação.
 
+## Qual arquitetura ASM está promovida atualmente?
+
+ASM-R (`J_NO_DIRECTION`) está promovida para qualidade por token de treinamento
+no protocolo Wikipedia byte-level atual. Ela completou três runs independentes
+até 100M tokens com CE congelado de validação `1,344538 ± 0,000561`
+(desvio-padrão populacional nas seeds 1, 2 e 3).
+
+ASM-R usa transição contextual direta, naturalização pela métrica relacional,
+mixer causal, residual token→estado e memória seletiva forget/write. Ela remove
+o catálogo direcional explícito, mas preserva geometria relacional aprendida.
+
+ASM-F geração 1 não é uma concorrente multiseed válida em 100M: as duas seeds
+adicionais divergiram antes de 70M e produziram checkpoints finais não finitos.
+Sua fatorização estabilizada é tratada como experimento de segunda geração.
+Veja o [benchmark versionado](benchmarks/asm_r_confirmation_100m_multiseed/README.md).
+
 ## Qual é o benchmark histórico 36M/37M?
 
 ```text
@@ -513,15 +529,18 @@ candidatos devem ser comparados posteriormente sobre tokens determinísticos e
 idênticos de validação antes de acessar o PG-19. O desvio do protocolo deve ser
 documentado.
 
-## A geração reproduz o forward local-mixer treinado?
+## A geração reproduz o forward treinado?
 
-Ainda não. `generation.py` avança o estado pela transição recorrente básica e
-não reproduz o caminho block-cumsum/local-mixer usado pelo modelo 125M líder.
+Sim, nos caminhos ASM suportados. Prefill e decode incremental agora
+compartilham o sequence engine do modelo e possuem testes de paridade com o
+forward completo, inclusive para comportamento sensível a BF16. Isso corrige a
+divergência anterior, na qual a geração avançava apenas a transição recorrente
+básica.
 
-Isso não invalida treino ou avaliação CE, que chamam
-`DRMEmitterModel.forward`. Porém, chat e amostras desses checkpoints ainda não
-devem ser apresentados como inferência fiel do sequence engine treinado. É
-necessária uma API comum de prefill/decode com testes de paridade.
+As limitações restantes são de desempenho: alguns modos preservam o prefixo ou
+o histórico completo do emitter, e modos sem bloco fixo ainda podem recorrer à
+recomposição integral. Amostras geradas também devem identificar exatamente a
+variante e o checkpoint usados.
 
 ## Como reproduzir o benchmark 36M?
 
