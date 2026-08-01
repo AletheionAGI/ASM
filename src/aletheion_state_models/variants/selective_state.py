@@ -3,7 +3,7 @@
 from drm_language_emitter.config import DRMConfig
 from drm_language_emitter.model import DRMEmitterModel
 
-from ._config import configured
+from ._config import block_scan_overrides, configured
 
 
 def build_selective_state(
@@ -13,6 +13,7 @@ def build_selective_state(
 ) -> DRMEmitterModel:
     config = configured(
         base,
+        **block_scan_overrides(base),
         use_drm_geometry=True,
         use_direction_field=False,
         use_relational_metric=False,

@@ -1,10 +1,17 @@
 import torch
 
-from aletheion_state_models import StateModel
+from aletheion_state_models import (
+    ASMConfig,
+    InferenceState,
+    StateModel,
+    StateModelProtocol,
+)
 from aletheion_state_models.variants import (
+    build_causal_memory,
     build_direct_state,
     build_explicit_drm,
     build_metric_subspace,
+    build_metric_frame,
     build_relational_state,
     build_selective_state,
 )
@@ -31,26 +38,34 @@ def _base_config() -> DRMConfig:
 
 def test_state_model_alias_preserves_checkpoint_compatible_class():
     assert StateModel is DRMEmitterModel
+    assert ASMConfig().schema_version == 2
+    assert isinstance(ASMConfig.from_dict({}), ASMConfig)
+    assert InferenceState(torch.empty(2, 0, dtype=torch.long)).batch_size == 2
+    assert isinstance(DRMEmitterModel(DRMConfig()), StateModelProtocol)
 
 
 def test_asm_variant_builders_select_expected_components():
     base = _base_config()
     explicit = build_explicit_drm(base)
     subspace = build_metric_subspace(base)
+    frame = build_metric_frame(base)
     relational = build_relational_state(base)
     direct = build_direct_state(base)
     selective = build_selective_state(base, memory_hidden_size=10)
+    memory = build_causal_memory(base)
 
     assert explicit.direction_field is not None and explicit.metric is not None
     assert explicit.config.directional_metric_composition == "post_naturalize"
     assert subspace.direction_field is not None and subspace.metric is not None
     assert subspace.config.directional_metric_composition == "metric_subspace"
+    assert frame.config.directional_metric_composition == "metric_orthonormal"
     assert relational.direction_field is None and relational.metric is not None
     assert relational.direct_transition is not None
     assert direct.direction_field is None and direct.metric is None
     assert direct.direct_transition is not None
     assert selective.metric is None and selective.selective_memory is not None
     assert selective.config.selective_memory_hidden_size == 10
+    assert not memory.config.use_drm_geometry and memory.selective_memory is not None
 
 
 def test_asm_variants_run_finite_causal_forwards():
@@ -59,10 +74,26 @@ def test_asm_variants_run_finite_causal_forwards():
     for builder in (
         build_explicit_drm,
         build_metric_subspace,
+        build_metric_frame,
         build_relational_state,
         build_direct_state,
         build_selective_state,
+        build_causal_memory,
     ):
         model = builder(base)
         output = model(tokens, tokens, collect_diagnostics=False)
         assert torch.isfinite(output["loss"])
+
+
+def test_direct_asm_builders_accept_default_config():
+    tokens = torch.randint(0, 256, (1, 4))
+    for builder in (
+        build_relational_state,
+        build_direct_state,
+        build_selective_state,
+        build_causal_memory,
+    ):
+        model = builder(DRMConfig())
+        output = model(tokens, collect_diagnostics=False)
+        assert torch.isfinite(output["logits"]).all()
+        assert model.config.sequence_mode == "directional_block_cumsum"

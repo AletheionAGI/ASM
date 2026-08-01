@@ -451,3 +451,53 @@ def test_selective_memory_is_causal_and_receives_finite_gradients():
     ]
     assert memory_grads
     assert all(torch.isfinite(gradient).all() for gradient in memory_grads)
+
+
+def test_blockwise_gate_diagnostics_use_individual_gates():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 4
+    config.directional_cumsum_step_mode = "velocity"
+    model = DRMEmitterModel(config)
+    captured = []
+
+    def capture(_module, _inputs, output):
+        captured.append(output[1].detach())
+
+    handle = model.direction_field.register_forward_hook(capture)
+    output = model(torch.randint(0, 17, (2, 4)), collect_diagnostics=True)
+    handle.remove()
+    gates = captured[0]
+    diagnostics = output["diagnostics"]
+    assert torch.allclose(
+        diagnostics["hard_active_fraction_025"],
+        (gates > 0.25).float().mean(),
+    )
+    assert torch.allclose(
+        diagnostics["hard_active_fraction_075"],
+        (gates > 0.75).float().mean(),
+    )
+    assert torch.allclose(diagnostics["gate_min"], gates.min())
+    assert torch.allclose(diagnostics["gate_max"], gates.max())
+
+
+def test_disabling_blockwise_diagnostics_does_not_change_logits():
+    config = tiny_config()
+    config.sequence_mode = "directional_block_cumsum"
+    config.directional_cumsum_block_size = 4
+    config.directional_cumsum_step_mode = "velocity"
+    config.lambda_action = 0.0
+    config.lambda_dim_sparsity = 0.0
+    config.lambda_dim_entropy = 0.0
+    config.lambda_dim_variance = 0.0
+    config.lambda_metric_reg = 0.0
+    config.lambda_active_fraction = 0.0
+    config.lambda_condition = 0.0
+    config.lambda_metric_u_floor = 0.0
+    config.lambda_metric_u_target = 0.0
+    config.lambda_blindspot = 0.0
+    model = DRMEmitterModel(config).eval()
+    tokens = torch.randint(0, 17, (2, 8))
+    with_diagnostics = model(tokens, collect_diagnostics=True)["logits"]
+    without_diagnostics = model(tokens, collect_diagnostics=False)["logits"]
+    assert torch.equal(with_diagnostics, without_diagnostics)

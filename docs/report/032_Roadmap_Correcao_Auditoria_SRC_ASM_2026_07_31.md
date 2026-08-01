@@ -2,7 +2,7 @@
 
 **Data:** 31 de julho de 2026
 **Origem:** `031_Auditoria_SRC_ASM_2026_07_31.md`
-**Estado:** aprovado para execução após o congelamento da scaling law de 100M
+**Estado:** implementado; validação registrada no relatório 034
 **Escopo:** corrigir A-01 a A-07 sem invalidar checkpoints ou resultados existentes
 
 ## Objetivo
@@ -17,6 +17,26 @@ O requisito central é:
 
 As correções preservarão compatibilidade com checkpoints existentes e serão
 separadas da scaling law atualmente em execução.
+
+## Atualização de execução
+
+O resultado da scaling law foi congelado e publicado no relatório 033 antes das
+alterações. As fases deste roadmap foram implementadas em 31 de julho de 2026.
+
+A inferência incremental foi entregue inicialmente em modo de referência: preserva
+o prefixo e recompõe o forward exato. Essa escolha resolve a divergência funcional
+entre treino e geração. Caches incrementais de mixer, memória e blocos permanecem
+como otimização futura, pois exigem um benchmark próprio e não são necessários para
+corretude.
+
+Resultados da validação:
+
+```text
+107 passed, 1 skipped
+checkpoint real schema 1: carregado com 83.206.400 parâmetros
+```
+
+Detalhes: `034_Implementacao_Correcoes_Auditoria_SRC_ASM_2026_07_31.md`.
 
 ## Regra de isolamento experimental
 

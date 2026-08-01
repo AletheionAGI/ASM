@@ -33,6 +33,24 @@ def test_config_validates_bptt_truncate_interval():
         DRMConfig(bptt_truncate_interval=-1)
 
 
+def test_config_validates_public_generation_and_emitter_fields():
+    assert DRMConfig().schema_version == 2
+    with pytest.raises(ValueError, match="top_k"):
+        DRMConfig(top_k=-1)
+    with pytest.raises(ValueError, match="emitter_layers"):
+        DRMConfig(emitter_layers=0)
+    with pytest.raises(ValueError, match="tokenizer_type"):
+        DRMConfig(tokenizer_type="unknown")
+
+
+def test_config_rejects_direct_transition_in_local_mode():
+    with pytest.raises(ValueError, match="direct state transitions"):
+        DRMConfig(
+            use_direction_field=False,
+            directional_cumsum_step_mode="velocity",
+        )
+
+
 def test_validated_copy_rechecks_runtime_mutations():
     config = DRMConfig()
     config.max_seq_len = 0

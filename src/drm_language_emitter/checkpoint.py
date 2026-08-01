@@ -19,7 +19,19 @@ def load_model(checkpoint: str | Path) -> DRMEmitterModel:
         raise ValueError("checkpoint 'config' must be a dictionary")
     if not isinstance(payload["model"], dict):
         raise ValueError("checkpoint 'model' must be a state_dict dictionary")
-    config = DRMConfig.from_dict(payload["config"])
+    schema_version = payload.get(
+        "schema_version",
+        payload["config"].get("schema_version", 1),
+    )
+    if not isinstance(schema_version, int) or schema_version < 1:
+        raise ValueError("checkpoint schema_version must be a positive integer")
+    if schema_version > 2:
+        raise ValueError(
+            f"checkpoint schema_version {schema_version} is newer than supported version 2"
+        )
+    config_data = dict(payload["config"])
+    config_data.setdefault("schema_version", schema_version)
+    config = DRMConfig.from_dict(config_data)
     model = DRMEmitterModel(config)
     model.load_state_dict(payload["model"])
     model.eval()

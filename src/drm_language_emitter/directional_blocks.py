@@ -12,6 +12,7 @@ class DirectionalBlocksMixin:
         token_embeddings: torch.Tensor,
         global_step: int | None,
         block_index: int = 0,
+        collect_diagnostics: bool = False,
     ) -> tuple[
         torch.Tensor,
         torch.Tensor,
@@ -29,7 +30,13 @@ class DirectionalBlocksMixin:
         local_size = int(self.config.directional_superblock_local_size)
         block_len = token_embeddings.shape[1]
         if block_len <= local_size or block_len % local_size != 0:
-            return self._directional_cumsum_block_base(z_start, token_embeddings, global_step, block_index)
+            return self._directional_cumsum_block_base(
+                z_start,
+                token_embeddings,
+                global_step,
+                block_index,
+                collect_diagnostics,
+            )
 
         batch, _block_len, d_token = token_embeddings.shape
         segment_count = block_len // local_size
@@ -53,11 +60,18 @@ class DirectionalBlocksMixin:
             flat_metric_diag,
             flat_condition,
             flat_active,
+            flat_gates,
             flat_u_norm,
             flat_risk,
             flat_consistency,
             flat_sampled_consistency,
-        ) = self._directional_cumsum_block_base(flat_starts, flat_tokens, global_step, block_index)
+        ) = self._directional_cumsum_block_base(
+            flat_starts,
+            flat_tokens,
+            global_step,
+            block_index,
+            collect_diagnostics,
+        )
 
         states = flat_states.reshape(batch, segment_count, local_size, -1).reshape(batch, block_len, -1)
         action = flat_action.reshape(batch, segment_count, local_size).reshape(batch, block_len)
@@ -65,6 +79,12 @@ class DirectionalBlocksMixin:
         metric_diag = flat_metric_diag.reshape(batch, segment_count, local_size, -1).reshape(batch, block_len, -1)
         condition = flat_condition.reshape(batch, segment_count, local_size).reshape(batch, block_len)
         active = flat_active.reshape(batch, segment_count, local_size).reshape(batch, block_len)
+        gate_values = flat_gates.reshape(
+            batch,
+            segment_count,
+            local_size,
+            self.config.n_directions,
+        ).reshape(batch, block_len, self.config.n_directions)
         u_norm = flat_u_norm.reshape(batch, segment_count, local_size).reshape(batch, block_len)
         risk = flat_risk.reshape(batch, segment_count, local_size).reshape(batch, block_len)
         consistency = (
@@ -86,6 +106,7 @@ class DirectionalBlocksMixin:
             metric_diag,
             condition,
             active,
+            gate_values,
             u_norm,
             risk,
             consistency,
@@ -145,6 +166,7 @@ class DirectionalBlocksMixin:
         token_embeddings: torch.Tensor,
         global_step: int | None,
         block_index: int = 0,
+        collect_diagnostics: bool = False,
     ) -> tuple[
         torch.Tensor,
         torch.Tensor,
@@ -248,8 +270,21 @@ class DirectionalBlocksMixin:
             dz = dz_raw
 
         assert self.risk is not None
-        base_risk = self.risk(z_start)
-        risk_mass_flat = base_risk["risk_mass"].unsqueeze(1).expand(-1, block_len).reshape(batch * block_len)
+        need_risk = (
+            self.config.use_powerlaw_risk
+            or self.config.lambda_blindspot != 0
+            or collect_diagnostics
+        )
+        if need_risk:
+            base_risk = self.risk(z_start)
+            risk_mass_flat = (
+                base_risk["risk_mass"]
+                .unsqueeze(1)
+                .expand(-1, block_len)
+                .reshape(batch * block_len)
+            )
+        else:
+            risk_mass_flat = flat_z.new_zeros(batch * block_len)
         if self.config.directional_cumsum_step_mode == "velocity":
             flat_next = self.updater(flat_z, dz)
         else:
@@ -260,7 +295,8 @@ class DirectionalBlocksMixin:
         states = self._apply_block_fixed_point(z_start, token_embeddings, states, global_step)
         states = self._apply_block_anderson(z_start, token_embeddings, states, global_step, block_index)
         velocity = (flat_next - flat_z) / max(self.config.dt, 1e-8)
-        if self.metric is not None:
+        need_action = self.config.lambda_action != 0 or collect_diagnostics
+        if need_action and self.metric is not None:
             action = self.metric.metric_energy(
                 flat_z,
                 velocity,
@@ -268,8 +304,10 @@ class DirectionalBlocksMixin:
                 metric_u,
                 risk_mass=risk_mass_flat,
             ).reshape(batch, block_len)
-        else:
+        elif need_action:
             action = velocity.pow(2).sum(dim=-1).reshape(batch, block_len)
+        else:
+            action = velocity.new_zeros(batch, block_len)
         dim = gates.sum(dim=-1).reshape(batch, block_len)
         risk_mass = risk_mass_flat.reshape(batch, block_len)
         if self.local_mixer is not None:
@@ -297,25 +335,44 @@ class DirectionalBlocksMixin:
             global_step,
             block_index,
         )
-        entropy = dimension_entropy(gates)
+        need_dim = (
+            self.config.lambda_dim_sparsity != 0
+            or self.config.lambda_dim_entropy != 0
+            or self.config.lambda_dim_variance != 0
+            or self.config.lambda_active_fraction != 0
+            or collect_diagnostics
+        )
+        entropy = dimension_entropy(gates) if need_dim else gates.new_tensor(0.0)
+        need_metric_reg = self.config.lambda_metric_reg != 0 or collect_diagnostics
         metric_reg = (
             metric_diag.pow(2).mean() + metric_u.pow(2).mean()
-            if self.metric is not None
+            if self.metric is not None and need_metric_reg
             else metric_diag.new_tensor(0.0)
         )
         metric_diag_step = metric_diag.reshape(batch, block_len, -1)
+        need_condition = self.config.lambda_condition != 0 or collect_diagnostics
         condition = (
             self.metric.condition_proxy(metric_diag, metric_u).reshape(
                 batch,
                 block_len,
             )
-            if self.metric is not None
+            if self.metric is not None and need_condition
             else metric_diag.new_ones(batch, block_len)
         )
-        active_050 = (gates > 0.50).float().mean(dim=-1).reshape(batch, block_len)
+        active_050 = (
+            (gates > 0.50).float().mean(dim=-1).reshape(batch, block_len)
+            if collect_diagnostics
+            else metric_diag.new_zeros(batch, block_len)
+        )
+        gate_values = gates.reshape(batch, block_len, self.config.n_directions)
+        need_u_norm = (
+            self.config.lambda_metric_u_floor != 0
+            or self.config.lambda_metric_u_target != 0
+            or collect_diagnostics
+        )
         u_norm = (
             metric_u.norm(dim=(1, 2)).reshape(batch, block_len)
-            if metric_u.numel()
+            if metric_u.numel() and need_u_norm
             else metric_diag.new_zeros(batch, block_len)
         )
         return (
@@ -327,6 +384,7 @@ class DirectionalBlocksMixin:
             metric_diag_step,
             condition,
             active_050,
+            gate_values,
             u_norm,
             risk_mass,
             consistency,

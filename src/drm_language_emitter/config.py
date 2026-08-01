@@ -6,6 +6,7 @@ from typing import Any
 
 @dataclass
 class DRMConfig:
+    schema_version: int = 2
     vocab_size: int = 256
     d_token: int = 64
     d_state: int = 96
@@ -131,6 +132,7 @@ class DRMConfig:
 
         # Integer / positive checks
         int_fields = [
+            ("schema_version", 1, None),
             ("vocab_size", 1, None),
             ("d_token", 1, None),
             ("d_state", 1, None),
@@ -139,6 +141,8 @@ class DRMConfig:
             ("hidden_size", 1, None),
             ("n_flow_steps", 1, None),
             ("max_seq_len", 1, None),
+            ("top_k", 0, None),
+            ("emitter_layers", 1, None),
             ("gate_top_k", 0, None),
             ("geodesic_solver_steps", 0, None),
             ("directional_cumsum_block_size", 0, None),
@@ -305,6 +309,8 @@ class DRMConfig:
             raise ValueError("'active_fraction_loss_mode' must be one of: upper_bound, target")
         if self.sampled_block_consistency_teacher_mode not in {"candidate", "velocity"}:
             raise ValueError("'sampled_block_consistency_teacher_mode' must be one of: candidate, velocity")
+        if self.tokenizer_type not in {"byte", "char"}:
+            raise ValueError("'tokenizer_type' must be one of: byte, char")
         if not self.use_drm_geometry and (
             self.use_direction_field or self.use_relational_metric
         ):
@@ -316,6 +322,14 @@ class DRMConfig:
             raise ValueError(
                 "models without a direction field require "
                 "directional_cumsum_step_mode='velocity'"
+            )
+        if self.use_drm_geometry and not self.use_direction_field and self.sequence_mode in {
+            "local_step",
+            "geodesic_step",
+            "directional_candidates",
+        }:
+            raise ValueError(
+                "direct state transitions require a cumsum/block-cumsum sequence mode"
             )
 
     def __post_init__(self) -> None:  # pragma: no cover

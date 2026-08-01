@@ -17,7 +17,6 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from drm_language_emitter.checkpoint import load_model
-from drm_language_emitter.generation import _advance
 from drm_language_emitter.tokenizer import load_tokenizer
 from drm_language_emitter.utils import load_yaml_or_json, save_json
 from sweep_drm_transformer import DRM_MODELS, TRANSFORMER_MODELS, save_csv, write_seed_config
@@ -49,16 +48,15 @@ def final(history: list[dict[str, Any]], key: str) -> Any:
 @torch.no_grad()
 def greedy_drm(model, input_ids: torch.Tensor, max_new_tokens: int) -> torch.Tensor:
     model.eval()
-    z = model.initializer(input_ids.shape[0], input_ids.device)
-    for t in range(input_ids.shape[1]):
-        z = _advance(model, z, model.token_embedding(input_ids[:, t]))
+    state = model.init_inference_state(input_ids.shape[0], input_ids.device)
+    logits, state = model.prefill(input_ids, state)
     out = [input_ids]
-    current = input_ids[:, -1]
-    for _ in range(max_new_tokens):
-        logits = model.emitter(z)
-        current = logits.argmax(dim=-1)
+    next_logits = logits[:, -1]
+    for index in range(max_new_tokens):
+        current = next_logits.argmax(dim=-1)
         out.append(current[:, None])
-        z = _advance(model, z, model.token_embedding(current))
+        if index + 1 < max_new_tokens:
+            next_logits, state = model.decode_step(current, state)
     return torch.cat(out, dim=1)
 
 

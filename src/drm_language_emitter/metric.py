@@ -7,6 +7,18 @@ from torch.nn import functional as F
 from .config import DRMConfig
 
 
+class _ZeroOutputLinear(nn.Module):
+    """Checkpoint-compatible zero-width projection without init warnings."""
+
+    def __init__(self, in_features: int):
+        super().__init__()
+        self.weight = nn.Parameter(torch.empty(0, in_features))
+        self.bias = nn.Parameter(torch.empty(0))
+
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+        return inputs.new_empty(*inputs.shape[:-1], 0)
+
+
 class RelationalMetric(nn.Module):
     """SPD metric G(z) = diag(softplus(d(z)) + eps) + U(z)U(z)^T."""
 
@@ -27,9 +39,12 @@ class RelationalMetric(nn.Module):
             self.u_basis = nn.Parameter(torch.empty(self.u_basis_size, config.d_state))
             nn.init.normal_(self.u_basis, std=0.02)
             self.u_head = nn.Linear(h, config.metric_rank * self.u_basis_size)
-        else:
+        elif config.metric_rank > 0:
             self.u_basis = None
             self.u_head = nn.Linear(h, config.d_state * config.metric_rank)
+        else:
+            self.u_basis = None
+            self.u_head = _ZeroOutputLinear(h)
 
     def forward(self, z: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         h = self.trunk(z)

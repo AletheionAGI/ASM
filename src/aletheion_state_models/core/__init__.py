@@ -1,6 +1,7 @@
 """Architecture-neutral state-model components."""
 
 from .emitter import LanguageEmitter, TokenEmbedding
+from .interfaces import StateModelProtocol
 from .memory import SelectiveStateMemory
 from .mixer import CausalMixer
 from .state_model import StateModel
@@ -13,5 +14,6 @@ __all__ = [
     "LanguageEmitter",
     "SelectiveStateMemory",
     "StateModel",
+    "StateModelProtocol",
     "TokenEmbedding",
 ]

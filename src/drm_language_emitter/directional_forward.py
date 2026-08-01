@@ -36,6 +36,7 @@ class DirectionalForwardMixin:
         metric_diag_steps = []
         condition_values = []
         active_050_values = []
+        gate_values = []
         u_norm_values = []
         risk_values = []
         consistency_values = []
@@ -52,11 +53,18 @@ class DirectionalForwardMixin:
                 metric_diag_block,
                 condition_block,
                 active_050_block,
+                gates_block,
                 u_norm_block,
                 risk_block,
                 consistency_block,
                 sampled_consistency_block,
-            ) = self._directional_cumsum_block(z_block, block_tokens, global_step, block_index)
+            ) = self._directional_cumsum_block(
+                z_block,
+                block_tokens,
+                global_step,
+                block_index,
+                collect_diagnostics,
+            )
             block_states.append(states_block)
             action_values.append(action_block)
             dim_values.append(dim_block)
@@ -65,6 +73,8 @@ class DirectionalForwardMixin:
             metric_diag_steps.append(metric_diag_block)
             condition_values.append(condition_block)
             active_050_values.append(active_050_block)
+            if collect_diagnostics:
+                gate_values.append(gates_block)
             u_norm_values.append(u_norm_block)
             risk_values.append(risk_block)
             if consistency_block is not None:
@@ -151,18 +161,19 @@ class DirectionalForwardMixin:
             "metric_naturalization_strength": token_embeddings.new_tensor(float(self._naturalization_strength(global_step))),
         }
         if collect_diagnostics:
-            flat_dim = dim_tensor.reshape(-1)
+            all_gates = torch.cat(gate_values, dim=1)
+            flat_gates = all_gates.reshape(-1).float()
             gate_quantiles = torch.quantile(
-                flat_dim.float(),
+                flat_gates,
                 torch.tensor([0.10, 0.25, 0.50, 0.75, 0.90], device=states.device),
             )
             diagnostics.update(
                 {
-                    "hard_active_fraction_025": (dim_tensor > 0.25).float().mean(),
-                    "hard_active_fraction_075": (dim_tensor > 0.75).float().mean(),
-                    "hard_active_fraction_090": (dim_tensor > 0.90).float().mean(),
-                    "gate_min": dim_tensor.min(),
-                    "gate_max": dim_tensor.max(),
+                    "hard_active_fraction_025": (all_gates > 0.25).float().mean(),
+                    "hard_active_fraction_075": (all_gates > 0.75).float().mean(),
+                    "hard_active_fraction_090": (all_gates > 0.90).float().mean(),
+                    "gate_min": all_gates.min(),
+                    "gate_max": all_gates.max(),
                     "gate_q10": gate_quantiles[0],
                     "gate_q25": gate_quantiles[1],
                     "gate_q50": gate_quantiles[2],
@@ -189,6 +200,7 @@ class DirectionalForwardMixin:
         token_embeddings: torch.Tensor,
         global_step: int | None,
         block_index: int = 0,
+        collect_diagnostics: bool = False,
     ) -> tuple[
         torch.Tensor,
         torch.Tensor,
@@ -206,7 +218,13 @@ class DirectionalForwardMixin:
         inner_block_size = int(self.config.directional_cumsum_inner_block_size)
         block_len = token_embeddings.shape[1]
         if self.config.sequence_mode == "directional_superblock_cumsum":
-            return self._directional_superblock_cumsum_block(z_start, token_embeddings, global_step, block_index)
+            return self._directional_superblock_cumsum_block(
+                z_start,
+                token_embeddings,
+                global_step,
+                block_index,
+                collect_diagnostics,
+            )
         if 0 < inner_block_size < block_len:
             states_parts = []
             action_parts = []
@@ -216,6 +234,7 @@ class DirectionalForwardMixin:
             metric_diag_parts = []
             condition_parts = []
             active_parts = []
+            gate_parts = []
             u_norm_parts = []
             risk_parts = []
             consistency_parts = []
@@ -233,6 +252,7 @@ class DirectionalForwardMixin:
                     metric_diag_inner,
                     condition_inner,
                     active_inner,
+                    gates_inner,
                     u_norm_inner,
                     risk_inner,
                     consistency_inner,
@@ -242,6 +262,7 @@ class DirectionalForwardMixin:
                     inner_tokens,
                     global_step,
                     block_index * inner_count + inner_index,
+                    collect_diagnostics,
                 )
                 states_parts.append(states_inner)
                 action_parts.append(action_inner)
@@ -251,6 +272,7 @@ class DirectionalForwardMixin:
                 metric_diag_parts.append(metric_diag_inner)
                 condition_parts.append(condition_inner)
                 active_parts.append(active_inner)
+                gate_parts.append(gates_inner)
                 u_norm_parts.append(u_norm_inner)
                 risk_parts.append(risk_inner)
                 if consistency_inner is not None:
@@ -269,9 +291,16 @@ class DirectionalForwardMixin:
                 torch.cat(metric_diag_parts, dim=1),
                 torch.cat(condition_parts, dim=1),
                 torch.cat(active_parts, dim=1),
+                torch.cat(gate_parts, dim=1),
                 torch.cat(u_norm_parts, dim=1),
                 torch.cat(risk_parts, dim=1),
                 consistency,
                 sampled_consistency,
             )
-        return self._directional_cumsum_block_base(z_start, token_embeddings, global_step, block_index)
+        return self._directional_cumsum_block_base(
+            z_start,
+            token_embeddings,
+            global_step,
+            block_index,
+            collect_diagnostics,
+        )
