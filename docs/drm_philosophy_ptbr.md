@@ -267,7 +267,7 @@ A teoria concebe transições de posto e dimensão efetiva variável. A métrica
 implementada atualmente no DRM Language Emitter é:
 
 $$
-G(z)=\mathrm{diag}\!\left(\mathrm{softplus}(d(z))+\varepsilon\right)+U(z)U(z)^{\mathsf T}
+G(z)=\mathrm{diag}\left(\mathrm{softplus}(d(z))+\varepsilon\right)+U(z)U(z)^{\mathsf T}
 $$
 
 Como a diagonal possui piso estritamente positivo, $G(z)$ é SPD e seu posto
@@ -342,7 +342,7 @@ Quando o movimento é uma combinação de poucas direções, ele fica restrito a
 espaço gerado por elas:
 
 $$
-v_{\mathrm{raw}}\in\mathrm{span}\!\left\{V_{1},\ldots,V_{n}\right\}
+v_{\mathrm{raw}}\in\mathrm{span}(V_{1},\ldots,V_{n})
 $$
 
 Uma transição direta pode produzir qualquer vetor do espaço de estados. A

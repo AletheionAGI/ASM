@@ -264,7 +264,7 @@ The theory considers rank transitions and variable effective dimension. The
 metric currently implemented by DRM Language Emitter is:
 
 $$
-G(z)=\mathrm{diag}\!\left(\mathrm{softplus}(d(z))+\varepsilon\right)+U(z)U(z)^{\mathsf T}
+G(z)=\mathrm{diag}\left(\mathrm{softplus}(d(z))+\varepsilon\right)+U(z)U(z)^{\mathsf T}
 $$
 
 Because its diagonal has a strictly positive floor, $G(z)$ is SPD and its exact
@@ -340,7 +340,7 @@ When movement is a combination of a limited set of directions, it is restricted
 to their span:
 
 $$
-v_{\mathrm{raw}}\in\mathrm{span}\!\left\{V_{1},\ldots,V_{n}\right\}
+v_{\mathrm{raw}}\in\mathrm{span}(V_{1},\ldots,V_{n})
 $$
 
 A direct transition may produce any vector in state space. A restriction
