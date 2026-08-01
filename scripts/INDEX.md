@@ -217,6 +217,41 @@ Commit: pending
 
 1. `benchmark_incremental_decode.py`
 
+### 017 — 2026-08-01 — ASM-R post-promotion evaluation
+
+Commit: pending
+
+1. `evaluate_asm_r_checkpoint.py`
+2. `evaluate_asm_r_mqar_curve.py`
+3. `run_asm_r_mqar_curve.sh`
+4. `run_asm_r_mqar_architecture_comparison.sh`
+5. `run_asm_r_post_promotion_suite.sh`
+6. `run_mqar_architecture_comparison.py`
+7. `summarize_asm_r_post_promotion.py`
+8. `run_transformer_asm_r_matched_100m.sh` — trains and frozen-rescores the
+   83.0M-parameter Transformer control on the same 100M-token protocol as ASM-R.
+9. `plot_asm_scaling_law.py` — generates publication-ready SVG charts and CSV
+   data from frozen scaling-law results.
+10. `plot_100m_model_comparison.py` — plots frozen quality, learning curves,
+    throughput, GPU time, and Pareto comparisons for ASM and Transformer at 100M.
+11. `rescore_asm_transformer_100m.py` — frozen paired rescoring over all eight
+    ASM-R and Transformer milestones.
+12. `benchmark_asm_transformer_paired.py` — paired context, prefill, cached
+    decode, VRAM, and qualitative-generation benchmark.
+13. `summarize_asm_transformer_paired.py` — consolidates the paired suite.
+14. `run_asm_transformer_paired_suite.sh` — executes the full protocol with one
+    command and optionally adds PG-19 context evaluation.
+15. `benchmark_asm_r_long_streaming.py` — probes cache growth, long decode, CUDA
+    memory, and delayed MQAR retention through 32K tokens.
+16. `run_asm_r_long_streaming_suite.sh` — runs the complete 32K streaming suite.
+17. `plot_asm_r_long_streaming.py` — generates reproducible SVG and CSV
+    artifacts for cache growth, decode throughput, VRAM, and delayed MQAR.
+18. `check_asm_c_parity.py` — quantifies real-checkpoint BF16 and argmax parity.
+19. `compare_asm_r_asm_c_streaming.py` — applies ASM-C promotion criteria.
+20. `run_asm_c_validation_suite.sh` — executes all five ASM-C validation phases.
+21. `plot_asm_c_validation.py` — generates versioned ASM-C/ASM-R/Transformer
+    streaming, memory, context, decode, and MQAR charts and CSV tables.
+
 ## Naming guidance
 
 - `train_*`: training entry points.

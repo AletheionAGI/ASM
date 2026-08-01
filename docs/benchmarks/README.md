@@ -6,6 +6,12 @@ Generated training directories under `runs/` remain local working artifacts and 
 
 ## Available Benchmarks
 
+- `asm_c_streaming_32k/`
+  - Compact ASM-C streaming validation against the legacy ASM-R inference path
+    through 32K tokens, plus BF16 parity, MQAR, and a paired Transformer probe.
+  - Streaming criteria passed; the short MQAR control failed.
+  - Main entry: `asm_c_streaming_32k/README.md`
+
 - `asm_r_confirmation_100m_multiseed/`
   - Promoted ASM-R result at 100M tokens with seeds 1, 2, and 3, using the
     same frozen continuous validation traversal at every milestone.

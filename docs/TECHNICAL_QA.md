@@ -177,6 +177,30 @@ seeds diverged before 70M and produced non-finite final checkpoints. Its
 stabilized factorization is treated as a second-generation experiment. See the
 [versioned benchmark](benchmarks/asm_r_confirmation_100m_multiseed/README.md).
 
+## What is ASM-C, and is it a new trained model?
+
+ASM-C — **Aletheion Compact State Model** — is the experimental compact
+streaming inference form of ASM-R. It reuses an ASM-R checkpoint and the same
+relational transition, mixer, selective memory, and emitter parameters. The
+difference is the inference state: ASM-C retains the completed latent state, a
+bounded open block, and a position counter instead of preserving all prefix
+token IDs and emitter history.
+
+ASM-C is not yet promoted as a separate trained architecture, and the project
+does not yet call it a constant-memory model. Promotion requires real-checkpoint
+BF16 parity within the documented tolerance, bounded cache and peak VRAM from
+4K through 32K, stable long-stream throughput, and corrected MQAR comparisons
+with sufficiently many targets. The validation entry point is:
+
+```bash
+./scripts/run_asm_c_validation_suite.sh
+```
+
+The first completed run passed the cache, peak-VRAM, and throughput gates
+through 32K. It failed the short MQAR control (`32.25%` versus `80%`), so ASM-C
+has demonstrated compact streaming but not long-range associative retention.
+See the [benchmark](benchmarks/asm_c_streaming_32k/README.md).
+
 ## What is the historical 36M/37M benchmark?
 
 The historical public artifact is:
@@ -533,10 +557,13 @@ model sequence engine and are covered by full-forward parity tests, including
 BF16-sensitive behavior. This fixes the earlier mismatch in which generation
 advanced only the basic recurrent transition.
 
-The remaining limitations are performance-related: some modes preserve a full
-prefix or emitter history, and modes without a fixed block can still fall back
-to full recomposition. Generated samples must also be identified by the exact
-variant and checkpoint used.
+The default ASM-R compatibility path can still preserve a full prefix or
+emitter history. ASM-C removes those histories in its supported fixed-block
+streaming path and raises an explicit error when that invariant is unavailable,
+rather than silently falling back to full recomposition. Its bounded-memory and
+parity claims remain experimental until the validation suite passes on the
+promoted checkpoint. Generated samples must also identify the exact variant,
+checkpoint, and inference mode used.
 
 ## How can the historical 36M benchmark be reproduced?
 

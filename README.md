@@ -128,12 +128,20 @@ The family taxonomy is:
 | ASM-U | Metric Subspace State Model | J_METRIC_SUBSPACE |
 | ASM-F | Relational Frame State Model | J_METRIC_ORTHONORMAL_DIRECTION |
 | ASM-R | Relational State Model | J_NO_DIRECTION |
+| ASM-C | Compact State Model | ASM-R weights + compact streaming inference |
 | ASM-D | Direct State Model | J_DIRECT_CONTROL |
 | ASM-S | Selective State Model | J_DIRECT_CONTROL_MATCHED |
 | ASM-M | Causal Memory State Model | SSM_CONTROL |
 
 See [MODEL_FAMILY.md](docs/MODEL_FAMILY.md) for definitions and promotion
 criteria.
+
+The first ASM-C validation kept cache (`6,144 B`), peak CUDA allocation
+(`387.53 MiB`), and throughput (`~503 tok/s`) effectively flat through 32K,
+reaching `2.97x` the legacy ASM-R streaming throughput at 32K. Its short MQAR
+control failed (`32.25%` versus the `80%` gate), so long-range associative
+memory is not yet established. See the
+[versioned ASM-C benchmark](docs/benchmarks/asm_c_streaming_32k/README.md).
 
 ### ASM-X recurrent path
 
@@ -207,7 +215,7 @@ Read the full design in [ARCHITECTURE.md](ARCHITECTURE.md). The planned formal D
 
 - `src/aletheion_state_models/core/`: architecture-neutral state, transition, memory, mixer, and emitter interfaces.
 - `src/aletheion_state_models/geometry/`: optional metric, directional basis, and naturalization operators.
-- `src/aletheion_state_models/variants/`: named ASM-X, ASM-U, ASM-R, ASM-D, and ASM-S constructors.
+- `src/aletheion_state_models/variants/`: named ASM-X, ASM-U, ASM-F, ASM-R, ASM-C, ASM-D, ASM-S, and ASM-M constructors.
 - `src/drm_language_emitter/`: checkpoint-compatible legacy implementation retained during migration.
 
 - `src/drm_language_emitter/config.py`: validated `DRMConfig` schema.
@@ -393,6 +401,19 @@ python scripts/profile_drm.py --checkpoint runs/quick_compare/drm/drm_tiny.pt
 ```
 
 ## Tests
+
+Evaluate a promoted ASM-R checkpoint with one command:
+
+```bash
+./scripts/run_asm_r_post_promotion_suite.sh \
+  --checkpoint runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_100000000.pt \
+  --output-root runs/asm_r_post_promotion_quick \
+  --device cuda \
+  --quick
+```
+
+Read the [suite report](docs/report/038_Suite_Avaliacao_Pos_Promocao_ASM_R_2026_08_01.md)
+before running `--full`.
 
 ```bash
 python -m pytest -q

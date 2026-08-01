@@ -23,6 +23,7 @@ The initial ASM taxonomy is:
 | ASM-U | Metric Subspace State Model |
 | ASM-F | Relational Frame State Model |
 | ASM-R | Relational State Model |
+| ASM-C | Compact State Model |
 | ASM-D | Direct State Model |
 | ASM-S | Selective State Model |
 | ASM-M | Causal Memory State Model |

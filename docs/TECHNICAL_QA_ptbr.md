@@ -189,6 +189,33 @@ adicionais divergiram antes de 70M e produziram checkpoints finais não finitos.
 Sua fatorização estabilizada é tratada como experimento de segunda geração.
 Veja o [benchmark versionado](benchmarks/asm_r_confirmation_100m_multiseed/README.md).
 
+## O que é ASM-C, e ele é um novo modelo treinado?
+
+ASM-C — **Aletheion Compact State Model**, ou **Modelo de Estado Compacto
+Aletheion** — é a forma experimental de inferência streaming compacta do ASM-R.
+Ele reutiliza um checkpoint ASM-R e os mesmos parâmetros da transição
+relacional, mixer, memória seletiva e emitter. A diferença está no estado de
+inferência: ASM-C retém o estado latente concluído, um bloco aberto limitado e
+um contador de posição, em vez de preservar todos os IDs do prefixo e o
+histórico do emitter.
+
+ASM-C ainda não está promovido como arquitetura treinada independente, e o
+projeto ainda não o chama de modelo de memória constante. A promoção exige
+paridade BF16 no checkpoint real dentro da tolerância documentada, cache e pico
+de VRAM limitados entre 4K e 32K, throughput estável em streaming longo e
+comparações MQAR corrigidas com número suficiente de targets. A validação pode
+ser executada por:
+
+```bash
+./scripts/run_asm_c_validation_suite.sh
+```
+
+A primeira execução completa passou nos gates de cache, pico de VRAM e
+throughput até 32K. Ela falhou no controle curto de MQAR (`32,25%` contra
+`80%`); portanto, ASM-C demonstrou streaming compacto, mas não retenção
+associativa de longo alcance. Veja o
+[benchmark](benchmarks/asm_c_streaming_32k/README.md).
+
 ## Qual é o benchmark histórico 36M/37M?
 
 ```text
@@ -537,10 +564,14 @@ forward completo, inclusive para comportamento sensível a BF16. Isso corrige a
 divergência anterior, na qual a geração avançava apenas a transição recorrente
 básica.
 
-As limitações restantes são de desempenho: alguns modos preservam o prefixo ou
-o histórico completo do emitter, e modos sem bloco fixo ainda podem recorrer à
-recomposição integral. Amostras geradas também devem identificar exatamente a
-variante e o checkpoint usados.
+O caminho padrão de compatibilidade do ASM-R ainda pode preservar o prefixo ou
+o histórico completo do emitter. ASM-C remove esses históricos no caminho
+streaming de bloco fixo suportado e produz erro explícito quando essa invariante
+não está disponível, em vez de recorrer silenciosamente à recomposição
+integral. Suas propriedades de memória limitada e paridade permanecem
+experimentais até a suíte passar com o checkpoint promovido. Amostras geradas
+também devem identificar exatamente a variante, o checkpoint e o modo de
+inferência usados.
 
 ## Como reproduzir o benchmark 36M?
 

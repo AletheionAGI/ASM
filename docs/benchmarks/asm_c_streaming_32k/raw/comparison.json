@@ -1,0 +1,89 @@
+{
+  "rows": [
+    {
+      "sequence_length": 512,
+      "asm_r_tokens_per_sec": 446.1383281036206,
+      "asm_c_tokens_per_sec": 453.583327269456,
+      "speedup": 1.0166876475228692,
+      "asm_r_cache_bytes": 10240,
+      "asm_c_cache_bytes": 6144,
+      "cache_reduction": 0.4,
+      "asm_r_peak_mb": 387.78466796875,
+      "asm_c_peak_mb": 387.53173828125
+    },
+    {
+      "sequence_length": 1024,
+      "asm_r_tokens_per_sec": 489.3219298772647,
+      "asm_c_tokens_per_sec": 497.9321839184677,
+      "speedup": 1.0175962970704433,
+      "asm_r_cache_bytes": 14336,
+      "asm_c_cache_bytes": 6144,
+      "cache_reduction": 0.5714285714285714,
+      "asm_r_peak_mb": 388.03857421875,
+      "asm_c_peak_mb": 387.53173828125
+    },
+    {
+      "sequence_length": 2048,
+      "asm_r_tokens_per_sec": 474.3676615396461,
+      "asm_c_tokens_per_sec": 500.1220055949581,
+      "speedup": 1.0542919472455639,
+      "asm_r_cache_bytes": 22528,
+      "asm_c_cache_bytes": 6144,
+      "cache_reduction": 0.7272727272727273,
+      "asm_r_peak_mb": 388.54638671875,
+      "asm_c_peak_mb": 387.53173828125
+    },
+    {
+      "sequence_length": 4096,
+      "asm_r_tokens_per_sec": 441.3751653186864,
+      "asm_c_tokens_per_sec": 505.43019579837,
+      "speedup": 1.14512604132005,
+      "asm_r_cache_bytes": 38912,
+      "asm_c_cache_bytes": 6144,
+      "cache_reduction": 0.8421052631578947,
+      "asm_r_peak_mb": 432.25341796875,
+      "asm_c_peak_mb": 387.53173828125
+    },
+    {
+      "sequence_length": 8192,
+      "asm_r_tokens_per_sec": 366.13696357472725,
+      "asm_c_tokens_per_sec": 505.83249160334503,
+      "speedup": 1.3815389920338006,
+      "asm_r_cache_bytes": 71680,
+      "asm_c_cache_bytes": 6144,
+      "cache_reduction": 0.9142857142857143,
+      "asm_r_peak_mb": 522.31591796875,
+      "asm_c_peak_mb": 387.53173828125
+    },
+    {
+      "sequence_length": 16384,
+      "asm_r_tokens_per_sec": 259.06869405362266,
+      "asm_c_tokens_per_sec": 504.3044846186172,
+      "speedup": 1.9466052679998265,
+      "asm_r_cache_bytes": 137216,
+      "asm_c_cache_bytes": 6144,
+      "cache_reduction": 0.9552238805970149,
+      "asm_r_peak_mb": 702.44091796875,
+      "asm_c_peak_mb": 387.53173828125
+    },
+    {
+      "sequence_length": 32768,
+      "asm_r_tokens_per_sec": 169.763678810041,
+      "asm_c_tokens_per_sec": 503.37377318654256,
+      "speedup": 2.965144115130766,
+      "asm_r_cache_bytes": 268288,
+      "asm_c_cache_bytes": 6144,
+      "cache_reduction": 0.9770992366412213,
+      "asm_r_peak_mb": 1062.69091796875,
+      "asm_c_peak_mb": 387.53173828125
+    }
+  ],
+  "criteria": {
+    "cache_bounded_4k_to_32k": true,
+    "peak_vram_growth_at_most_10pct": true,
+    "throughput_retention_at_least_90pct": true,
+    "mqar_short_control_at_least_80pct": false
+  },
+  "all_streaming_criteria_passed": false,
+  "mqar_retention_interpretable": false
+}

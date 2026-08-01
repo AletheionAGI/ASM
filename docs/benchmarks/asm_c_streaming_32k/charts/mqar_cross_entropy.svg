@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="105" y="38" font-family="Arial" font-size="25" font-weight="700" fill="#111827">ASM-C delayed MQAR cross-entropy</text>
+<text x="105" y="66" font-family="Arial" font-size="14" fill="#4b5563">Lower is better; long-range retention is not interpretable after control failure.</text>
+<line x1="105" y1="630.00" x2="1145" y2="630.00" stroke="#e5e7eb"/>
+<text x="93" y="635.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">1.580</text>
+<line x1="105" y1="525.00" x2="1145" y2="525.00" stroke="#e5e7eb"/>
+<text x="93" y="530.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">2.652</text>
+<line x1="105" y1="420.00" x2="1145" y2="420.00" stroke="#e5e7eb"/>
+<text x="93" y="425.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">3.724</text>
+<line x1="105" y1="315.00" x2="1145" y2="315.00" stroke="#e5e7eb"/>
+<text x="93" y="320.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">4.795</text>
+<line x1="105" y1="210.00" x2="1145" y2="210.00" stroke="#e5e7eb"/>
+<text x="93" y="215.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">5.867</text>
+<line x1="105" y1="105.00" x2="1145" y2="105.00" stroke="#e5e7eb"/>
+<text x="93" y="110.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">6.939</text>
+<line x1="105.00" y1="105" x2="105.00" y2="630" stroke="#f3f4f6"/>
+<text x="105.00" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">40</text>
+<line x1="500.24" y1="105" x2="500.24" y2="630" stroke="#f3f4f6"/>
+<text x="500.24" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">512</text>
+<line x1="607.70" y1="105" x2="607.70" y2="630" stroke="#f3f4f6"/>
+<text x="607.70" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">1K</text>
+<line x1="715.16" y1="105" x2="715.16" y2="630" stroke="#f3f4f6"/>
+<text x="715.16" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">2K</text>
+<line x1="822.62" y1="105" x2="822.62" y2="630" stroke="#f3f4f6"/>
+<text x="822.62" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">4K</text>
+<line x1="930.08" y1="105" x2="930.08" y2="630" stroke="#f3f4f6"/>
+<text x="930.08" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">8K</text>
+<line x1="1037.54" y1="105" x2="1037.54" y2="630" stroke="#f3f4f6"/>
+<text x="1037.54" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">16K</text>
+<line x1="1145.00" y1="105" x2="1145.00" y2="630" stroke="#f3f4f6"/>
+<text x="1145.00" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">32K</text>
+<polyline points="105.00,586.25 500.24,153.80 607.70,148.75 715.16,156.64 822.62,153.69 930.08,158.80 1037.54,157.22 1145.00,156.64" fill="none" stroke="#7c3aed" stroke-width="3"/>
+<circle cx="105.00" cy="586.25" r="4" fill="#7c3aed"/>
+<circle cx="500.24" cy="153.80" r="4" fill="#7c3aed"/>
+<circle cx="607.70" cy="148.75" r="4" fill="#7c3aed"/>
+<circle cx="715.16" cy="156.64" r="4" fill="#7c3aed"/>
+<circle cx="822.62" cy="153.69" r="4" fill="#7c3aed"/>
+<circle cx="930.08" cy="158.80" r="4" fill="#7c3aed"/>
+<circle cx="1037.54" cy="157.22" r="4" fill="#7c3aed"/>
+<circle cx="1145.00" cy="156.64" r="4" fill="#7c3aed"/>
+<line x1="120" y1="88" x2="148" y2="88" stroke="#7c3aed" stroke-width="4"/>
+<text x="156" y="93" font-family="Arial" font-size="14" fill="#111827">ASM-C</text>
+<text x="625.0" y="695" text-anchor="middle" font-family="Arial" font-size="14" fill="#111827">Sequence length (log scale)</text>
+<text x="25" y="367.5" text-anchor="middle" transform="rotate(-90 25 367.5)" font-family="Arial" font-size="14" fill="#111827">Cross-entropy</text>
+</svg>

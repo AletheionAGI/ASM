@@ -11,6 +11,11 @@ live in `src/aletheion_state_models/`; `src/drm_language_emitter/` remains the
 checkpoint-compatible implementation during migration. See
 [docs/MODEL_FAMILY.md](docs/MODEL_FAMILY.md).
 
+ASM-C — Aletheion Compact State Model — is an experimental inference form of
+ASM-R. It emits from the latest state and retains a bounded open block instead
+of the full prefix. It does not replace promoted ASM-R until the 32K validation
+criteria pass. See [ASM-C architecture](docs/ARCHITECTURE_ASM_C.md).
+
 ## Promoted Architecture: ASM-R
 
 ASM-R — Aletheion Relational State Model — is the promoted architecture for
@@ -39,6 +44,7 @@ diverged in both additional seeds before 70M tokens. See
 | J | block-cumsum DRM | forget/write | explicit DRM reference (ASM-X) |
 | J_NO_* | component removed or bypassed | forget/write | causal geometry ablations |
 | SSM_CONTROL | none | widened forget/write | parameter-matched control |
+| ASM-C | ASM-R relational transition | forget/write | compact streaming inference experiment |
 
 Variant J is a hybrid. Its selective memory was added after the original DRM
 showed weak sample efficiency; it must not be presented as part of the original

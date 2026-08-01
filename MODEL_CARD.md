@@ -21,6 +21,12 @@ and selective-memory capacity vary by ASM code. ASM-X is the explicit DRM
 variant; ASM-R and ASM-S are the current scaling-law finalists. No current
 variant uses Transformer blocks or self-attention.
 
+ASM-C is the experimental compact-streaming inference form of ASM-R. It reuses
+ASM-R weights and is not yet promoted as a separate trained language model.
+Its first 32K validation passed bounded-cache, peak-VRAM, and throughput gates,
+but failed the short MQAR control; long-range associative memory is therefore
+not established.
+
 ## Training Data
 
 The default script uses a tiny local text file or fallback corpus. This is only a smoke test and has no meaningful coverage.

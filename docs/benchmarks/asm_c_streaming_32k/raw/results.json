@@ -1,0 +1,198 @@
+{
+  "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_100000000.pt",
+  "protocol": {
+    "lengths": [
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384,
+      32768
+    ],
+    "prompt_tokens": 64,
+    "compact": true,
+    "mqar_steps": 5000,
+    "mqar_batches": 128,
+    "mqar_batch_size": 4,
+    "mqar_control_length": 40,
+    "mqar_control_threshold": 0.8,
+    "device": "cuda",
+    "seed": 1234
+  },
+  "streaming": [
+    {
+      "sequence_length": 512,
+      "segment_tokens": 448,
+      "segment_elapsed_sec": 0.9876906249992317,
+      "segment_tokens_per_sec": 453.583327269456,
+      "state_sequence_length": 512,
+      "cache_tensor_bytes": 6144,
+      "cache_mebibytes": 0.005859375,
+      "cuda_allocated_mb": 330.9091796875,
+      "cuda_peak_mb": 387.53173828125,
+      "open_block_tokens": 0
+    },
+    {
+      "sequence_length": 1024,
+      "segment_tokens": 512,
+      "segment_elapsed_sec": 1.0282524740032386,
+      "segment_tokens_per_sec": 497.9321839184677,
+      "state_sequence_length": 1024,
+      "cache_tensor_bytes": 6144,
+      "cache_mebibytes": 0.005859375,
+      "cuda_allocated_mb": 330.9091796875,
+      "cuda_peak_mb": 387.53173828125,
+      "open_block_tokens": 0
+    },
+    {
+      "sequence_length": 2048,
+      "segment_tokens": 1024,
+      "segment_elapsed_sec": 2.0475003869942157,
+      "segment_tokens_per_sec": 500.1220055949581,
+      "state_sequence_length": 2048,
+      "cache_tensor_bytes": 6144,
+      "cache_mebibytes": 0.005859375,
+      "cuda_allocated_mb": 330.9091796875,
+      "cuda_peak_mb": 387.53173828125,
+      "open_block_tokens": 0
+    },
+    {
+      "sequence_length": 4096,
+      "segment_tokens": 2048,
+      "segment_elapsed_sec": 4.051993761007907,
+      "segment_tokens_per_sec": 505.43019579837,
+      "state_sequence_length": 4096,
+      "cache_tensor_bytes": 6144,
+      "cache_mebibytes": 0.005859375,
+      "cuda_allocated_mb": 330.9091796875,
+      "cuda_peak_mb": 387.53173828125,
+      "open_block_tokens": 0
+    },
+    {
+      "sequence_length": 8192,
+      "segment_tokens": 4096,
+      "segment_elapsed_sec": 8.09754230499675,
+      "segment_tokens_per_sec": 505.83249160334503,
+      "state_sequence_length": 8192,
+      "cache_tensor_bytes": 6144,
+      "cache_mebibytes": 0.005859375,
+      "cuda_allocated_mb": 330.9091796875,
+      "cuda_peak_mb": 387.53173828125,
+      "open_block_tokens": 0
+    },
+    {
+      "sequence_length": 16384,
+      "segment_tokens": 8192,
+      "segment_elapsed_sec": 16.244154572996194,
+      "segment_tokens_per_sec": 504.3044846186172,
+      "state_sequence_length": 16384,
+      "cache_tensor_bytes": 6144,
+      "cache_mebibytes": 0.005859375,
+      "cuda_allocated_mb": 330.9091796875,
+      "cuda_peak_mb": 387.53173828125,
+      "open_block_tokens": 0
+    },
+    {
+      "sequence_length": 32768,
+      "segment_tokens": 16384,
+      "segment_elapsed_sec": 32.548378307998064,
+      "segment_tokens_per_sec": 503.37377318654256,
+      "state_sequence_length": 32768,
+      "cache_tensor_bytes": 6144,
+      "cache_mebibytes": 0.005859375,
+      "cuda_allocated_mb": 330.9091796875,
+      "cuda_peak_mb": 387.53173828125,
+      "open_block_tokens": 0
+    }
+  ],
+  "mqar_adaptation_sec": 88.83475008700043,
+  "mqar_control_passed": false,
+  "mqar_retention_interpretable": false,
+  "mqar": [
+    {
+      "sequence_length": 40,
+      "validation_ce": 2.0268439138308167,
+      "validation_accuracy": 0.322509765625,
+      "correct": 1321,
+      "targets": 4096,
+      "accuracy_ci95_low": 0.30836656413804386,
+      "accuracy_ci95_high": 0.336985588003639,
+      "elapsed_sec": 0.4251089030003641
+    },
+    {
+      "sequence_length": 512,
+      "validation_ce": 6.440671071410179,
+      "validation_accuracy": 0.017822265625,
+      "correct": 73,
+      "targets": 4096,
+      "accuracy_ci95_low": 0.014199004221171239,
+      "accuracy_ci95_high": 0.02234913949247858,
+      "elapsed_sec": 3.0294438160053687
+    },
+    {
+      "sequence_length": 1024,
+      "validation_ce": 6.49221495911479,
+      "validation_accuracy": 0.01416015625,
+      "correct": 58,
+      "targets": 4096,
+      "accuracy_ci95_low": 0.010970178602882899,
+      "accuracy_ci95_high": 0.018260609240237674,
+      "elapsed_sec": 5.945985693993862
+    },
+    {
+      "sequence_length": 2048,
+      "validation_ce": 6.411679498851299,
+      "validation_accuracy": 0.016845703125,
+      "correct": 69,
+      "targets": 4096,
+      "accuracy_ci95_low": 0.013333115305602803,
+      "accuracy_ci95_high": 0.021263733509239217,
+      "elapsed_sec": 11.934495301989955
+    },
+    {
+      "sequence_length": 4096,
+      "validation_ce": 6.4417929276824,
+      "validation_accuracy": 0.017578125,
+      "correct": 72,
+      "targets": 4096,
+      "accuracy_ci95_low": 0.013982232297691808,
+      "accuracy_ci95_high": 0.022078087691256063,
+      "elapsed_sec": 23.539027995997458
+    },
+    {
+      "sequence_length": 8192,
+      "validation_ce": 6.389612212777138,
+      "validation_accuracy": 0.01953125,
+      "correct": 80,
+      "targets": 4096,
+      "accuracy_ci95_low": 0.015721612791882385,
+      "accuracy_ci95_high": 0.02424129699468108,
+      "elapsed_sec": 47.27109011101129
+    },
+    {
+      "sequence_length": 16384,
+      "validation_ce": 6.405754312872887,
+      "validation_accuracy": 0.012939453125,
+      "correct": 53,
+      "targets": 4096,
+      "accuracy_ci95_low": 0.009906447688210106,
+      "accuracy_ci95_high": 0.01688522153140072,
+      "elapsed_sec": 93.89190624799812
+    },
+    {
+      "sequence_length": 32768,
+      "validation_ce": 6.411648590117693,
+      "validation_accuracy": 0.015625,
+      "correct": 64,
+      "targets": 4096,
+      "accuracy_ci95_low": 0.012255510493532556,
+      "accuracy_ci95_high": 0.019902219697799716,
+      "elapsed_sec": 184.73772297700634
+    }
+  ],
+  "interpretation": {
+    "streaming": "Actual decode_step path; compact mode retains only counter, completed state, and open block.",
+    "mqar": "Retention is interpretable only if the post-adaptation short control reaches its threshold."
+  }
+}

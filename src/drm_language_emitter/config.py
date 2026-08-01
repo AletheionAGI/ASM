@@ -116,6 +116,7 @@ class DRMConfig:
     direction_basis_size: int = 0
     metric_u_basis_size: int = 0
     bptt_truncate_interval: int = 0
+    compact_streaming_inference: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -260,6 +261,7 @@ class DRMConfig:
             "emitter_swiglu",
             "emitter_residual",
             "use_torch_compile",
+            "compact_streaming_inference",
         ]
         for name in bool_fields:
             val = getattr(self, name)

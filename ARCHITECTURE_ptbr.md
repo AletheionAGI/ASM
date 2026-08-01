@@ -11,6 +11,12 @@ família ficam em `src/aletheion_state_models/`; `src/drm_language_emitter/`
 permanece como implementação compatível com checkpoints durante a migração.
 Consulte [docs/MODEL_FAMILY_ptbr.md](docs/MODEL_FAMILY_ptbr.md).
 
+ASM-C — Aletheion Compact State Model — é uma forma experimental de inferência
+do ASM-R. Ela emite a partir do último estado e retém um bloco aberto limitado,
+em vez do prefixo completo. Ela não substitui o ASM-R promovido antes de passar
+nos critérios de validação em 32K. Consulte
+[a arquitetura ASM-C](docs/ARCHITECTURE_ASM_C.md).
+
 ## Arquitetura promovida: ASM-R
 
 ASM-R — Aletheion Relational State Model — é a arquitetura promovida para
@@ -39,6 +45,7 @@ nas duas seeds adicionais antes de 70M tokens. Consulte o
 | J | DRM block-cumsum | forget/write | referência DRM explícita (ASM-X) |
 | J_NO_* | componente removido ou contornado | forget/write | ablações causais da geometria |
 | SSM_CONTROL | nenhuma | forget/write ampliada | controle pareado por parâmetros |
+| ASM-C | transição relacional ASM-R | forget/write | experimento de inferência streaming compacta |
 
 A variante J é híbrida. Sua memória seletiva foi adicionada depois que o DRM
 original mostrou baixa eficiência amostral; ela não deve ser apresentada como

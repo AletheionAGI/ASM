@@ -15,7 +15,7 @@ Directional Relational Manifolds
 Aletheion State Models
     research program
           ↓
-ASM-X, ASM-R, ASM-S, ASM-F...
+ASM-X, ASM-R, ASM-C, ASM-S, ASM-F...
  architectural variants
 ```
 
@@ -63,6 +63,7 @@ seed confirmation.
 | ASM-U | Metric Subspace State Model | naturalized movement inside the subspace |
 | ASM-F | Relational Frame State Model | directional frame normalized by the metric |
 | ASM-R | Relational State Model | direct transition conditioned by the metric |
+| ASM-C | Compact State Model | ASM-R weights with bounded streaming inference state |
 | ASM-D | Direct State Model | direct neural transition without geometry |
 | ASM-S | Selective State Model | capacity concentrated in selective memory |
 | ASM-M | Causal Memory State Model | mixer, residual, and narrow selective memory |
@@ -190,6 +191,25 @@ independent 100M-token runs, its frozen-validation CE was `1.344538 ±
 0.000561` (population standard deviation). It loses to the selective control
 at 5M tokens, overtakes it by 30M, and maintains a reproducible trajectory to
 100M.
+
+### 7.1 ASM-C — Aletheion Compact State Model
+
+`ASM-C` is the compact-streaming inference form of ASM-R. It reuses the same
+trained parameters and relational transition, but retains only a token counter,
+the completed state, and a bounded open block. Its emitter consumes only the
+latest state instead of allocating activations proportional to the full prefix.
+
+The name **Compact** describes the implemented mechanism without prematurely
+claiming constant memory. ASM-C remains experimental until real-checkpoint BF16
+parity, bounded cache and peak VRAM, stable 4K–32K throughput, and corrected
+MQAR retention satisfy the criteria in
+`report/044_Plano_Implementacao_ASM_C_Streaming_Constante_2026_08_01.md`.
+
+The first completed 32K validation passed all three streaming-engineering
+criteria, including a constant 6,144-byte retained cache and 99.6% throughput
+retention from 4K to 32K. It failed the short MQAR control (32.25% versus the
+80% gate), so compact execution is validated but associative retention is not.
+ASM-C remains experimental.
 
 ## 8. ASM-D — Direct State Model
 

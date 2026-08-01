@@ -5,6 +5,8 @@ ASM — Aletheion State Models
    :maxdepth: 2
 
    api
+   MODEL_FAMILY
+   ARCHITECTURE_ASM_C
    math
    limitations
    competition

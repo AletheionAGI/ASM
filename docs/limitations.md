@@ -14,6 +14,11 @@ models.
 ASM-X is the explicit DRM member. Other ASM variants intentionally remove or
 recompose direction, metric, naturalization, or memory mechanisms.
 
+ASM-C is the experimental compact-streaming inference form of ASM-R. It reuses
+ASM-R weights; it is not currently evidence for a separately trained model or
+a new quality result. The name means **Compact State Model**, not
+"constant-memory model."
+
 The previously published 36M and 125M comparisons against GPT-2 are retracted
 as comparative evidence. Their GPT-2 training path applied a target shift
 before calling a causal-LM implementation that shifts internally, causing a
@@ -71,21 +76,36 @@ The relational metric, direction field, and flow are parameter-heavy. J is
 approximately 2.5 times slower than SSM_CONTROL in the current 5M-token runs.
 Parameter matching therefore does not imply compute matching.
 
-## Generation mismatch
+## Streaming inference and generation
 
-`generation.py` currently advances only the original recurrent geometry. It
-does not reproduce:
+Supported ASM generation paths now share the model sequence engine with the
+trained forward path and have full-forward parity tests. The default ASM-R
+compatibility path may nevertheless retain complete prefix token IDs and
+emitter history, so the ability to process a long sequence does not by itself
+demonstrate bounded-memory recurrence.
 
-- block-cumsum state construction;
-- the causal local mixer;
-- the token-to-state residual;
-- selective memory;
-- component-ablation paths;
-- SSM_CONTROL.
+ASM-C addresses this limitation for fixed-block streaming inference. Its cache
+contains only the completed latent state, a bounded open block, selective-memory
+state, and a position counter; the emitter receives only the latest state. A
+compact request without the required fixed-block invariant fails explicitly
+instead of reverting to complete-prefix recomputation.
 
-Generation from J-family checkpoints is therefore not faithful to the training
-forward path and must not be used as qualitative evidence until generation is
-unified with model forward semantics.
+ASM-C remains experimental until measurements on the promoted checkpoint
+confirm:
+
+- acceptable BF16 parity with the reference ASM-R path;
+- bounded cache and peak VRAM from 4K through 32K tokens;
+- stable prefill and token-by-token decode throughput;
+- MQAR retention with a short post-adaptation control and enough targets for
+  useful confidence intervals.
+
+Generated samples and benchmark results must identify the exact checkpoint,
+variant, precision, and compact/reference inference mode.
+
+The first completed ASM-C run passed the cache, peak-VRAM, and throughput gates
+through 32K. Its 40-token MQAR control reached only 32.25% against an 80%
+requirement. The reported long-distance MQAR values must not be interpreted as
+a retention curve because the model did not first master the short control.
 
 ## Geometry and mathematical interpretation
 

@@ -19,6 +19,8 @@ class InferenceState:
     block_tokens: torch.Tensor | None = None
     block_index: int = 0
     block_size: int = 0
+    tokens_seen: int = 0
+    compact: bool = False
 
     @property
     def batch_size(self) -> int:
@@ -26,7 +28,7 @@ class InferenceState:
 
     @property
     def sequence_length(self) -> int:
-        return int(self.input_ids.shape[1])
+        return self.tokens_seen if self.compact else int(self.input_ids.shape[1])
 
     @property
     def uses_block_cache(self) -> bool:
@@ -46,7 +48,8 @@ class InferenceMixin:
         if batch_size <= 0:
             raise ValueError("batch_size must be positive")
         return InferenceState(
-            torch.empty(batch_size, 0, dtype=torch.long, device=device)
+            torch.empty(batch_size, 0, dtype=torch.long, device=device),
+            compact=bool(self.config.compact_streaming_inference),
         )
 
     def _inference_block_size(self) -> int:
@@ -68,6 +71,11 @@ class InferenceMixin:
         states: torch.Tensor,
     ) -> InferenceState:
         block_size = self._inference_block_size()
+        compact = bool(self.config.compact_streaming_inference)
+        if compact and (block_size <= 0 or not self.config.use_drm_geometry):
+            raise RuntimeError(
+                "compact streaming requires DRM geometry with fixed block boundaries"
+            )
         if block_size <= 0 or not self.config.use_drm_geometry:
             return InferenceState(prefix)
         block_start = (prefix.shape[1] // block_size) * block_size
@@ -76,11 +84,13 @@ class InferenceMixin:
         else:
             completed_state = states[:, block_start - 1]
         return InferenceState(
-            input_ids=prefix,
+            input_ids=(prefix[:, :0].detach() if compact else prefix),
             completed_state=completed_state.detach(),
             block_tokens=prefix[:, block_start:].detach(),
             block_index=block_start // block_size,
             block_size=block_size,
+            tokens_seen=int(prefix.shape[1]),
+            compact=compact,
         )
 
     @torch.no_grad()
@@ -99,6 +109,10 @@ class InferenceMixin:
             if state.batch_size != input_ids.shape[0]:
                 raise ValueError(
                     "inference state batch size does not match input_ids"
+                )
+            if state.compact and state.tokens_seen:
+                raise RuntimeError(
+                    "compact streaming state cannot be extended with prefill; use decode_step"
                 )
             prefix = torch.cat([state.input_ids, input_ids], dim=1)
         output = self(
@@ -137,17 +151,19 @@ class InferenceMixin:
             collect_diagnostics=False,
         )
         block_states = block_output[0]
-        prefix = torch.cat([state.input_ids, input_ids], dim=1)
-        # Match the full-forward BF16 GEMM shape. Earlier emitter rows are
-        # position-independent and can therefore be zero without changing the
-        # selected final row.
-        emitter_states = block_states.new_zeros(
-            block_states.shape[0],
-            prefix.shape[1],
-            block_states.shape[-1],
-        )
-        emitter_states[:, -block_states.shape[1] :] = block_states
-        next_logits = self.emitter(emitter_states)[:, -1]
+        if state.compact:
+            prefix = state.input_ids
+            next_logits = self.emitter(block_states[:, -1:])[:, -1]
+        else:
+            prefix = torch.cat([state.input_ids, input_ids], dim=1)
+            # Compatibility path: preserve the full BF16 GEMM shape.
+            emitter_states = block_states.new_zeros(
+                block_states.shape[0],
+                prefix.shape[1],
+                block_states.shape[-1],
+            )
+            emitter_states[:, -block_states.shape[1] :] = block_states
+            next_logits = self.emitter(emitter_states)[:, -1]
         if open_tokens.shape[1] == state.block_size:
             completed_state = block_states[:, -1].detach()
             block_tokens = open_tokens[:, :0].detach()
@@ -162,5 +178,7 @@ class InferenceMixin:
             block_tokens=block_tokens,
             block_index=block_index,
             block_size=state.block_size,
+            tokens_seen=state.sequence_length + 1,
+            compact=state.compact,
         )
         return next_logits, next_state

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="650" viewBox="0 0 1100 650">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="115" y="40" font-family="Arial" font-size="25" font-weight="700" fill="#111827">Frozen validation CE at 100M tokens</text>
+<text x="115" y="68" font-family="Arial" font-size="14" fill="#4b5563">Same continuous 4,834,787-token validation stream; seed 1; lower is better.</text>
+<line x1="115" y1="555.00" x2="1045" y2="555.00" stroke="#e5e7eb"/>
+<text x="103" y="560.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">1.092</text>
+<line x1="115" y1="467.00" x2="1045" y2="467.00" stroke="#e5e7eb"/>
+<text x="103" y="472.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">1.151</text>
+<line x1="115" y1="379.00" x2="1045" y2="379.00" stroke="#e5e7eb"/>
+<text x="103" y="384.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">1.210</text>
+<line x1="115" y1="291.00" x2="1045" y2="291.00" stroke="#e5e7eb"/>
+<text x="103" y="296.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">1.269</text>
+<line x1="115" y1="203.00" x2="1045" y2="203.00" stroke="#e5e7eb"/>
+<text x="103" y="208.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">1.328</text>
+<line x1="115" y1="115.00" x2="1045" y2="115.00" stroke="#e5e7eb"/>
+<text x="103" y="120.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">1.387</text>
+<rect x="175" y="512.42" width="120" height="42.58" rx="5" fill="#111827"/>
+<text x="235.0" y="502.42" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#111827">1.1207</text>
+<text x="235.0" y="583" text-anchor="middle" font-family="Arial" font-size="14" fill="#111827">Transformer</text>
+<rect x="360" y="177.66" width="120" height="377.34" rx="5" fill="#0f766e"/>
+<text x="420.0" y="167.66" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#111827">1.3448</text>
+<text x="420.0" y="583" text-anchor="middle" font-family="Arial" font-size="14" fill="#111827">ASM-R</text>
+<rect x="545" y="175.87" width="120" height="379.13" rx="5" fill="#be123c"/>
+<text x="605.0" y="165.87" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#111827">1.3460</text>
+<text x="605.0" y="583" text-anchor="middle" font-family="Arial" font-size="14" fill="#111827">ASM-F</text>
+<rect x="730" y="174.29" width="120" height="380.71" rx="5" fill="#d97706"/>
+<text x="790.0" y="164.29" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#111827">1.3471</text>
+<text x="790.0" y="583" text-anchor="middle" font-family="Arial" font-size="14" fill="#111827">ASM-X</text>
+<rect x="915" y="157.58" width="120" height="397.42" rx="5" fill="#2563eb"/>
+<text x="975.0" y="147.58" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#111827">1.3583</text>
+<text x="975.0" y="583" text-anchor="middle" font-family="Arial" font-size="14" fill="#111827">ASM-S</text>
+<text x="28" y="335.0" text-anchor="middle" transform="rotate(-90 28 335.0)" font-family="Arial" font-size="14" fill="#111827">Cross-entropy</text>
+</svg>

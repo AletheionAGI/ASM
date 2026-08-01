@@ -15,7 +15,7 @@ Directional Relational Manifolds
 Aletheion State Models
  programa de pesquisa
           ↓
-ASM-X, ASM-R, ASM-S, ASM-F...
+ASM-X, ASM-R, ASM-C, ASM-S, ASM-F...
  variantes arquiteturais
 ```
 
@@ -73,6 +73,7 @@ seeds adicionais.
 | ASM-U | Metric Subspace State Model | movimento naturalizado dentro do subespaço |
 | ASM-F | Relational Frame State Model | frame direcional normalizado pela métrica |
 | ASM-R | Relational State Model | transição direta condicionada pela métrica |
+| ASM-C | Compact State Model | pesos ASM-R com estado de inferência streaming limitado |
 | ASM-D | Direct State Model | transição neural direta sem geometria |
 | ASM-S | Selective State Model | capacidade concentrada em memória seletiva |
 | ASM-M | Causal Memory State Model | mixer, residual e memória seletiva estreita |
@@ -201,6 +202,25 @@ Subtítulo técnico:
 independentes de 100M tokens, seu CE congelado de validação foi `1,344538 ±
 0,000561` (desvio-padrão populacional). Ele perde para o controle seletivo em
 5M, ultrapassa-o até 30M e mantém trajetória reproduzível até 100M.
+
+### 7.1 ASM-C — Aletheion Compact State Model
+
+`ASM-C` é a forma de inferência streaming compacta do ASM-R. Ela reutiliza os
+mesmos parâmetros treinados e a transição relacional, mas retém somente um
+contador de tokens, o estado concluído e um bloco aberto limitado. Seu emitter
+recebe apenas o último estado, sem alocar ativações proporcionais ao prefixo.
+
+O nome **Compact** descreve o mecanismo implementado sem alegar prematuramente
+memória constante. ASM-C permanece experimental até que paridade BF16 no
+checkpoint real, cache e pico de VRAM limitados, throughput estável entre 4K e
+32K e retenção MQAR corrigida satisfaçam os critérios de
+`report/044_Plano_Implementacao_ASM_C_Streaming_Constante_2026_08_01.md`.
+
+A primeira validação completa até 32K passou nos três critérios de engenharia
+de streaming, incluindo cache retido constante de 6.144 bytes e retenção de
+99,6% do throughput entre 4K e 32K. Ela falhou no controle curto de MQAR
+(32,25% contra o gate de 80%); portanto, a execução compacta foi validada, mas
+a retenção associativa não. ASM-C permanece experimental.
 
 ## 8. ASM-D — Direct State Model
 

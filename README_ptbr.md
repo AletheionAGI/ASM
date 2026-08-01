@@ -142,6 +142,7 @@ O tokenizer padrão opera sobre bytes UTF-8.
 | ASM-U | Metric Subspace State Model | J_METRIC_SUBSPACE |
 | ASM-F | Relational Frame State Model | J_METRIC_ORTHONORMAL_DIRECTION |
 | ASM-R | Relational State Model | J_NO_DIRECTION |
+| ASM-C | Compact State Model | pesos ASM-R + inferência streaming compacta |
 | ASM-D | Direct State Model | J_DIRECT_CONTROL |
 | ASM-S | Selective State Model | J_DIRECT_CONTROL_MATCHED |
 | ASM-M | Causal Memory State Model | SSM_CONTROL |
@@ -149,11 +150,18 @@ O tokenizer padrão opera sobre bytes UTF-8.
 Leia [MODEL_FAMILY_ptbr.md](docs/MODEL_FAMILY_ptbr.md) para definições e
 critérios de promoção.
 
+A primeira validação do ASM-C manteve cache (`6.144 B`), pico de alocação CUDA
+(`387,53 MiB`) e throughput (`~503 tok/s`) praticamente constantes até 32K,
+atingindo `2,97x` o throughput streaming do caminho ASM-R anterior em 32K. O
+controle curto de MQAR falhou (`32,25%` contra o gate de `80%`); portanto, a
+memória associativa de longo alcance ainda não foi demonstrada. Veja o
+[benchmark ASM-C versionado](docs/benchmarks/asm_c_streaming_32k/README.md).
+
 ## Componentes principais
 
 - `src/aletheion_state_models/core/`: interfaces neutras de estado, transição, memória, mixer e emitter.
 - `src/aletheion_state_models/geometry/`: métrica, base direcional e naturalização opcionais.
-- `src/aletheion_state_models/variants/`: construtores nomeados ASM-X, ASM-U, ASM-R, ASM-D e ASM-S.
+- `src/aletheion_state_models/variants/`: construtores nomeados ASM-X, ASM-U, ASM-F, ASM-R, ASM-C, ASM-D, ASM-S e ASM-M.
 - `src/drm_language_emitter/`: implementação legada compatível com checkpoints durante a migração.
 
 - `src/drm_language_emitter/config.py`: schema validado do `DRMConfig`.
@@ -342,6 +350,19 @@ Os resultados simbólicos ainda têm baixa acurácia absoluta e são apenas
 diagnósticos.
 
 ## Testes
+
+Avaliar o checkpoint promovido ASM-R em uma única suíte:
+
+```bash
+./scripts/run_asm_r_post_promotion_suite.sh \
+  --checkpoint runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_100000000.pt \
+  --output-root runs/asm_r_post_promotion_quick \
+  --device cuda \
+  --quick
+```
+
+Consulte o [relatório da suíte](docs/report/038_Suite_Avaliacao_Pos_Promocao_ASM_R_2026_08_01.md)
+antes de executar `--full`.
 
 ```bash
 python -m pytest -q

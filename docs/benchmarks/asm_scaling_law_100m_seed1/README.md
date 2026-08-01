@@ -35,6 +35,27 @@ ASM-F was the strongest explicit-direction formulation. The experiment contains
 one seed, so promotion is provisional even though the ordering is consistent with
 earlier paired ablations.
 
+## Charts
+
+### Validation CE by training tokens
+
+![Validation CE by training tokens](charts/validation_ce_by_tokens.svg)
+
+### Perplexity by training tokens
+
+![Validation perplexity by training tokens](charts/validation_ppl_by_tokens.svg)
+
+### Validation CE by GPU time
+
+![Validation CE by GPU time](charts/validation_ce_by_gpu_hours.svg)
+
+### Final validation CE at 100M tokens
+
+![Final validation CE at 100M tokens](charts/validation_ce_at_100m.svg)
+
+The token curves use a logarithmic horizontal axis. The final bar chart uses a
+truncated CE axis because all four models finish within 0.014 CE of one another.
+
 ## Files
 
 - `scaling_law_summary.json`: frozen scores, timings, fitted curves, checkpoint
@@ -42,6 +63,7 @@ earlier paired ablations.
 - `ablation_manifest.json`: exact training commands and parameter counts.
 - `configs/`: resolved model configuration for each variant.
 - `training_summaries/`: final trainer summaries retained for provenance.
+- `charts/`: reproducible SVG plots and their source CSV table.
 
 Large checkpoints remain under the ignored local `runs/` directory and are not
 committed to Git.

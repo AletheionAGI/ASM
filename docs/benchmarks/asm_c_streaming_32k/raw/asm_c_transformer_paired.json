@@ -1,0 +1,286 @@
+{
+  "protocol": {
+    "manifest": "data/benchmark_125m_wikipedia/validation/manifest.json",
+    "manifest_sha256": "4adabd5a6a64c30bda37ec23fd2db0341421995f6cdf516f46757e49c1948c07",
+    "split": "validation",
+    "asm_compact": true,
+    "context_batches": 8,
+    "speed_repeats": 5,
+    "decode_tokens": 128,
+    "device": "cuda"
+  },
+  "checkpoints": {
+    "asm_r": {
+      "path": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_100000000.pt",
+      "sha256": "1a71e10bab68242f30ff888c0aa63d7b5ab18e2fef5149135f40cf7605662a18"
+    },
+    "transformer": {
+      "path": "runs/transformer_asm_r_matched_100m_seed1/checkpoint_milestone_100000000.pt",
+      "sha256": "c239680e031a76396bd5494c2994c273b2cac9bfed627117641f16904fb359a6"
+    }
+  },
+  "context": [
+    {
+      "family": "asm_r",
+      "context_length": 64,
+      "supported": true,
+      "ce": 1.3120917603373528,
+      "ppl": 3.7139342531509456,
+      "tokens": 512,
+      "elapsed_sec": 0.17306441398977768,
+      "tokens_per_sec": 2958.4360423757716,
+      "peak_memory_mb": 707.64697265625
+    },
+    {
+      "family": "transformer",
+      "context_length": 64,
+      "supported": true,
+      "ce": 1.2122637555003166,
+      "ppl": 3.3610847209792127,
+      "tokens": 512,
+      "elapsed_sec": 0.025863281000056304,
+      "tokens_per_sec": 19796.40556814448,
+      "peak_memory_mb": 660.1943359375
+    },
+    {
+      "family": "asm_r",
+      "context_length": 128,
+      "supported": true,
+      "ce": 1.3018899708986282,
+      "ppl": 3.676238089015471,
+      "tokens": 1024,
+      "elapsed_sec": 0.0366066129936371,
+      "tokens_per_sec": 27973.087818258136,
+      "peak_memory_mb": 708.45458984375
+    },
+    {
+      "family": "transformer",
+      "context_length": 128,
+      "supported": true,
+      "ce": 1.2019772082567215,
+      "ppl": 3.3266879793624566,
+      "tokens": 1024,
+      "elapsed_sec": 0.02249270300671924,
+      "tokens_per_sec": 45525.875644830274,
+      "peak_memory_mb": 664.65673828125
+    },
+    {
+      "family": "asm_r",
+      "context_length": 256,
+      "supported": true,
+      "ce": 1.2553828954696655,
+      "ppl": 3.509181766937494,
+      "tokens": 2048,
+      "elapsed_sec": 0.06875004401081242,
+      "tokens_per_sec": 29789.07183939996,
+      "peak_memory_mb": 710.03857421875
+    },
+    {
+      "family": "transformer",
+      "context_length": 256,
+      "supported": true,
+      "ce": 1.0927947834134102,
+      "ppl": 2.9825981509880055,
+      "tokens": 2048,
+      "elapsed_sec": 0.022889575993758626,
+      "tokens_per_sec": 89473.04225112927,
+      "peak_memory_mb": 673.8896484375
+    },
+    {
+      "family": "asm_r",
+      "context_length": 512,
+      "supported": true,
+      "ce": 1.2539541870355606,
+      "ppl": 3.5041717491298185,
+      "tokens": 4096,
+      "elapsed_sec": 0.1324734320078278,
+      "tokens_per_sec": 30919.407294875316,
+      "peak_memory_mb": 713.3603515625
+    },
+    {
+      "family": "transformer",
+      "context_length": 512,
+      "supported": true,
+      "ce": 1.0500541552901268,
+      "ppl": 2.8578058791790726,
+      "tokens": 4096,
+      "elapsed_sec": 0.02833419799571857,
+      "tokens_per_sec": 144560.2942641583,
+      "peak_memory_mb": 695.12109375
+    },
+    {
+      "family": "asm_r",
+      "context_length": 1024,
+      "supported": true,
+      "ce": 1.2560716196894646,
+      "ppl": 3.5115994578776464,
+      "tokens": 8192,
+      "elapsed_sec": 0.2604298070073128,
+      "tokens_per_sec": 31455.692780089383,
+      "peak_memory_mb": 719.54248046875
+    },
+    {
+      "family": "transformer",
+      "context_length": 1024,
+      "supported": false,
+      "reason": "exceeds learned absolute-position limit"
+    },
+    {
+      "family": "asm_r",
+      "context_length": 2048,
+      "supported": true,
+      "ce": 1.270198941230774,
+      "ppl": 3.561561033216576,
+      "tokens": 16384,
+      "elapsed_sec": 0.5149624019977637,
+      "tokens_per_sec": 31815.914980276855,
+      "peak_memory_mb": 732.21435546875
+    },
+    {
+      "family": "transformer",
+      "context_length": 2048,
+      "supported": false,
+      "reason": "exceeds learned absolute-position limit"
+    }
+  ],
+  "speed": [
+    {
+      "family": "asm_r",
+      "prompt_tokens": 64,
+      "requested_decode_tokens": 128,
+      "decode_tokens": 128,
+      "decode_supported": true,
+      "prefill_sec": 0.002568443201016635,
+      "prefill_tokens_per_sec": 24917.817911903865,
+      "prefill_peak_memory_mb": 707.6162109375,
+      "decode_sec": 0.33094816299853846,
+      "decode_tokens_per_sec": 386.7675192400608,
+      "decode_peak_memory_mb": 707.99267578125
+    },
+    {
+      "family": "transformer",
+      "prompt_tokens": 64,
+      "requested_decode_tokens": 128,
+      "decode_tokens": 128,
+      "decode_supported": true,
+      "prefill_sec": 0.0027012762002414092,
+      "prefill_tokens_per_sec": 23692.505044201112,
+      "prefill_peak_memory_mb": 660.53955078125,
+      "decode_sec": 0.32388252699456643,
+      "decode_tokens_per_sec": 395.2050182754915,
+      "decode_peak_memory_mb": 662.78955078125
+    },
+    {
+      "family": "asm_r",
+      "prompt_tokens": 128,
+      "requested_decode_tokens": 128,
+      "decode_tokens": 128,
+      "decode_supported": true,
+      "prefill_sec": 0.004453170200577006,
+      "prefill_tokens_per_sec": 28743.567893141564,
+      "prefill_peak_memory_mb": 715.4130859375,
+      "decode_sec": 0.2549075130082201,
+      "decode_tokens_per_sec": 502.1429085766975,
+      "decode_peak_memory_mb": 715.4130859375
+    },
+    {
+      "family": "transformer",
+      "prompt_tokens": 128,
+      "requested_decode_tokens": 128,
+      "decode_tokens": 128,
+      "decode_supported": true,
+      "prefill_sec": 0.0027338107989635318,
+      "prefill_tokens_per_sec": 46821.089465492114,
+      "prefill_peak_memory_mb": 671.615234375,
+      "decode_sec": 0.31922025699168444,
+      "decode_tokens_per_sec": 400.97705955839245,
+      "decode_peak_memory_mb": 671.61474609375
+    },
+    {
+      "family": "asm_r",
+      "prompt_tokens": 256,
+      "requested_decode_tokens": 128,
+      "decode_tokens": 128,
+      "decode_supported": true,
+      "prefill_sec": 0.008457868002005852,
+      "prefill_tokens_per_sec": 30267.675014470256,
+      "prefill_peak_memory_mb": 719.14892578125,
+      "decode_sec": 0.2548856630019145,
+      "decode_tokens_per_sec": 502.18595464523463,
+      "decode_peak_memory_mb": 719.14892578125
+    },
+    {
+      "family": "transformer",
+      "prompt_tokens": 256,
+      "requested_decode_tokens": 128,
+      "decode_tokens": 128,
+      "decode_supported": true,
+      "prefill_sec": 0.0027241615985985844,
+      "prefill_tokens_per_sec": 93973.86709059273,
+      "prefill_peak_memory_mb": 682.99951171875,
+      "decode_sec": 0.3276364639896201,
+      "decode_tokens_per_sec": 390.67690586495644,
+      "decode_peak_memory_mb": 682.9990234375
+    },
+    {
+      "family": "asm_r",
+      "prompt_tokens": 512,
+      "requested_decode_tokens": 128,
+      "decode_tokens": 0,
+      "decode_supported": false,
+      "decode_reason": "no shared positional capacity remains after prefill",
+      "prefill_sec": 0.016331385800731367,
+      "prefill_tokens_per_sec": 31350.67692645355,
+      "prefill_peak_memory_mb": 726.77392578125,
+      "decode_sec": null,
+      "decode_tokens_per_sec": null,
+      "decode_peak_memory_mb": null
+    },
+    {
+      "family": "transformer",
+      "prompt_tokens": 512,
+      "requested_decode_tokens": 128,
+      "decode_tokens": 0,
+      "decode_supported": false,
+      "decode_reason": "no shared positional capacity remains after prefill",
+      "prefill_sec": 0.0029418977996101604,
+      "prefill_tokens_per_sec": 174037.31702299335,
+      "prefill_peak_memory_mb": 708.53466796875,
+      "decode_sec": null,
+      "decode_tokens_per_sec": null,
+      "decode_peak_memory_mb": null
+    }
+  ],
+  "generations": [
+    {
+      "family": "asm_r",
+      "prompt": "Aletheion State Models ",
+      "text": "Aletheion State Models that the centre of Judes Ström, who has second conditions so the supported granthropist. As a result, heaving with him. Berlina"
+    },
+    {
+      "family": "transformer",
+      "prompt": "Aletheion State Models ",
+      "text": "Aletheion State Models Alex David described television series Alex Lang and Gatherson University James Shanson Models Martin Bassu John Williamsburg Ja"
+    },
+    {
+      "family": "asm_r",
+      "prompt": "The geometry of language ",
+      "text": "The geometry of language in 1919 but can be marked in the difficulty more plan acute a small its new deck round. In the 19th century against a document o"
+    },
+    {
+      "family": "transformer",
+      "prompt": "The geometry of language ",
+      "text": "The geometry of language is from the central and fair in the cities. It was faced by a small italian descendants to the outerwards and condemn documents "
+    },
+    {
+      "family": "asm_r",
+      "prompt": "In a causal state model, memory ",
+      "text": "In a causal state model, memory of Cherry Valteres are out of many is not still distinct size, and in personnel strength. See also Lord (20 May 1993) poet Backy"
+    },
+    {
+      "family": "transformer",
+      "prompt": "In a causal state model, memory ",
+      "text": "In a causal state model, memory for the board of food and breaking in nucleaces, both foreign and silice, annual transports. The other breaking partners began t"
+    }
+  ]
+}

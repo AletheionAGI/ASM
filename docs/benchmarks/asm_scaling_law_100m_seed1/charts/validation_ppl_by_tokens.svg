@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="105" y="38" font-family="Arial" font-size="25" font-weight="700" fill="#111827">ASM scaling law: perplexity by training tokens</text>
+<text x="105" y="66" font-family="Arial" font-size="14" fill="#4b5563">Frozen rescoring over the same validation stream; seed 1; lower is better.</text>
+<line x1="105" y1="630.00" x2="1145" y2="630.00" stroke="#e5e7eb"/>
+<text x="93" y="635.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">3.226</text>
+<line x1="105" y1="525.00" x2="1145" y2="525.00" stroke="#e5e7eb"/>
+<text x="93" y="530.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">4.694</text>
+<line x1="105" y1="420.00" x2="1145" y2="420.00" stroke="#e5e7eb"/>
+<text x="93" y="425.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">6.161</text>
+<line x1="105" y1="315.00" x2="1145" y2="315.00" stroke="#e5e7eb"/>
+<text x="93" y="320.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">7.629</text>
+<line x1="105" y1="210.00" x2="1145" y2="210.00" stroke="#e5e7eb"/>
+<text x="93" y="215.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">9.096</text>
+<line x1="105" y1="105.00" x2="1145" y2="105.00" stroke="#e5e7eb"/>
+<text x="93" y="110.00" text-anchor="end" font-family="Arial" font-size="12" fill="#4b5563">10.564</text>
+<line x1="105.00" y1="105" x2="105.00" y2="630" stroke="#f3f4f6"/>
+<text x="105.00" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">1M</text>
+<line x1="261.54" y1="105" x2="261.54" y2="630" stroke="#f3f4f6"/>
+<text x="261.54" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">2M</text>
+<line x1="468.46" y1="105" x2="468.46" y2="630" stroke="#f3f4f6"/>
+<text x="468.46" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">5M</text>
+<line x1="625.00" y1="105" x2="625.00" y2="630" stroke="#f3f4f6"/>
+<text x="625.00" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">10M</text>
+<line x1="781.54" y1="105" x2="781.54" y2="630" stroke="#f3f4f6"/>
+<text x="781.54" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">20M</text>
+<line x1="873.10" y1="105" x2="873.10" y2="630" stroke="#f3f4f6"/>
+<text x="873.10" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">30M</text>
+<line x1="988.46" y1="105" x2="988.46" y2="630" stroke="#f3f4f6"/>
+<text x="988.46" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">50M</text>
+<line x1="1145.00" y1="105" x2="1145.00" y2="630" stroke="#f3f4f6"/>
+<text x="1145.00" y="655" text-anchor="middle" font-family="Arial" font-size="12" fill="#4b5563">100M</text>
+<polyline points="105.00,194.46 261.54,326.64 468.46,448.86 625.00,502.02 781.54,535.81 873.10,551.12 988.46,566.66 1145.00,586.25" fill="none" stroke="#0f766e" stroke-width="3"/>
+<circle cx="105.00" cy="194.46" r="4" fill="#0f766e"/>
+<circle cx="261.54" cy="326.64" r="4" fill="#0f766e"/>
+<circle cx="468.46" cy="448.86" r="4" fill="#0f766e"/>
+<circle cx="625.00" cy="502.02" r="4" fill="#0f766e"/>
+<circle cx="781.54" cy="535.81" r="4" fill="#0f766e"/>
+<circle cx="873.10" cy="551.12" r="4" fill="#0f766e"/>
+<circle cx="988.46" cy="566.66" r="4" fill="#0f766e"/>
+<circle cx="1145.00" cy="586.25" r="4" fill="#0f766e"/>
+<polyline points="105.00,148.75 261.54,301.90 468.46,444.19 625.00,499.10 781.54,534.30 873.10,550.11 988.46,565.90 1145.00,585.92" fill="none" stroke="#be123c" stroke-width="3"/>
+<circle cx="105.00" cy="148.75" r="4" fill="#be123c"/>
+<circle cx="261.54" cy="301.90" r="4" fill="#be123c"/>
+<circle cx="468.46" cy="444.19" r="4" fill="#be123c"/>
+<circle cx="625.00" cy="499.10" r="4" fill="#be123c"/>
+<circle cx="781.54" cy="534.30" r="4" fill="#be123c"/>
+<circle cx="873.10" cy="550.11" r="4" fill="#be123c"/>
+<circle cx="988.46" cy="565.90" r="4" fill="#be123c"/>
+<circle cx="1145.00" cy="585.92" r="4" fill="#be123c"/>
+<polyline points="105.00,150.85 261.54,305.19 468.46,444.62 625.00,501.54 781.54,535.51 873.10,551.21 988.46,566.54 1145.00,585.63" fill="none" stroke="#d97706" stroke-width="3"/>
+<circle cx="105.00" cy="150.85" r="4" fill="#d97706"/>
+<circle cx="261.54" cy="305.19" r="4" fill="#d97706"/>
+<circle cx="468.46" cy="444.62" r="4" fill="#d97706"/>
+<circle cx="625.00" cy="501.54" r="4" fill="#d97706"/>
+<circle cx="781.54" cy="535.51" r="4" fill="#d97706"/>
+<circle cx="873.10" cy="551.21" r="4" fill="#d97706"/>
+<circle cx="988.46" cy="566.54" r="4" fill="#d97706"/>
+<circle cx="1145.00" cy="585.63" r="4" fill="#d97706"/>
+<polyline points="105.00,261.72 261.54,367.27 468.46,457.16 625.00,501.07 781.54,533.15 873.10,547.39 988.46,562.33 1145.00,582.53" fill="none" stroke="#2563eb" stroke-width="3"/>
+<circle cx="105.00" cy="261.72" r="4" fill="#2563eb"/>
+<circle cx="261.54" cy="367.27" r="4" fill="#2563eb"/>
+<circle cx="468.46" cy="457.16" r="4" fill="#2563eb"/>
+<circle cx="625.00" cy="501.07" r="4" fill="#2563eb"/>
+<circle cx="781.54" cy="533.15" r="4" fill="#2563eb"/>
+<circle cx="873.10" cy="547.39" r="4" fill="#2563eb"/>
+<circle cx="988.46" cy="562.33" r="4" fill="#2563eb"/>
+<circle cx="1145.00" cy="582.53" r="4" fill="#2563eb"/>
+<line x1="120" y1="88" x2="148" y2="88" stroke="#0f766e" stroke-width="4"/>
+<text x="156" y="93" font-family="Arial" font-size="14" fill="#111827">ASM-R</text>
+<line x1="290" y1="88" x2="318" y2="88" stroke="#be123c" stroke-width="4"/>
+<text x="326" y="93" font-family="Arial" font-size="14" fill="#111827">ASM-F</text>
+<line x1="460" y1="88" x2="488" y2="88" stroke="#d97706" stroke-width="4"/>
+<text x="496" y="93" font-family="Arial" font-size="14" fill="#111827">ASM-X</text>
+<line x1="630" y1="88" x2="658" y2="88" stroke="#2563eb" stroke-width="4"/>
+<text x="666" y="93" font-family="Arial" font-size="14" fill="#111827">ASM-S</text>
+<text x="625.0" y="695" text-anchor="middle" font-family="Arial" font-size="14" fill="#111827">Training tokens (log scale)</text>
+<text x="25" y="367.5" text-anchor="middle" transform="rotate(-90 25 367.5)" font-family="Arial" font-size="14" fill="#111827">Perplexity</text>
+</svg>

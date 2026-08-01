@@ -9,6 +9,7 @@ The neutral public namespace is `aletheion_state_models`:
 ```python
 from aletheion_state_models import StateModel
 from aletheion_state_models.variants import (
+    build_compact_streaming,
     build_direct_state,
     build_explicit_drm,
     build_metric_subspace,
@@ -16,6 +17,10 @@ from aletheion_state_models.variants import (
     build_selective_state,
 )
 ```
+
+`build_compact_streaming(config)` constructs ASM-C, the compact inference form
+of ASM-R. It enables bounded fixed-block streaming state while preserving the
+ASM-R parameterization and checkpoint keys.
 
 `StateModel` is currently an alias of `DRMEmitterModel`, not a subclass. This
 preserves exact state-dict keys and checkpoint behavior during migration.
@@ -35,6 +40,8 @@ Main fields:
 - `use_powerlaw_risk`, `risk_mass_max`, `risk_exponent_min`, `risk_exponent_max`, `risk_alpha_max`: blindspot/dubiety risk controls.
 - `use_metric_naturalization`, `metric_naturalization_strength`, `metric_damping`: metric preconditioning controls.
 - `use_torch_compile`: opt-in compilation of the DRM forward path with fallback to eager execution.
+- `compact_streaming_inference`: enables the ASM-C inference state; it requires
+  a supported fixed-block sequence mode and fails explicitly otherwise.
 
 `DRMConfig.from_dict(data)` rejects unknown keys. This is intentional: experiment config typos should fail before training starts.
 
@@ -69,7 +76,11 @@ Output keys:
 tokens = generate(model, input_ids, max_new_tokens=32, temperature=0.9, top_k=20)
 ```
 
-Generation replays the prompt into the latent state, samples from the emitter, and advances the state with each generated token. It does not use attention or a KV cache.
+Generation replays the prompt into the latent state, samples from the emitter,
+and advances the state with each generated token. It does not use attention or
+a KV cache. In ASM-C mode, incremental inference retains the completed state,
+bounded open block, selective-memory state, and position counter rather than
+the complete token prefix.
 
 ## Tokenizers
 

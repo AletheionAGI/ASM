@@ -26,6 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--precision", choices=("fp32", "bf16"), default="bf16")
     parser.add_argument("--seed", type=int, default=1234)
+    parser.add_argument("--output", type=Path, default=None)
     return parser.parse_args()
 
 
@@ -114,7 +115,11 @@ def main() -> None:
         "max_abs_error": float(error.max()),
         "mean_abs_error": float(error.mean()),
     }
-    print(json.dumps(result, indent=2))
+    rendered = json.dumps(result, indent=2)
+    print(rendered)
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(rendered + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
