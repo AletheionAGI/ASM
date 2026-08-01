@@ -71,15 +71,22 @@ Transformers e modelos Hugging Face existem apenas como baselines.
 
 ## Qual é a equação operacional principal?
 
-```text
-z_{t+1} = z_t + dt * dz_t
+$$
+z_{t+1} = z_t + \Delta t\,\Delta z_t
+$$
 
-dz_raw_t = Σ_i gates_i(z_t) * c_i(z_t, e_t) * direction_i(z_t)
-dz_t = naturalize_G(dz_raw_t)
+$$
+\Delta z_t^{\mathrm{bruto}}
+= \sum_i a_i(z_t)\,c_i(z_t,e_t)\,v_i(z_t),
+\qquad
+\Delta z_t = \mathcal{N}_{G}\!\left(\Delta z_t^{\mathrm{bruto}}\right)
+$$
 
-logits_t = Emitter(z_{t+1})
-p(x_{t+1} | z_{t+1}) = softmax(logits_t)
-```
+$$
+\ell_t = E(z_{t+1}),
+\qquad
+p(x_{t+1}\mid z_{t+1}) = \mathrm{softmax}(\ell_t)
+$$
 
 Onde:
 
@@ -95,9 +102,10 @@ Onde:
 
 A métrica implementada é:
 
-```text
-G(z) = diag(softplus(d(z)) + eps) + U(z)U(z)ᵀ
-```
+$$
+G(z) = \mathrm{diag}\!\left(\mathrm{softplus}(d(z)) + \varepsilon\right)
+       + U(z)U(z)^{\mathsf T}
+$$
 
 A diagonal é estritamente positiva e `UUᵀ` é positiva semidefinida. Assim, a
 métrica neural atual é positiva definida (SPD) sem materializar uma matriz
@@ -105,12 +113,17 @@ densa completa `d_state × d_state`.
 
 O código também calcula:
 
-```text
-low_rank_scale = sum(U²)
-upper = max(diag) + low_rank_scale
-lower = max(min(diag), 1e-8)
-condition_proxy = upper / lower
-```
+$$
+s_{\mathrm{lr}} = \sum_{i,j} U_{ij}^{2},
+\qquad
+u = \max(d) + s_{\mathrm{lr}},
+\qquad
+l = \max\!\left(\min(d),10^{-8}\right)
+$$
+
+$$
+\mathrm{condition\_proxy} = \frac{u}{l}
+$$
 
 Isso é um proxy numérico, não um cálculo exato do espectro.
 
@@ -118,17 +131,18 @@ Isso é um proxy numérico, não um cálculo exato do espectro.
 
 Não. Como `softplus(d) + eps > 0`, a métrica tem rank matemático completo e:
 
-```text
-Ker(G) = {0}
-rank(G) = d_state
-```
+$$
+\ker(G)=\{0\},
+\qquad
+\mathrm{rank}(G)=d_{\mathrm{state}}
+$$
 
 O diagnóstico atual `dimD` é a soma dos gates direcionais. Ele mede atividade
 direcional, não:
 
-```text
-d_DRM(p) = rank(g_p)
-```
+$$
+d_{\mathrm{DRM}}(p)=\mathrm{rank}(g_p)
+$$
 
 definido em `docs/paper/drm_v6.tex`.
 
@@ -207,11 +221,12 @@ escolha controlada, não uma alegação de que bytes são ideais em escala.
 
 ## Quantos tokens cada modelo 36M processou?
 
-```text
-steps * grad_accum_steps * batch_size * seq_len
-= 1000 * 1 * 4 * 512
-= 2.048.000 tokens
-```
+$$
+\mathrm{steps}\times\mathrm{grad\_accum\_steps}\times
+\mathrm{batch\_size}\times\mathrm{seq\_len}
+=1000\times1\times4\times512
+=2\,048\,000\ \text{tokens}
+$$
 
 Cada família processou 6.144.000 tokens somando as três seeds.
 
@@ -352,9 +367,9 @@ um estado. A diferença central é:
 
 Uma transição Mamba pode ser representada aproximadamente por:
 
-\[
+$$
 h_t = A_t h_{t-1} + B_t x_t,\qquad y_t = C_t h_t
-\]
+$$
 
 Os parâmetros dependentes da entrada decidem quanto preservar, escrever e ler.
 Apesar da seletividade, a transição mantém uma estrutura de SSM projetada para
@@ -362,11 +377,11 @@ execução eficiente por selective scan.
 
 No DRM original, a atualização conceitual é mais próxima de:
 
-\[
+$$
 \Delta z_t =
 g(z_t)^{-1}
 \sum_k \alpha_k(z_t,x_t)\,v_k(z_t)
-\]
+$$
 
 Aqui, \(z_t\) é o estado latente, \(v_k\) são direções aprendidas,
 \(\alpha_k\) são gates de direção e \(g(z_t)\) é uma métrica SPD aprendida que
@@ -400,9 +415,9 @@ A combinação proposta pela implementação DRM é:
 
 A variante J acrescenta uma memória seletiva forget/write:
 
-\[
+$$
 m_t=f_t\odot m_{t-1}+w_t\odot c_t
-\]
+$$
 
 Esse mecanismo é conceitualmente próximo de Mamba, embora não seja uma
 implementação de Mamba. J e J_DILATED são híbridos: combinam memória seletiva
@@ -426,9 +441,9 @@ modernos também continuam sendo baselines externos necessários.
 
 O modelo também lembra Neural ODEs, mas usa update discreto:
 
-```text
-z_next = z + dt * dz
-```
+$$
+z_{t+1}=z_t+\Delta t\,\Delta z_t
+$$
 
 Não há solver ODE adaptativo no núcleo.
 

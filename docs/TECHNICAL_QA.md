@@ -62,15 +62,22 @@ Transformer and Hugging Face models exist in the repository only as baselines fo
 
 The operational update is:
 
-```text
-z_{t+1} = z_t + dt * dz_t
+$$
+z_{t+1} = z_t + \Delta t\,\Delta z_t
+$$
 
-dz_raw_t = sum_i gates_i(z_t) * c_i(z_t, e_t) * direction_i(z_t)
-dz_t = naturalize_G(dz_raw_t)
+$$
+\Delta z_t^{\mathrm{raw}}
+= \sum_i a_i(z_t)\,c_i(z_t,e_t)\,v_i(z_t),
+\qquad
+\Delta z_t = \mathcal{N}_{G}\!\left(\Delta z_t^{\mathrm{raw}}\right)
+$$
 
-logits_t = Emitter(z_{t+1})
-p(x_{t+1} | z_{t+1}) = softmax(logits_t)
-```
+$$
+\ell_t = E(z_{t+1}),
+\qquad
+p(x_{t+1}\mid z_{t+1}) = \mathrm{softmax}(\ell_t)
+$$
 
 Where:
 
@@ -86,20 +93,26 @@ Where:
 
 The implemented metric is:
 
-```text
-G(z) = diag(softplus(d(z)) + eps) + U(z)U(z)^T
-```
+$$
+G(z) = \mathrm{diag}\!\left(\mathrm{softplus}(d(z)) + \varepsilon\right)
+       + U(z)U(z)^{\mathsf T}
+$$
 
 It is implemented in `RelationalMetric`. The diagonal is strictly positive because of `softplus + metric_eps`, and `U U^T` is positive semidefinite. This provides an SPD metric form while avoiding a full dense `d_state x d_state` matrix.
 
 The implementation also computes a diagnostic `condition_proxy`:
 
-```text
-low_rank_scale = sum(U^2)
-upper = max(diag) + low_rank_scale
-lower = max(min(diag), 1e-8)
-condition_proxy = upper / lower
-```
+$$
+s_{\mathrm{lr}} = \sum_{i,j} U_{ij}^{2},
+\qquad
+u = \max(d) + s_{\mathrm{lr}},
+\qquad
+l = \max\!\left(\min(d),10^{-8}\right)
+$$
+
+$$
+\mathrm{condition\_proxy} = \frac{u}{l}
+$$
 
 This is a numerical proxy, not an exact eigenspectrum calculation.
 
@@ -108,17 +121,18 @@ This is a numerical proxy, not an exact eigenspectrum calculation.
 No. Because `softplus(d) + eps > 0`, the current neural metric is strictly
 positive definite:
 
-```text
-Ker(G) = {0}
-rank(G) = d_state
-```
+$$
+\ker(G)=\{0\},
+\qquad
+\mathrm{rank}(G)=d_{\mathrm{state}}
+$$
 
 The current `dimD` diagnostic is the sum of directional gates. It measures
 directional activity, not the paper's formal definition:
 
-```text
-d_DRM(p) = rank(g_p)
-```
+$$
+d_{\mathrm{DRM}}(p)=\mathrm{rank}(g_p)
+$$
 
 A tolerance-based numerical rank can be a useful spectral approximation, but
 it must be labeled as such. A literal implementation of the paper requires a
@@ -195,11 +209,12 @@ The downside is that byte-level tokenization usually produces longer sequences t
 
 Each run saw:
 
-```text
-steps * grad_accum_steps * batch_size * seq_len
-= 1000 * 1 * 4 * 512
-= 2,048,000 tokens
-```
+$$
+\mathrm{steps}\times\mathrm{grad\_accum\_steps}\times
+\mathrm{batch\_size}\times\mathrm{seq\_len}
+=1000\times1\times4\times512
+=2{,}048{,}000\ \text{tokens}
+$$
 
 With 3 seeds per family, each family processed 6,144,000 tokens across the aggregate, but each reported seed run corresponds to 2,048,000 tokens.
 
@@ -342,20 +357,20 @@ and updates a state. The central distinction is:
 
 Approximately, a Mamba transition can be described as:
 
-\[
+$$
 h_t = A_t h_{t-1} + B_t x_t,\qquad y_t = C_t h_t
-\]
+$$
 
 Input-dependent parameters decide what to preserve, write, and read while
 retaining an SSM structure designed for an efficient selective scan.
 
 The original DRM update is closer to:
 
-\[
+$$
 \Delta z_t =
 g(z_t)^{-1}
 \sum_k \alpha_k(z_t,x_t)\,v_k(z_t)
-\]
+$$
 
 Here, \(z_t\) is the latent state, \(v_k\) are learned directions,
 \(\alpha_k\) are direction gates, and \(g(z_t)\) is a learned SPD metric that
@@ -391,9 +406,9 @@ of:
 
 Variant J adds a selective forget/write memory:
 
-\[
+$$
 m_t=f_t\odot m_{t-1}+w_t\odot c_t
-\]
+$$
 
 This mechanism is conceptually close to Mamba, although it is not a Mamba
 implementation. J and J_DILATED are hybrids: they combine SSM-like selective
@@ -416,9 +431,9 @@ also remain necessary external baselines.
 
 DRM is also conceptually close to Neural ODEs because it describes state evolution, but the current implementation uses a discrete update:
 
-```text
-z_next = z + dt * dz
-```
+$$
+z_{t+1}=z_t+\Delta t\,\Delta z_t
+$$
 
 There is no adaptive ODE solver in the current core.
 
