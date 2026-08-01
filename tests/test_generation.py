@@ -82,3 +82,47 @@ def test_generation_supports_all_public_asm_variants():
         output = generate(model, prompt, max_new_tokens=2, top_k=1)
         assert output.shape == (2, 7)
         assert output.max() < 17
+
+
+def test_incremental_block_cache_stays_bounded_and_matches_full_prefix():
+    torch.manual_seed(11)
+    prompt = torch.randint(0, 17, (2, 3))
+    continuation = torch.randint(0, 17, (2, 10))
+    for builder in (
+        build_relational_state,
+        build_selective_state,
+        build_metric_frame,
+    ):
+        model = builder(_block_config()).eval()
+        _logits, state = model.prefill(prompt)
+        assert state.uses_block_cache
+        prefix = prompt
+        for position in range(continuation.shape[1]):
+            token = continuation[:, position]
+            actual, state = model.decode_step(token, state)
+            prefix = torch.cat([prefix, token.unsqueeze(1)], dim=1)
+            expected = model(prefix, collect_diagnostics=False)["logits"][:, -1]
+            assert torch.allclose(actual, expected, atol=1e-6, rtol=1e-6)
+            assert state.block_tokens.shape[1] < state.block_size
+
+
+def test_non_block_mode_retains_correct_reference_fallback():
+    config = DRMConfig(
+        vocab_size=17,
+        d_token=8,
+        d_state=12,
+        n_directions=4,
+        metric_rank=2,
+        hidden_size=16,
+        sequence_mode="directional_cumsum",
+        directional_cumsum_step_mode="velocity",
+    )
+    model = DRMEmitterModel(config).eval()
+    prompt = torch.randint(0, 17, (1, 3))
+    token = torch.randint(0, 17, (1,))
+    _logits, state = model.prefill(prompt)
+    assert not state.uses_block_cache
+    actual, _state = model.decode_step(token, state)
+    prefix = torch.cat([prompt, token.unsqueeze(1)], dim=1)
+    expected = model(prefix, collect_diagnostics=False)["logits"][:, -1]
+    assert torch.allclose(actual, expected, atol=1e-6, rtol=1e-6)

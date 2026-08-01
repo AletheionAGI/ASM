@@ -15,6 +15,7 @@ from .directional_solvers import DirectionalSolversMixin
 from .dynamics import DRMFlow, StateUpdater
 from .emitter import LanguageEmitter, TokenEmbedding
 from .geometric_steps import GeometricStepsMixin
+from .inference import InferenceMixin
 from .losses import (
     combine_losses,
     dimension_entropy,
@@ -48,6 +49,7 @@ class DRMEmitterModel(
     DirectionalBlocksMixin,
     DirectionalSolversMixin,
     GeometricStepsMixin,
+    InferenceMixin,
     SelectiveControlMixin,
     nn.Module,
 ):
@@ -376,44 +378,6 @@ class DRMEmitterModel(
                 )
                 self._compiled_forward = None
         return self._forward_impl(input_ids, targets, return_states, global_step, collect_diagnostics)
-
-    def init_inference_state(
-        self,
-        batch_size: int,
-        device: torch.device | str,
-    ):
-        """Create a correctness-first state for causal prefill and decoding."""
-        from .inference import InferenceState
-
-        if batch_size <= 0:
-            raise ValueError("batch_size must be positive")
-        return InferenceState(
-            torch.empty(batch_size, 0, dtype=torch.long, device=device)
-        )
-
-    def prefill(self, input_ids: torch.Tensor, state=None):
-        """Run the exact trained forward path over a prompt."""
-        from .inference import InferenceState
-
-        if input_ids.ndim != 2 or input_ids.shape[1] == 0:
-            raise ValueError("input_ids must have shape [batch, sequence] with sequence > 0")
-        if state is None:
-            prefix = input_ids
-        else:
-            if state.batch_size != input_ids.shape[0]:
-                raise ValueError("inference state batch size does not match input_ids")
-            prefix = torch.cat([state.input_ids, input_ids], dim=1)
-        output = self(prefix, collect_diagnostics=False)
-        return output["logits"], InferenceState(prefix)
-
-    def decode_step(self, input_ids: torch.Tensor, state):
-        """Append one token and return its exact forward-path logits."""
-        if input_ids.ndim == 1:
-            input_ids = input_ids.unsqueeze(1)
-        if input_ids.ndim != 2 or input_ids.shape[1] != 1:
-            raise ValueError("decode_step expects one token per batch item")
-        logits, next_state = self.prefill(input_ids, state)
-        return logits[:, -1], next_state
 
     def state_dict_with_config(self) -> dict[str, Any]:
         return {

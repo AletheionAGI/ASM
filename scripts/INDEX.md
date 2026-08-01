@@ -211,6 +211,12 @@ Commit: pending
 13. `rescore_drm_scaling_law.py`
 14. `run_drm_scaling_law_100m.sh`
 
+### 016 — 2026-07-31 — cached causal inference
+
+Commit: pending
+
+1. `benchmark_incremental_decode.py`
+
 ## Naming guidance
 
 - `train_*`: training entry points.

@@ -55,11 +55,13 @@ Os testes comparam logits completos e token a token em FP32 para ASM-X, ASM-U,
 ASM-F, ASM-R, ASM-D, ASM-S e ASM-M com tolerância de 1e-6. Também verificam geração
 em batch para todas essas variantes.
 
-### Limitação deliberada
+### Atualização: cache incremental
 
-Ainda não existem caches incrementais especializados. A próxima otimização de
-inferência poderá guardar buffers do mixer, memória seletiva e estado de blocos,
-mas só será aceita quando reproduzir a implementação de referência.
+Após esta primeira implementação, foi adicionado um cache de blocos fixos para
+ASM-R, ASM-S, ASM-F e demais variantes que usam o mesmo forward blockwise. Modos
+sem fronteira fixa continuam na implementação de referência.
+
+O resultado e a validação BF16 estão documentados no relatório 035.
 
 ## 3. Diagnósticos de gates
 
@@ -191,9 +193,8 @@ variant_j_no_direction_seed_1/checkpoint_milestone_1000000.pt
 ## Próximos passos técnicos
 
 1. Executar benchmark CUDA antes/depois para quantificar a remoção de auxiliares.
-2. Implementar caches incrementais somente contra a API de referência já testada.
-3. Confirmar geração qualitativa após definir tokenizer/checkpoint promovido.
-4. Atualizar Architecture e README quando ASM-R deixar de ser uma promoção
+2. Confirmar geração qualitativa após definir tokenizer/checkpoint promovido.
+3. Atualizar Architecture e README quando ASM-R deixar de ser uma promoção
    provisória.
 
 ## Conclusão
