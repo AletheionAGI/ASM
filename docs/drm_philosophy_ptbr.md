@@ -51,25 +51,19 @@ Se $z$ é o estado, $V_{i}(z)$ são direções locais e $a_{i}(z,x)$ são coefic
 dependentes do estado e da entrada, o movimento bruto pode ser escrito como:
 
 $$
-v_{\mathrm{raw}}(z,x)
-=
-\sum_{i} a_{i}(z,x)V_{i}(z)
+v_{\mathrm{raw}}(z,x)=\sum_{i} a_{i}(z,x)V_{i}(z)
 $$
 
 Uma métrica relacional $G(z)$ pode transformar ou naturalizar esse movimento:
 
 $$
-v(z,x)
-=
-G(z)^{-1}v_{\mathrm{raw}}(z,x).
+v(z,x)=G(z)^{-1}v_{\mathrm{raw}}(z,x)
 $$
 
 Uma atualização local seria então:
 
 $$
-z_{t+1}
-=
-z_{t}+\Delta t\,v(z_{t},x_{t})
+z_{t+1}=z_{t}+\Delta t\,v(z_{t},x_{t})
 $$
 
 Essa formulação separa duas perguntas:
@@ -273,10 +267,7 @@ A teoria concebe transições de posto e dimensão efetiva variável. A métrica
 implementada atualmente no DRM Language Emitter é:
 
 $$
-G(z)
-=
-\mathrm{diag}\!\left(\mathrm{softplus}(d(z))+\varepsilon\right)
-+U(z)U(z)^{\mathsf T}
+G(z)=\mathrm{diag}\!\left(\mathrm{softplus}(d(z))+\varepsilon\right)+U(z)U(z)^{\mathsf T}
 $$
 
 Como a diagonal possui piso estritamente positivo, $G(z)$ é SPD e seu posto
@@ -302,17 +293,13 @@ mais estável que J completa.
 Ela substitui:
 
 $$
-v_{\mathrm{raw}}
-=
-\sum_{i} a_{i}(z,x)V_{i}(z)
+v_{\mathrm{raw}}=\sum_{i} a_{i}(z,x)V_{i}(z)
 $$
 
 por uma transição neural direta:
 
 $$
-v_{\mathrm{raw}}
-=
-T(z,x).
+v_{\mathrm{raw}}=T(z,x)
 $$
 
 A variante continua possuindo movimento. O que desaparece é a obrigação de
@@ -355,9 +342,7 @@ Quando o movimento é uma combinação de poucas direções, ele fica restrito a
 espaço gerado por elas:
 
 $$
-v_{\mathrm{raw}}
-\in
-\mathrm{span}\!\left\{V_{1},\ldots,V_{n}\right\}
+v_{\mathrm{raw}}\in\mathrm{span}\!\left\{V_{1},\ldots,V_{n}\right\}
 $$
 
 Uma transição direta pode produzir qualquer vetor do espaço de estados. A
@@ -507,18 +492,14 @@ entrada → estado → direção → movimento bruto → métrica → movimento 
 ou:
 
 $$
-v_{\mathrm{raw}}=Vc,
-\qquad
-v=G^{-1}Vc.
+v_{\mathrm{raw}}=Vc,\qquad v=G^{-1}Vc
 $$
 
 Se $G^{-1}$ misturar as coordenadas, o movimento final não precisa permanecer
 no subespaço das direções:
 
 $$
-G^{-1}Vc
-\notin
-\mathrm{span}(V).
+G^{-1}Vc\notin\mathrm{span}(V)
 $$
 
 Isso cria uma tensão conceitual. O campo declara quais movimentos estão
@@ -545,9 +526,7 @@ Simplesmente aplicar $G^{-1}$ a cada direção antes de somá-las não altera o
 resultado, pois a transformação é linear:
 
 $$
-G^{-1}\sum_{i} c_{i}V_{i}
-=
-\sum_{i} c_{i}G^{-1}V_{i}
+G^{-1}\sum_{i} c_{i}V_{i}=\sum_{i} c_{i}G^{-1}V_{i}
 $$
 
 A ordem somente muda efetivamente quando a métrica participa da construção,

@@ -51,25 +51,19 @@ If $z$ is the state, $V_{i}(z)$ are local directions, and $a_{i}(z,x)$ are
 state- and input-dependent coefficients, raw movement may be written as:
 
 $$
-v_{\mathrm{raw}}(z,x)
-=
-\sum_{i} a_{i}(z,x)V_{i}(z)
+v_{\mathrm{raw}}(z,x)=\sum_{i} a_{i}(z,x)V_{i}(z)
 $$
 
 A relational metric $G(z)$ may transform or naturalize this movement:
 
 $$
-v(z,x)
-=
-G(z)^{-1}v_{\mathrm{raw}}(z,x).
+v(z,x)=G(z)^{-1}v_{\mathrm{raw}}(z,x)
 $$
 
 A local update would then be:
 
 $$
-z_{t+1}
-=
-z_{t}+\Delta t\,v(z_{t},x_{t})
+z_{t+1}=z_{t}+\Delta t\,v(z_{t},x_{t})
 $$
 
 This formulation separates two questions:
@@ -270,10 +264,7 @@ The theory considers rank transitions and variable effective dimension. The
 metric currently implemented by DRM Language Emitter is:
 
 $$
-G(z)
-=
-\mathrm{diag}\!\left(\mathrm{softplus}(d(z))+\varepsilon\right)
-+U(z)U(z)^{\mathsf T}
+G(z)=\mathrm{diag}\!\left(\mathrm{softplus}(d(z))+\varepsilon\right)+U(z)U(z)^{\mathsf T}
 $$
 
 Because its diagonal has a strictly positive floor, $G(z)$ is SPD and its exact
@@ -299,17 +290,13 @@ directional field achieved lower and more stable CE than complete J.
 It replaces:
 
 $$
-v_{\mathrm{raw}}
-=
-\sum_{i} a_{i}(z,x)V_{i}(z)
+v_{\mathrm{raw}}=\sum_{i} a_{i}(z,x)V_{i}(z)
 $$
 
 with a direct neural transition:
 
 $$
-v_{\mathrm{raw}}
-=
-T(z,x).
+v_{\mathrm{raw}}=T(z,x)
 $$
 
 The variant still has movement. What disappears is the requirement that every
@@ -353,9 +340,7 @@ When movement is a combination of a limited set of directions, it is restricted
 to their span:
 
 $$
-v_{\mathrm{raw}}
-\in
-\mathrm{span}\!\left\{V_{1},\ldots,V_{n}\right\}
+v_{\mathrm{raw}}\in\mathrm{span}\!\left\{V_{1},\ldots,V_{n}\right\}
 $$
 
 A direct transition may produce any vector in state space. A restriction
@@ -503,18 +488,14 @@ input → state → direction → raw movement → metric → final movement
 or:
 
 $$
-v_{\mathrm{raw}}=Vc,
-\qquad
-v=G^{-1}Vc.
+v_{\mathrm{raw}}=Vc,\qquad v=G^{-1}Vc
 $$
 
 If $G^{-1}$ mixes coordinates, final movement need not remain in the
 directional subspace:
 
 $$
-G^{-1}Vc
-\notin
-\mathrm{span}(V).
+G^{-1}Vc\notin\mathrm{span}(V)
 $$
 
 This creates a conceptual tension. The field declares which movements are
@@ -540,9 +521,7 @@ Merely applying $G^{-1}$ to each direction before adding them does not change
 the result because the transformation is linear:
 
 $$
-G^{-1}\sum_{i} c_{i}V_{i}
-=
-\sum_{i} c_{i}G^{-1}V_{i}
+G^{-1}\sum_{i} c_{i}V_{i}=\sum_{i} c_{i}G^{-1}V_{i}
 $$
 
 Order changes effectively only when the metric participates in constructing,
