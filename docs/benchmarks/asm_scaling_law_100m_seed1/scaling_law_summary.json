@@ -1,0 +1,509 @@
+{
+  "manifest": "data/benchmark_125m_wikipedia/validation/manifest.json",
+  "manifest_sha256": "4adabd5a6a64c30bda37ec23fd2db0341421995f6cdf516f46757e49c1948c07",
+  "commit": "2c56203ea973c68feca38d54f60bbc7ed49717bb",
+  "python_version": "3.14.4",
+  "torch_version": "2.13.0+cu130",
+  "cuda_version": "13.0",
+  "device": "cuda",
+  "rows": [
+    {
+      "variant": "J_NO_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 1000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_1000000.pt",
+      "checkpoint_sha256": "038e0ea16ed0acbe3e84e2c06597d5d2cd9d8b65fb38018a51fd3ed716e8f8fa",
+      "validation_ce": 2.2314516286482493,
+      "validation_ppl": 9.313375834710964,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 65.61086931399996,
+      "training_gpu_hours": 0.018225241476111098
+    },
+    {
+      "variant": "J_NO_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 2000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_2000000.pt",
+      "checkpoint_sha256": "10f14642f72d91e5a4e23ff5b80a4ae5578d23fa7d81bba3710b7b7b2cfef907",
+      "validation_ce": 2.010348032035686,
+      "validation_ppl": 7.465915272902995,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 126.17830009399995,
+      "training_gpu_hours": 0.035049527803888876
+    },
+    {
+      "variant": "J_NO_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 5000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_5000000.pt",
+      "checkpoint_sha256": "f4d9a33a0d99ea2e0e27d17eddbc902352f1e7fce5a1f5f53b3ac85836087023",
+      "validation_ce": 1.7505421838910236,
+      "validation_ppl": 5.757723574849988,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 307.919444142,
+      "training_gpu_hours": 0.08553317892833333
+    },
+    {
+      "variant": "J_NO_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 10000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_10000000.pt",
+      "checkpoint_sha256": "5a7bcf6c61c6d0bc03e0fb37f534902d81558ae43f7c09360932723aa8dc6075",
+      "validation_ce": 1.6124101347897248,
+      "validation_ppl": 5.014883218939491,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 606.7713599879999,
+      "training_gpu_hours": 0.16854759999666663
+    },
+    {
+      "variant": "J_NO_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 20000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_20000000.pt",
+      "checkpoint_sha256": "3eff422a017989e791d9ae7da7806b4beb85a5bc5c507edd645d7dbb60f4ab81",
+      "validation_ce": 1.5135056567399583,
+      "validation_ppl": 4.542627807087608,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 1205.5769473229998,
+      "training_gpu_hours": 0.3348824853674999
+    },
+    {
+      "variant": "J_NO_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 30000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_30000000.pt",
+      "checkpoint_sha256": "928fb1065bf92fe2f93a22b6edb5f9e0d7bfaf909a254d1e5109e3ed1d531701",
+      "validation_ce": 1.4652373119012518,
+      "validation_ppl": 4.328570339681511,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 1806.011973046,
+      "training_gpu_hours": 0.5016699925127778
+    },
+    {
+      "variant": "J_NO_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 50000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_50000000.pt",
+      "checkpoint_sha256": "5639bae724753a9c7f27a6c128e6b0a201aae06c65deb3609ce28423fc8e72b8",
+      "validation_ce": 1.4137466097982558,
+      "validation_ppl": 4.111330134294042,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 2998.7458731849997,
+      "training_gpu_hours": 0.8329849647736111
+    },
+    {
+      "variant": "J_NO_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 100000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_no_direction_seed_1/checkpoint_milestone_100000000.pt",
+      "checkpoint_sha256": "1a71e10bab68242f30ff888c0aa63d7b5ab18e2fef5149135f40cf7605662a18",
+      "validation_ce": 1.344848597262847,
+      "validation_ppl": 3.837605472640744,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 6034.379833049999,
+      "training_gpu_hours": 1.6762166202916664
+    },
+    {
+      "variant": "J",
+      "seed": 1,
+      "milestone_tokens": 1000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_seed_1/checkpoint_milestone_1000000.pt",
+      "checkpoint_sha256": "ecca758fbcbca01e30fc81f66384da6ec1cbd7d04976036154a5409fcd31c0c0",
+      "validation_ce": 2.2948403223413436,
+      "validation_ppl": 9.922851428094136,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 70.42947648499921,
+      "training_gpu_hours": 0.019563743468055336
+    },
+    {
+      "variant": "J",
+      "seed": 1,
+      "milestone_tokens": 2000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_seed_1/checkpoint_milestone_2000000.pt",
+      "checkpoint_sha256": "6ffd2f421e24596246750e7094c0b86e54f96c1fd13874f147e0a9d4d0ba2955",
+      "validation_ce": 2.0497132716179025,
+      "validation_ppl": 7.765674147871619,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 141.652339063,
+      "training_gpu_hours": 0.03934787196194445
+    },
+    {
+      "variant": "J",
+      "seed": 1,
+      "milestone_tokens": 5000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_seed_1/checkpoint_milestone_5000000.pt",
+      "checkpoint_sha256": "95bdbecffdfb55dba077964fe9d0586f0fb8115f5b5862ff8ee3e266ac012ff9",
+      "validation_ce": 1.7607816927209359,
+      "validation_ppl": 5.816982710693569,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 354.54663395199987,
+      "training_gpu_hours": 0.09848517609777774
+    },
+    {
+      "variant": "J",
+      "seed": 1,
+      "milestone_tokens": 10000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_seed_1/checkpoint_milestone_10000000.pt",
+      "checkpoint_sha256": "bccee4a83fffbe0d690120ed59f40a7848057aaac5bdd32d22738eb3dee64ad1",
+      "validation_ce": 1.6137350921828395,
+      "validation_ppl": 5.0215321293248305,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 703.4202057089997,
+      "training_gpu_hours": 0.19539450158583324
+    },
+    {
+      "variant": "J",
+      "seed": 1,
+      "milestone_tokens": 20000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_seed_1/checkpoint_milestone_20000000.pt",
+      "checkpoint_sha256": "e0b48343f4ff929a460899b77e4f3670ca7c9a0f0523697754921ba7e8e0b8f6",
+      "validation_ce": 1.5144282549172572,
+      "validation_ppl": 4.546820761131038,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 1397.548660339,
+      "training_gpu_hours": 0.3882079612052778
+    },
+    {
+      "variant": "J",
+      "seed": 1,
+      "milestone_tokens": 30000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_seed_1/checkpoint_milestone_30000000.pt",
+      "checkpoint_sha256": "fe4275dbde42d96bbeb6ff7202ea8cfda0cfe44e00023413bdd8cb7eefeeb805",
+      "validation_ce": 1.464949623178607,
+      "validation_ppl": 4.327325237919066,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 2089.5791194819994,
+      "training_gpu_hours": 0.5804386443005554
+    },
+    {
+      "variant": "J",
+      "seed": 1,
+      "milestone_tokens": 50000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_seed_1/checkpoint_milestone_50000000.pt",
+      "checkpoint_sha256": "8526b8ac858c5ae74bfbdc6bf273b2d0085bbed7e2b67962d0d9cb18d472bf5b",
+      "validation_ce": 1.4141799763656737,
+      "validation_ppl": 4.113112233445068,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 3463.196344505999,
+      "training_gpu_hours": 0.9619989845849998
+    },
+    {
+      "variant": "J",
+      "seed": 1,
+      "milestone_tokens": 100000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_seed_1/checkpoint_milestone_100000000.pt",
+      "checkpoint_sha256": "db3ab3c481929381cbf3b99101a9e4b6d5751c211f267f148e26b3f7e2e6cade",
+      "validation_ce": 1.3471031806941467,
+      "validation_ppl": 3.846267435244741,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 6868.687628149999,
+      "training_gpu_hours": 1.907968785597222
+    },
+    {
+      "variant": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 1000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_metric_orthonormal_direction_seed_1/checkpoint_milestone_1000000.pt",
+      "checkpoint_sha256": "99d09ed9d03793ac4edae7a42507773062bf923b83f60edb12e5e1cc745f624f",
+      "validation_ce": 2.2977900222887193,
+      "validation_ppl": 9.952164072929419,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 59.42692771700058,
+      "training_gpu_hours": 0.01650747992138905
+    },
+    {
+      "variant": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 2000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_metric_orthonormal_direction_seed_1/checkpoint_milestone_2000000.pt",
+      "checkpoint_sha256": "e84c2637a2a155c56f1d1049e69d2b18a2cd1db4514d5c9b3a9cd085faf8e267",
+      "validation_ce": 2.0556314479405082,
+      "validation_ppl": 7.81176904105668,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 119.1821851700006,
+      "training_gpu_hours": 0.03310616254722239
+    },
+    {
+      "variant": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 5000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_metric_orthonormal_direction_seed_1/checkpoint_milestone_5000000.pt",
+      "checkpoint_sha256": "85f30ba9935654b8ebcc1c55db59d6fdda204712a0542a03c2e7d3add85a5728",
+      "validation_ce": 1.761830103771146,
+      "validation_ppl": 5.823084497677885,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 297.49734429100135,
+      "training_gpu_hours": 0.08263815119194481
+    },
+    {
+      "variant": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 10000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_metric_orthonormal_direction_seed_1/checkpoint_milestone_10000000.pt",
+      "checkpoint_sha256": "7d3d000d2a61b70fb678b6759df7c630d22c3e78e756b59553b03d8ad949377f",
+      "validation_ce": 1.620510775571149,
+      "validation_ppl": 5.05567197092324,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 589.3917577800003,
+      "training_gpu_hours": 0.16371993271666674
+    },
+    {
+      "variant": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 20000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_metric_orthonormal_direction_seed_1/checkpoint_milestone_20000000.pt",
+      "checkpoint_sha256": "1364f42ca3fb4e211f5ee077829f37d62250624938c85e3752f44014ac44a2d0",
+      "validation_ce": 1.5181147139740325,
+      "validation_ppl": 4.563613363308044,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 1170.8030224520007,
+      "training_gpu_hours": 0.32522306179222243
+    },
+    {
+      "variant": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 30000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_metric_orthonormal_direction_seed_1/checkpoint_milestone_30000000.pt",
+      "checkpoint_sha256": "09b88e7c7a01e86c8bce83c8788f4cb009dca6d549c89a00de25a7e6b773769b",
+      "validation_ce": 1.4685018801745873,
+      "validation_ppl": 4.3427243438674275,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 1751.297593618001,
+      "training_gpu_hours": 0.48647155378277807
+    },
+    {
+      "variant": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 50000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_metric_orthonormal_direction_seed_1/checkpoint_milestone_50000000.pt",
+      "checkpoint_sha256": "8255938a3ca95fcdce70ddb5f5d015f2c47e5b6734876c913f6bcee14547ab17",
+      "validation_ce": 1.416345663837382,
+      "validation_ppl": 4.122029601709781,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 2907.3224098830015,
+      "training_gpu_hours": 0.8075895583008338
+    },
+    {
+      "variant": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "seed": 1,
+      "milestone_tokens": 100000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_metric_orthonormal_direction_seed_1/checkpoint_milestone_100000000.pt",
+      "checkpoint_sha256": "c5e85e96484861858f83cd642ccae719808b3515406323c877f3c489ea1719c1",
+      "validation_ce": 1.3460455985530497,
+      "validation_ppl": 3.842201841723834,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 5812.360526128001,
+      "training_gpu_hours": 1.6145445905911113
+    },
+    {
+      "variant": "J_DIRECT_CONTROL_MATCHED",
+      "seed": 1,
+      "milestone_tokens": 1000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_direct_control_matched_seed_1/checkpoint_milestone_1000000.pt",
+      "checkpoint_sha256": "ffd66413809d6c8c0080088fc492dfe5fe4f88e452d3fb1c01127cf82b4aa0fa",
+      "validation_ce": 2.1250451377200705,
+      "validation_ppl": 8.37327543015992,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 29.74197928799913,
+      "training_gpu_hours": 0.008261660913333092
+    },
+    {
+      "variant": "J_DIRECT_CONTROL_MATCHED",
+      "seed": 1,
+      "milestone_tokens": 2000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_direct_control_matched_seed_1/checkpoint_milestone_2000000.pt",
+      "checkpoint_sha256": "7e1ac39b7d732ff60d588f2810985b0bfde5aabf7dedae1fffc8767fb128c75d",
+      "validation_ce": 1.931246780620398,
+      "validation_ppl": 6.898105306401262,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 59.49156209099965,
+      "training_gpu_hours": 0.016525433914166568
+    },
+    {
+      "variant": "J_DIRECT_CONTROL_MATCHED",
+      "seed": 1,
+      "milestone_tokens": 5000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_direct_control_matched_seed_1/checkpoint_milestone_5000000.pt",
+      "checkpoint_sha256": "5f74786ed76cfd6823e15e58a216b6711e91f32e9df28c78dccd2bb67b838d8a",
+      "validation_ce": 1.7302087800966957,
+      "validation_ppl": 5.6418316876409,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 148.10188861499773,
+      "training_gpu_hours": 0.041139413504166035
+    },
+    {
+      "variant": "J_DIRECT_CONTROL_MATCHED",
+      "seed": 1,
+      "milestone_tokens": 10000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_direct_control_matched_seed_1/checkpoint_milestone_10000000.pt",
+      "checkpoint_sha256": "fcb5b69b3160482a5114edc2ba239407f0c0054ec681ec39d63fe75ba6f466d5",
+      "validation_ce": 1.6150354957235336,
+      "validation_ppl": 5.028066395155911,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 292.8815275889974,
+      "training_gpu_hours": 0.08135597988583261
+    },
+    {
+      "variant": "J_DIRECT_CONTROL_MATCHED",
+      "seed": 1,
+      "milestone_tokens": 20000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_direct_control_matched_seed_1/checkpoint_milestone_20000000.pt",
+      "checkpoint_sha256": "608a929960b88fb8b4c05daf22d8a540421e58b68ce0341f41658bd09e884540",
+      "validation_ce": 1.5216344237856978,
+      "validation_ppl": 4.579704259069728,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 580.1222442789986,
+      "training_gpu_hours": 0.16114506785527738
+    },
+    {
+      "variant": "J_DIRECT_CONTROL_MATCHED",
+      "seed": 1,
+      "milestone_tokens": 30000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_direct_control_matched_seed_1/checkpoint_milestone_30000000.pt",
+      "checkpoint_sha256": "277e7a4af71e8fe115baf0579bff15f2e61232b6c8257e7e55c442bb21286343",
+      "validation_ce": 1.4772245382583231,
+      "validation_ppl": 4.380770132448461,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 866.567847115999,
+      "training_gpu_hours": 0.2407132908655553
+    },
+    {
+      "variant": "J_DIRECT_CONTROL_MATCHED",
+      "seed": 1,
+      "milestone_tokens": 50000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_direct_control_matched_seed_1/checkpoint_milestone_50000000.pt",
+      "checkpoint_sha256": "3dbe68f27c4190061fb269e53449d4b4d34e430d98fe9a0d1703da43b0bc8b49",
+      "validation_ce": 1.428362111933444,
+      "validation_ppl": 4.171860552374944,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 1436.531172166,
+      "training_gpu_hours": 0.3990364367127778
+    },
+    {
+      "variant": "J_DIRECT_CONTROL_MATCHED",
+      "seed": 1,
+      "milestone_tokens": 100000000,
+      "checkpoint": "runs/asm_scaling_law_100m_seed1/variant_j_direct_control_matched_seed_1/checkpoint_milestone_100000000.pt",
+      "checkpoint_sha256": "5dc827343750eabfd659809dc83a9783d754749a1169ab80d13e6a742f3d8ace",
+      "validation_ce": 1.35829052752574,
+      "validation_ppl": 3.8895385562641485,
+      "validation_tokens": 4834787,
+      "validation_batches": 2362,
+      "training_elapsed_sec": 2867.5504963780004,
+      "training_gpu_hours": 0.7965418045494446
+    }
+  ],
+  "power_law_fits": {
+    "J_NO_DIRECTION": {
+      "loss_asymptote": 1.1334535058085742,
+      "coefficient": 150.37118244452822,
+      "alpha": 0.3557142796420677,
+      "squared_error": 0.0003776668895637951
+    },
+    "J": {
+      "loss_asymptote": 1.1651933171259308,
+      "coefficient": 264.6799327796479,
+      "alpha": 0.3944862944687972,
+      "squared_error": 0.0006339111829757793
+    },
+    "J_METRIC_ORTHONORMAL_DIRECTION": {
+      "loss_asymptote": 1.1561397409818355,
+      "coefficient": 239.28894316045108,
+      "alpha": 0.3864138620912973,
+      "squared_error": 0.0007324388709320047
+    },
+    "J_DIRECT_CONTROL_MATCHED": {
+      "loss_asymptote": 1.1134122111839109,
+      "coefficient": 66.71049945626135,
+      "alpha": 0.3032445572848926,
+      "squared_error": 9.74370404232939e-05
+    }
+  },
+  "observed_crossovers": [
+    {
+      "left": "J_NO_DIRECTION",
+      "right": "J",
+      "between_tokens": [
+        20000000,
+        30000000
+      ],
+      "estimated_crossover_tokens": 27243559.485612046
+    },
+    {
+      "left": "J_NO_DIRECTION",
+      "right": "J",
+      "between_tokens": [
+        30000000,
+        50000000
+      ],
+      "estimated_crossover_tokens": 36781980.49269392
+    },
+    {
+      "left": "J_NO_DIRECTION",
+      "right": "J_DIRECT_CONTROL_MATCHED",
+      "between_tokens": [
+        5000000,
+        10000000
+      ],
+      "estimated_crossover_tokens": 9237976.999935048
+    },
+    {
+      "left": "J",
+      "right": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "between_tokens": [
+        50000000,
+        100000000
+      ],
+      "estimated_crossover_tokens": 79658018.89028516
+    },
+    {
+      "left": "J",
+      "right": "J_DIRECT_CONTROL_MATCHED",
+      "between_tokens": [
+        5000000,
+        10000000
+      ],
+      "estimated_crossover_tokens": 9721163.293349769
+    },
+    {
+      "left": "J_METRIC_ORTHONORMAL_DIRECTION",
+      "right": "J_DIRECT_CONTROL_MATCHED",
+      "between_tokens": [
+        10000000,
+        20000000
+      ],
+      "estimated_crossover_tokens": 15248880.125935793
+    }
+  ]
+}

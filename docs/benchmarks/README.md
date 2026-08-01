@@ -6,6 +6,11 @@ Generated training directories under `runs/` remain local working artifacts and 
 
 ## Available Benchmarks
 
+- `asm_scaling_law_100m_seed1/`
+  - Frozen continuous-validation scaling-law comparison of ASM-R, ASM-X, ASM-F,
+    and ASM-S from 1M through 100M training tokens using seed 1.
+  - Main entry: `asm_scaling_law_100m_seed1/README.md`
+
 - `drm_transformer_full_1k_3k/`
   - Step-matched and parameter-matched DRM vs Tiny Transformer sweep.
   - Main entry: `drm_transformer_full_1k_3k/dashboard.html`

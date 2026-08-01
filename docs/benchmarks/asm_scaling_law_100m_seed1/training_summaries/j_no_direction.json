@@ -1,0 +1,11 @@
+{
+  "final_step": 12208,
+  "tokens_seen": 100007936,
+  "target_tokens": 100000000,
+  "parameter_count": 83206400,
+  "best_val_ce": 1.287050686776638,
+  "world_size": 1,
+  "dataset_manifest": "data/benchmark_125m_wikipedia/train/manifest.json",
+  "train_manifest": "data/benchmark_125m_wikipedia/train/manifest.json",
+  "validation_manifest": "data/benchmark_125m_wikipedia/validation/manifest.json"
+}
