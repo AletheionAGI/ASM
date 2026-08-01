@@ -222,8 +222,8 @@ escolha controlada, não uma alegação de que bytes são ideais em escala.
 ## Quantos tokens cada modelo 36M processou?
 
 $$
-\mathrm{steps}\times\mathrm{grad\_accum\_steps}\times
-\mathrm{batch\_size}\times\mathrm{seq\_len}
+N_{\mathrm{tokens}}
+=N_{\mathrm{steps}}\times N_{\mathrm{accum}}\times B\times L
 =1000\times1\times4\times512
 =2\,048\,000\ \text{tokens}
 $$
