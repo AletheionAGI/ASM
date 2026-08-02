@@ -296,6 +296,9 @@ Commit: pending
 41. `summarize_asm_c2_fw_lm_post_fp32.py` — applies the final post-FP32 gate
     and publishes the technical ASM-C2-FW-LM variant under the proposed public
     name ASM-CM only when every frozen measurement passes.
+42. `plot_asm_cm_post_fp32.py` — generates dependency-free SVG charts and CSV
+    source data for frozen CE, retained state, allocated VRAM, and streaming
+    throughput.
 
 ## Naming guidance
 

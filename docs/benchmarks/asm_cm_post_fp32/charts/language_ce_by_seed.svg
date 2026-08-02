@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+<rect width="100%" height="100%" fill="#07111f"/>
+<text x="100" y="38" fill="#f8fafc" font-family="sans-serif" font-size="24" font-weight="700">Qualidade linguística por seed</text>
+<rect x="160" y="111.5" width="42" height="323.5" rx="4" fill="#06b6d4"/>
+<text x="181" y="103.5" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11">1.329</text>
+<rect x="215" y="107.8" width="42" height="327.2" rx="4" fill="#8b5cf6"/>
+<text x="236" y="99.8" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11">1.345</text>
+<rect x="270" y="162.3" width="42" height="272.7" rx="4" fill="#f59e0b"/>
+<text x="291" y="154.3" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11">1.121</text>
+<text x="236" y="463" text-anchor="middle" fill="#cbd5e1" font-family="sans-serif" font-size="14">Seed 1</text>
+<rect x="410" y="111.9" width="42" height="323.1" rx="4" fill="#06b6d4"/>
+<text x="431" y="103.9" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11">1.328</text>
+<rect x="465" y="108.0" width="42" height="327.0" rx="4" fill="#8b5cf6"/>
+<text x="486" y="100.0" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11">1.344</text>
+<rect x="520" y="161.7" width="42" height="273.3" rx="4" fill="#f59e0b"/>
+<text x="541" y="153.7" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11">1.123</text>
+<text x="486" y="463" text-anchor="middle" fill="#cbd5e1" font-family="sans-serif" font-size="14">Seed 2</text>
+<rect x="660" y="111.8" width="42" height="323.2" rx="4" fill="#06b6d4"/>
+<text x="681" y="103.8" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11">1.328</text>
+<rect x="715" y="107.7" width="42" height="327.3" rx="4" fill="#8b5cf6"/>
+<text x="736" y="99.7" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11">1.345</text>
+<rect x="770" y="161.4" width="42" height="273.6" rx="4" fill="#f59e0b"/>
+<text x="791" y="153.4" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11">1.125</text>
+<text x="736" y="463" text-anchor="middle" fill="#cbd5e1" font-family="sans-serif" font-size="14">Seed 3</text>
+<rect x="180" y="492" width="14" height="14" fill="#06b6d4"/>
+<text x="202" y="504" fill="#cbd5e1" font-family="sans-serif" font-size="13">ASM-CM</text>
+<rect x="370" y="492" width="14" height="14" fill="#8b5cf6"/>
+<text x="392" y="504" fill="#cbd5e1" font-family="sans-serif" font-size="13">ASM-R</text>
+<rect x="560" y="492" width="14" height="14" fill="#f59e0b"/>
+<text x="582" y="504" fill="#cbd5e1" font-family="sans-serif" font-size="13">Transformer</text>
+</svg>
