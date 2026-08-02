@@ -62,3 +62,25 @@ def test_compact_bf16_argmax_parity_is_measured():
         first,state=model.prefill(tokens[:,:3]); rows=[first]
         for position in range(3,tokens.shape[1]): logits,state=model.decode_step(tokens[:,position],state); rows.append(logits[:,None])
     actual=torch.cat(rows,1); assert float((actual.float()-expected.float()).abs().max())<0.05; assert torch.equal(actual.argmax(-1),expected.argmax(-1))
+
+
+def test_compact_stable_core_matches_full_forward_under_cpu_bf16_autocast():
+    cfg = config()
+    cfg.addressable_memory = True
+    cfg.addressable_memory_backend = "fast_weight"
+    cfg.addressable_memory_dim = 6
+    cfg.fast_weight_durable_memory = True
+    cfg.fast_weight_state_fp32 = True
+    cfg.fast_weight_compute_fp32 = True
+    cfg.compact_streaming_inference = True
+    model = DRMEmitterModel(cfg.validated_copy()).eval()
+    tokens = torch.randint(0, 17, (2, 15))
+    with torch.autocast("cpu", dtype=torch.bfloat16):
+        expected = model(tokens, collect_diagnostics=False)["logits"]
+        first, state = model.prefill(tokens[:, :3])
+        rows = [first]
+        for position in range(3, tokens.shape[1]):
+            logits, state = model.decode_step(tokens[:, position], state)
+            rows.append(logits[:, None])
+    actual = torch.cat(rows, dim=1)
+    assert torch.allclose(actual, expected, atol=1e-6, rtol=1e-6)

@@ -247,6 +247,26 @@ class DirectionalForwardMixin:
         torch.Tensor | None,
         torch.Tensor | None,
     ]:
+        stable_compact_inference = (
+            not self.training
+            and self.config.compact_streaming_inference
+            and self.config.fast_weight_compute_fp32
+            and torch.is_autocast_enabled(token_embeddings.device.type)
+        )
+        if stable_compact_inference:
+            # Full forward evaluates complete blocks while incremental decode
+            # recomputes a growing open block. BF16 GEMM/conv kernels can choose
+            # different accumulation paths for those shapes. Run the compact
+            # recurrent core in FP32 so both execution orders share one numeric
+            # contract; training and non-compact variants remain unchanged.
+            with torch.autocast(device_type=token_embeddings.device.type, enabled=False):
+                return self._directional_cumsum_block(
+                    z_start.float(),
+                    token_embeddings.float(),
+                    global_step,
+                    block_index,
+                    collect_diagnostics,
+                )
         inner_block_size = int(self.config.directional_cumsum_inner_block_size)
         block_len = token_embeddings.shape[1]
         if self.config.sequence_mode == "directional_superblock_cumsum":

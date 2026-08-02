@@ -72,12 +72,14 @@ token e_t
 
 The current experimental high-quality path can also solve short causal trajectory blocks without a Python loop over every token. In `directional_block_cumsum`, local directional deltas are evaluated in parallel inside blocks, prefix states are recovered with `torch.cumsum`, and optional causal Anderson refinement computes prefix-only coefficients with cumulative Gram matrices plus batched small linear solves. This keeps autoregressive prefix causality while replacing the strict one-step-at-a-time loop with a blockwise solver.
 
-The promoted architecture is **ASM-R**, represented experimentally by
-`J_NO_DIRECTION`: a direct contextual transition, relational metric
-naturalization, causal mixer, token-to-state residual, and selective
-forget/write memory. It completed three independent 100M-token runs with mean
-frozen-validation CE **1.344538** and population standard deviation
-**0.000561**. ASM-S remains the faster efficiency-oriented variant.
+The promoted architecture is **ASM-CM — Aletheion Compact Memory Model**. Its
+technical lineage remains `ASM-C2-FW-LM`: ASM-R specialized with bounded
+fast-weight associative memory, mixed language/MQAR training, distillation,
+and an FP32 recurrent memory core. Frozen post-correction rescoring across
+three independent seeds produced mean CE **1.328496 ± 0.000687**, while 32K
+compact decode retained a fixed **143,360-byte** state, **363.66 MiB** peak
+VRAM, and **80.68 tok/s** mean throughput. The matched Transformer remains the
+stronger general-language CE control.
 
 The working hypothesis is that language generation can be modeled as motion through a relational state space, where geometry is measurable through action, condition, active dimension, recurrence, stability, and low-action path diagnostics.
 
@@ -131,6 +133,7 @@ The family taxonomy is:
 | ASM-C | Compact State Model | ASM-R weights + compact streaming inference |
 | ASM-C2 | Compact Addressable State Model | ASM-C + bounded key/value slots |
 | ASM-C2-FW | Compact Fast-Weight State Model | ASM-C + bounded delta-rule associative matrix |
+| ASM-CM | Aletheion Compact Memory Model | promoted public name for ASM-C2-FW-LM |
 | ASM-D | Direct State Model | J_DIRECT_CONTROL |
 | ASM-S | Selective State Model | J_DIRECT_CONTROL_MATCHED |
 | ASM-M | Causal Memory State Model | SSM_CONTROL |
@@ -144,6 +147,10 @@ reaching `2.97x` the legacy ASM-R streaming throughput at 32K. Its short MQAR
 control failed (`32.25%` versus the `80%` gate), so long-range associative
 memory is not yet established. See the
 [versioned ASM-C benchmark](docs/benchmarks/asm_c_streaming_32k/README.md).
+
+ASM-CM subsequently solved the associative-memory gate and recovered language
+compatibility. Its final post-FP32 frozen measurements are published in the
+[ASM-CM benchmark](docs/benchmarks/asm_cm_post_fp32/README.md).
 
 ### ASM-X recurrent path
 

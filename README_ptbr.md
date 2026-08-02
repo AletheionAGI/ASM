@@ -70,12 +70,13 @@ token e_t
   → logits
 ```
 
-O modelo promovido é **ASM-R**, representado por `J_NO_DIRECTION`: transição
-contextual direta, naturalização por métrica relacional, mixer causal,
-residual token→estado e memória seletiva forget/write. Ele completou três runs
-independentes de 100M tokens com CE médio congelado de **1,344538** e
-desvio-padrão populacional de **0,000561**. ASM-S permanece como variante de
-maior eficiência por tempo.
+O modelo promovido é **ASM-CM — Aletheion Compact Memory Model**. Sua linhagem
+técnica permanece `ASM-C2-FW-LM`: ASM-R especializado com memória associativa
+fast-weight limitada, treinamento misto de linguagem/MQAR, destilação e núcleo
+recorrente em FP32. O rescoring congelado pós-correção em três seeds produziu
+CE médio **1,328496 ± 0,000687**; no decode compacto em 32K, o estado permaneceu
+em **143.360 bytes**, a VRAM em **363,66 MiB** e o throughput em **80,68 tok/s**.
+O Transformer pareado continua sendo o controle superior de CE geral.
 
 ```text
 input_ids
@@ -145,6 +146,7 @@ O tokenizer padrão opera sobre bytes UTF-8.
 | ASM-C | Compact State Model | pesos ASM-R + inferência streaming compacta |
 | ASM-C2 | Compact Addressable State Model | ASM-C + slots limitados de chave/valor |
 | ASM-C2-FW | Compact Fast-Weight State Model | ASM-C + matriz associativa limitada com regra delta |
+| ASM-CM | Aletheion Compact Memory Model | nome público promovido do ASM-C2-FW-LM |
 | ASM-D | Direct State Model | J_DIRECT_CONTROL |
 | ASM-S | Selective State Model | J_DIRECT_CONTROL_MATCHED |
 | ASM-M | Causal Memory State Model | SSM_CONTROL |

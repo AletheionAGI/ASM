@@ -1,0 +1,19 @@
+{
+  "public_name": "ASM-CM",
+  "technical_variant": "ASM-C2-FW-LM",
+  "promote": true,
+  "training_repeated": false,
+  "aggregate": {
+    "ce_mean": 1.3284963349730792,
+    "ce_std": 0.0006869637439128447,
+    "throughput_4096_mean": 80.67025710361416,
+    "throughput_32768_mean": 80.68042206322075,
+    "vram_peak_32768_mib_mean": 363.66064453125,
+    "cache_32768_bytes_mean": 143360.0
+  },
+  "seeds": [
+    {"seed": 1, "ce": 1.3294005018546124, "ppl": 3.778777338384313, "throughput_4096": 80.86363939927723, "throughput_32768": 80.92146777436474, "vram_peak_32768_mib": 363.66064453125, "cache_32768_bytes": 143360, "bf16_argmax_mismatch_rate": 0.0},
+    {"seed": 2, "ce": 1.3277364521399644, "ppl": 3.7724944939651857, "throughput_4096": 80.7627654380679, "throughput_32768": 81.05336761242825, "vram_peak_32768_mib": 363.66064453125, "cache_32768_bytes": 143360, "bf16_argmax_mismatch_rate": 0.0},
+    {"seed": 3, "ce": 1.3283520509246605, "ppl": 3.774817551953418, "throughput_4096": 80.38436647349732, "throughput_32768": 80.06643080286922, "vram_peak_32768_mib": 363.66064453125, "cache_32768_bytes": 143360, "bf16_argmax_mismatch_rate": 0.0}
+  ]
+}

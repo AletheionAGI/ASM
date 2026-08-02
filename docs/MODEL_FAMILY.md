@@ -66,6 +66,7 @@ seed confirmation.
 | ASM-C | Compact State Model | ASM-R weights with bounded streaming inference state |
 | ASM-C2 | Compact Addressable State Model | ASM-C with bounded key/value memory slots |
 | ASM-C2-FW | Compact Fast-Weight State Model | ASM-C with a bounded delta-rule associative matrix |
+| ASM-CM | Aletheion Compact Memory Model | promoted public identity of ASM-C2-FW-LM |
 | ASM-D | Direct State Model | direct neural transition without geometry |
 | ASM-S | Selective State Model | capacity concentrated in selective memory |
 | ASM-M | Causal Memory State Model | mixer, residual, and narrow selective memory |
@@ -240,6 +241,26 @@ consolidated matrix and trains with delayed-MQAR curriculum plus language
 replay. It is not a new promoted family code; it is the next validation stage
 of ASM-C2-FW.
 
+### 7.4 ASM-CM — promoted language-compatible compact memory
+
+ASM-C2-FW-LM starts from a 100M-token ASM-R checkpoint and specializes the
+compact fast-weight architecture with approximately 80% language replay and
+20% delayed MQAR. It uses a lower learning rate for the language backbone, a
+higher rate for fast-weight memory and gates, frozen ASM-R logit distillation,
+and FP32 computation in the numerically sensitive memory recurrence.
+
+The initial three-seed specialization suite passed every internal gate. Its
+seed-1 frozen-language CE improved from `1.342003` to `1.326738`; MQAR reached
+100% at 512, 4K, and 32K tokens; retained cache remained `0.1367 MiB`; and the
+BF16 argmax mismatch rate was `0.195%`. Independent confirmation and frozen
+post-FP32 revalidation then passed every gate across three distinct ASM-R
+lineages. The promoted public name is **ASM-CM — Aletheion Compact Memory
+Model**; `ASM-C2-FW-LM` remains the exact technical lineage identifier. Final
+mean CE was `1.328496 ± 0.000687`; at 32K, cache remained `143,360 bytes`, peak
+VRAM `363.66 MiB`, and mean throughput `80.68 tok/s`. Transformer CE remains
+lower, so promotion is specifically for durable associative memory, bounded
+state, and language compatibility.
+
 ## 8. ASM-D — Direct State Model
 
 `ASM-D` is the structural direct control without geometry:
@@ -395,7 +416,7 @@ DRM inside the family.
 
 The promoted architecture is:
 
-> **ASM-R — Aletheion Relational State Model**
+> **ASM-CM — Aletheion Compact Memory Model**
 
 with the public architecture name:
 

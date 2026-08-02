@@ -130,12 +130,16 @@ def main() -> None:
     parser.add_argument("--lengths",default="512,1024,2048,4096,8192,16384,32768"); parser.add_argument("--prompt-tokens",type=int,default=64)
     parser.add_argument("--mqar-steps",type=int,default=5000); parser.add_argument("--mqar-batches",type=int,default=8); parser.add_argument("--mqar-batch-size",type=int,default=1)
     parser.add_argument("--mqar-control-length",type=int,default=40); parser.add_argument("--mqar-control-threshold",type=float,default=.8)
+    parser.add_argument("--skip-mqar", action="store_true", help="Measure streaming throughput and memory without retraining or evaluating MQAR.")
     parser.add_argument("--compact",action="store_true")
     parser.add_argument("--seed",type=int,default=1234); parser.add_argument("--device",default="cuda")
     args=parser.parse_args(); lengths=parse_lengths(args.lengths); device=torch.device(args.device)
     if device.type=='cuda' and not torch.cuda.is_available(): raise SystemExit("CUDA requested but unavailable")
     model=load_model(args.checkpoint).to(device).eval(); model.config.compact_streaming_inference=args.compact; partial=args.output.with_name('partial.json')
     streaming=streaming_probe(model,lengths,args.prompt_tokens,device,args.seed,partial)
+    if args.skip_mqar:
+        payload={"checkpoint":str(args.checkpoint),"protocol":{"lengths":lengths,"prompt_tokens":args.prompt_tokens,"compact":args.compact,"skip_mqar":True,"device":str(device),"seed":args.seed},"streaming":streaming,"mqar":[],"interpretation":{"streaming":"Actual decode_step path; compact mode retains only counter, completed state, and open block.","mqar":"Not repeated: this run isolates post-FP32 CE, throughput, and VRAM remeasurement."}}
+        save_partial(args.output,payload); print(f"saved={args.output}"); return
     del model
     if device.type=='cuda': torch.cuda.empty_cache()
     model=load_model(args.checkpoint).to(device); model.config.compact_streaming_inference=args.compact; adaptation_sec=adapt_mqar(model,args.mqar_steps,4,device,args.seed)

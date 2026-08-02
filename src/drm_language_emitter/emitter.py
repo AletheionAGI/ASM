@@ -29,6 +29,10 @@ class RMSNorm(nn.Module):
 class LanguageEmitter(nn.Module):
     def __init__(self, config: DRMConfig):
         super().__init__()
+        self.stable_compact_inference = bool(
+            config.compact_streaming_inference
+            and config.fast_weight_compute_fp32
+        )
         self.legacy = config.emitter_layers == 1 and not config.emitter_swiglu and not config.emitter_residual
         if self.legacy:
             self.net = nn.Sequential(
@@ -47,6 +51,16 @@ class LanguageEmitter(nn.Module):
         self.lm_head = nn.Linear(config.d_state, config.vocab_size)
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
+        if (
+            self.stable_compact_inference
+            and not self.training
+            and torch.is_autocast_enabled(z.device.type)
+        ):
+            # The full path emits an entire prefix and compact decode emits one
+            # position. Disable autocast to prevent shape-dependent BF16 GEMM
+            # accumulation from becoming an artificial parity failure.
+            with torch.autocast(device_type=z.device.type, enabled=False):
+                return self.forward(z.float())
         if self.legacy:
             return self.net(z)
         x = self.norm(z)

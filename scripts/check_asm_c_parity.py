@@ -23,7 +23,7 @@ def main() -> None:
         _,state=model.prefill(tokens[:,:args.prompt_tokens])
         for position in range(args.prompt_tokens,tokens.shape[1]): logits,state=model.decode_step(tokens[:,position],state); rows.append(logits[:,None])
     actual=torch.cat(rows,1); error=(actual.float()-reference.float()).abs(); mismatch=(actual.argmax(-1)!=reference.argmax(-1))
-    payload={"precision":args.precision,"batch_size":args.batch_size,"prompt_tokens":args.prompt_tokens,"decode_tokens":args.decode_tokens,"max_abs_error":float(error.max()),"mean_abs_error":float(error.mean()),"argmax_mismatches":int(mismatch.sum()),"argmax_total":mismatch.numel(),"argmax_mismatch_rate":float(mismatch.float().mean()),"final_cache_tokens":state.input_ids.numel(),"final_sequence_length":state.sequence_length}
+    payload={"precision":args.precision,"batch_size":args.batch_size,"prompt_tokens":args.prompt_tokens,"decode_tokens":args.decode_tokens,"stable_compact_fp32_core":bool(model.config.compact_streaming_inference and model.config.fast_weight_compute_fp32),"max_abs_error":float(error.max()),"mean_abs_error":float(error.mean()),"argmax_mismatches":int(mismatch.sum()),"argmax_total":mismatch.numel(),"argmax_mismatch_rate":float(mismatch.float().mean()),"final_cache_tokens":state.input_ids.numel(),"final_sequence_length":state.sequence_length}
     args.output.parent.mkdir(parents=True,exist_ok=True); args.output.write_text(json.dumps(payload,indent=2)+'\n'); print(json.dumps(payload,indent=2))
 
 

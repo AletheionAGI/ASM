@@ -20,12 +20,23 @@ ASM-C2 adds a fixed-capacity content-addressable memory to ASM-C. It remains an
 unpromoted second-generation experiment; see
 [ASM-C2 architecture](docs/ARCHITECTURE_ASM_C2.md).
 
-ASM-C2-FW replaces the unsuccessful learned slot router with a bounded
-fast-weight associative matrix. Its isolated storage control reached 100%
-MQAR accuracy, but the complete learned-controller variant remains an
-unpromoted candidate until the end-to-end gates pass.
+ASM-CM is the promoted public name of ASM-C2-FW-LM. It adds a bounded
+fast-weight associative matrix, selective consolidation, mixed language/MQAR
+specialization, teacher-logit distillation, and an FP32 critical recurrence to
+the compact ASM-R lineage.
 
-## Promoted Architecture: ASM-R
+## Promoted Architecture: ASM-CM
+
+ASM-CM passed independent three-lineage confirmation and frozen post-FP32
+revalidation. Mean validation CE was `1.328496 ± 0.000687`; compact 32K decode
+held cache at `143,360 bytes`, peak VRAM at `363.66 MiB`, and mean throughput
+at `80.68 tok/s`. Its state is bounded and does not retain the full prefix.
+
+The promotion is scoped to durable associative memory, bounded streaming
+state, and language compatibility. It is not a claim of Transformer
+superiority: the matched Transformer retains lower general-language CE.
+
+## Predecessor: ASM-R
 
 ASM-R — Aletheion Relational State Model — is the promoted architecture for
 quality per training token. It completed three independent 100M-token runs
@@ -56,6 +67,7 @@ diverged in both additional seeds before 70M tokens. See
 | ASM-C | ASM-R relational transition | forget/write | compact streaming inference experiment |
 | ASM-C2 | ASM-R relational transition | forget/write + fixed key/value slots | addressable streaming experiment |
 | ASM-C2-FW | ASM-R relational transition | forget/write + fast-weight matrix | bounded associative streaming candidate |
+| ASM-CM | ASM-R + compact FP32 recurrence | durable fast-weight memory + language replay | promoted bounded-memory architecture |
 
 Variant J is a hybrid. Its selective memory was added after the original DRM
 showed weak sample efficiency; it must not be presented as part of the original

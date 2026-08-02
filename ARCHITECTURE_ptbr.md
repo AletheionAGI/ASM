@@ -21,12 +21,24 @@ ASM-C2 acrescenta ao ASM-C memória endereçável por conteúdo e de capacidade
 fixa. Ele permanece um experimento de segunda geração não promovido; veja
 [a arquitetura ASM-C2](docs/ARCHITECTURE_ASM_C2.md).
 
-ASM-C2-FW substitui o roteador de slots aprendido, que falhou, por uma matriz
-associativa fast-weight limitada. O controle isolado de armazenamento atingiu
-100% no MQAR, mas a variante completa com controlador aprendido permanece não
-promovida até passar pelos gates de ponta a ponta.
+ASM-CM é o nome público promovido do ASM-C2-FW-LM. Ele acrescenta matriz
+associativa fast-weight limitada, consolidação seletiva, especialização mista
+de linguagem/MQAR, destilação e recorrência crítica em FP32 à linhagem compacta
+do ASM-R.
 
-## Arquitetura promovida: ASM-R
+## Arquitetura promovida: ASM-CM
+
+O ASM-CM passou pela confirmação independente em três linhagens e pela
+revalidação congelada pós-FP32. O CE médio foi `1,328496 ± 0,000687`; no decode
+compacto em 32K, manteve cache de `143.360 bytes`, pico de VRAM de `363,66 MiB`
+e throughput médio de `80,68 tok/s`. Seu estado é limitado e não retém o
+prefixo completo.
+
+A promoção reconhece memória associativa durável, streaming de estado limitado
+e compatibilidade linguística. Ela não afirma superioridade sobre o
+Transformer, que mantém CE geral menor no controle pareado.
+
+## Antecessor: ASM-R
 
 ASM-R — Aletheion Relational State Model — é a arquitetura promovida para
 qualidade por token de treinamento. Ela completou três runs independentes de
@@ -57,6 +69,7 @@ nas duas seeds adicionais antes de 70M tokens. Consulte o
 | ASM-C | transição relacional ASM-R | forget/write | experimento de inferência streaming compacta |
 | ASM-C2 | transição relacional ASM-R | forget/write + slots fixos de chave/valor | experimento streaming endereçável |
 | ASM-C2-FW | transição relacional ASM-R | forget/write + matriz fast-weight | candidata streaming associativa limitada |
+| ASM-CM | ASM-R + recorrência compacta FP32 | memória fast-weight durável + replay de linguagem | arquitetura promovida de memória limitada |
 
 A variante J é híbrida. Sua memória seletiva foi adicionada depois que o DRM
 original mostrou baixa eficiência amostral; ela não deve ser apresentada como

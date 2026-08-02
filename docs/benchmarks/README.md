@@ -6,6 +6,13 @@ Generated training directories under `runs/` remain local working artifacts and 
 
 ## Available Benchmarks
 
+- `asm_cm_post_fp32/`
+  - Final frozen three-seed revalidation of promoted ASM-CM after the FP32
+    recurrent-core correction; no checkpoint was retrained.
+  - CE: `1.328496 ± 0.000687`; fixed 32K cache: `143,360 bytes`; mean 32K
+    throughput: `80.68 tok/s`; mean peak VRAM: `363.66 MiB`.
+  - Main entry: `asm_cm_post_fp32/README.md`
+
 - `asm_c_streaming_32k/`
   - Compact ASM-C streaming validation against the legacy ASM-R inference path
     through 32K tokens, plus BF16 parity, MQAR, and a paired Transformer probe.

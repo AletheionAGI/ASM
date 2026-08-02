@@ -76,6 +76,7 @@ seeds adicionais.
 | ASM-C | Compact State Model | pesos ASM-R com estado de inferência streaming limitado |
 | ASM-C2 | Compact Addressable State Model | ASM-C com slots limitados de chave/valor |
 | ASM-C2-FW | Compact Fast-Weight State Model | ASM-C com matriz associativa limitada por regra delta |
+| ASM-CM | Aletheion Compact Memory Model | identidade pública promovida do ASM-C2-FW-LM |
 | ASM-D | Direct State Model | transição neural direta sem geometria |
 | ASM-S | Selective State Model | capacidade concentrada em memória seletiva |
 | ASM-M | Causal Memory State Model | mixer, residual e memória seletiva estreita |
@@ -252,6 +253,27 @@ A forma durável experimental separa memória rápida de trabalho e uma matriz
 lenta consolidada, treinando com currículo MQAR atrasado e replay de linguagem.
 Ela não recebe um novo código de família promovido: é a próxima etapa de
 validação do ASM-C2-FW.
+
+### 7.4 ASM-CM — memória compacta compatível com linguagem promovida
+
+O ASM-C2-FW-LM parte de um checkpoint ASM-R treinado em 100 milhões de tokens e
+especializa a arquitetura compacta fast-weight com aproximadamente 80% de
+repetição de linguagem e 20% de MQAR atrasado. Ele usa learning rate menor no
+backbone linguístico, learning rate maior na memória fast-weight e nos gates,
+destilação dos logits de um ASM-R congelado e computação FP32 na recorrência de
+memória numericamente sensível.
+
+A suíte inicial de especialização com três seeds passou todos os gates internos.
+Na seed 1, a CE linguística congelada melhorou de `1,342003` para `1,326738`; o
+MQAR alcançou 100% em 512, 4K e 32K tokens; o cache retido permaneceu em `0,1367
+MiB`; e a divergência de argmax BF16 foi `0,195%`. A confirmação independente e
+a revalidação congelada pós-FP32 passaram todos os gates em três linhagens
+distintas do ASM-R. O nome público promovido é **ASM-CM — Aletheion Compact
+Memory Model**; `ASM-C2-FW-LM` permanece como identificador técnico. O CE médio
+final foi `1,328496 ± 0,000687`; em 32K, o cache permaneceu em `143.360 bytes`,
+o pico de VRAM em `363,66 MiB` e o throughput médio em `80,68 tok/s`. O
+Transformer ainda possui CE menor; portanto, a promoção é por memória
+associativa durável, estado limitado e compatibilidade linguística.
 
 ## 8. ASM-D — Direct State Model
 
@@ -434,7 +456,7 @@ explicitamente o DRM dentro da família.
 
 A arquitetura promovida é:
 
-> **ASM-R — Aletheion Relational State Model**
+> **ASM-CM — Aletheion Compact Memory Model**
 
 com a arquitetura pública:
 

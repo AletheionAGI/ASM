@@ -281,6 +281,21 @@ Commit: pending
     backbone and fast-weight learning rates.
 35. `run_asm_c2_fw_lm_suite.sh` — runs the three-seed compatibility protocol
     and repeats language CE, 32K MQAR, bounded-streaming, and BF16 gates.
+36. `run_asm_c2_fw_lm_confirmation.sh` — performs independent three-lineage
+    confirmation against ASM-R and matched Transformers on the complete frozen
+    validation corpus, MQAR 32K, streaming, VRAM, throughput, and BF16 gates.
+37. `summarize_asm_c2_fw_lm_confirmation.py` — applies the official promotion
+    decision without treating Transformer CE superiority as a gate.
+38. `plot_asm_c2_fw_lm_confirmation.py` — plots language CE and MQAR 32K with
+    distinct family colors.
+39. `rerun_asm_c2_fw_lm_parity.sh` — reruns only the three BF16 parity checks
+    after numerical corrections and reapplies the official confirmation gate.
+40. `run_asm_cm_post_fp32_validation.sh` — remeasures frozen CE, compact
+    throughput, VRAM, cache, and BF16 parity for all three promoted candidate
+    lineages without retraining.
+41. `summarize_asm_c2_fw_lm_post_fp32.py` — applies the final post-FP32 gate
+    and publishes the technical ASM-C2-FW-LM variant under the proposed public
+    name ASM-CM only when every frozen measurement passes.
 
 ## Naming guidance
 
