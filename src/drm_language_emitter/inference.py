@@ -4,6 +4,11 @@ from dataclasses import dataclass
 
 import torch
 
+from .addressable_memory import AddressableMemoryState
+from .fast_weight_memory import FastWeightMemoryState
+
+MemoryState = AddressableMemoryState | FastWeightMemoryState
+
 
 @dataclass(frozen=True)
 class InferenceState:
@@ -21,6 +26,7 @@ class InferenceState:
     block_size: int = 0
     tokens_seen: int = 0
     compact: bool = False
+    addressable_memory: MemoryState | None = None
 
     @property
     def batch_size(self) -> int:
@@ -69,6 +75,8 @@ class InferenceMixin:
         self,
         prefix: torch.Tensor,
         states: torch.Tensor,
+        final_memory: MemoryState | None = None,
+        memory_before_last_block: MemoryState | None = None,
     ) -> InferenceState:
         block_size = self._inference_block_size()
         compact = bool(self.config.compact_streaming_inference)
@@ -83,6 +91,11 @@ class InferenceMixin:
             completed_state = self.initializer(prefix.shape[0], prefix.device)
         else:
             completed_state = states[:, block_start - 1]
+        completed_memory = (
+            final_memory
+            if prefix.shape[1] % block_size == 0
+            else memory_before_last_block
+        )
         return InferenceState(
             input_ids=(prefix[:, :0].detach() if compact else prefix),
             completed_state=completed_state.detach(),
@@ -91,6 +104,7 @@ class InferenceMixin:
             block_size=block_size,
             tokens_seen=int(prefix.shape[1]),
             compact=compact,
+            addressable_memory=(completed_memory.detach() if completed_memory is not None else None),
         )
 
     @torch.no_grad()
@@ -123,6 +137,8 @@ class InferenceMixin:
         return output["logits"], self._inference_state_from_forward(
             prefix,
             output["states"],
+            output.get("addressable_final_memory"),
+            output.get("addressable_before_last_block"),
         )
 
     @torch.no_grad()
@@ -151,6 +167,15 @@ class InferenceMixin:
             collect_diagnostics=False,
         )
         block_states = block_output[0]
+        next_memory = state.addressable_memory
+        if self.addressable_memory is not None:
+            if next_memory is None:
+                next_memory = self.addressable_memory.initial_state(
+                    input_ids.shape[0], input_ids.device, block_states.dtype
+                )
+            block_states, recomputed_memory, _ = self.addressable_memory.forward_sequence(
+                block_states, token_embeddings, next_memory
+            )
         if state.compact:
             prefix = state.input_ids
             next_logits = self.emitter(block_states[:, -1:])[:, -1]
@@ -168,6 +193,7 @@ class InferenceMixin:
             completed_state = block_states[:, -1].detach()
             block_tokens = open_tokens[:, :0].detach()
             block_index = state.block_index + 1
+            next_memory = recomputed_memory.detach() if self.addressable_memory is not None else next_memory
         else:
             completed_state = state.completed_state
             block_tokens = open_tokens.detach()
@@ -180,5 +206,6 @@ class InferenceMixin:
             block_size=state.block_size,
             tokens_seen=state.sequence_length + 1,
             compact=state.compact,
+            addressable_memory=next_memory,
         )
         return next_logits, next_state

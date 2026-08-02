@@ -129,6 +129,8 @@ The family taxonomy is:
 | ASM-F | Relational Frame State Model | J_METRIC_ORTHONORMAL_DIRECTION |
 | ASM-R | Relational State Model | J_NO_DIRECTION |
 | ASM-C | Compact State Model | ASM-R weights + compact streaming inference |
+| ASM-C2 | Compact Addressable State Model | ASM-C + bounded key/value slots |
+| ASM-C2-FW | Compact Fast-Weight State Model | ASM-C + bounded delta-rule associative matrix |
 | ASM-D | Direct State Model | J_DIRECT_CONTROL |
 | ASM-S | Selective State Model | J_DIRECT_CONTROL_MATCHED |
 | ASM-M | Causal Memory State Model | SSM_CONTROL |
@@ -215,7 +217,7 @@ Read the full design in [ARCHITECTURE.md](ARCHITECTURE.md). The planned formal D
 
 - `src/aletheion_state_models/core/`: architecture-neutral state, transition, memory, mixer, and emitter interfaces.
 - `src/aletheion_state_models/geometry/`: optional metric, directional basis, and naturalization operators.
-- `src/aletheion_state_models/variants/`: named ASM-X, ASM-U, ASM-F, ASM-R, ASM-C, ASM-D, ASM-S, and ASM-M constructors.
+- `src/aletheion_state_models/variants/`: named ASM-X, ASM-U, ASM-F, ASM-R, ASM-C, ASM-C2, ASM-C2-FW, ASM-D, ASM-S, and ASM-M constructors.
 - `src/drm_language_emitter/`: checkpoint-compatible legacy implementation retained during migration.
 
 - `src/drm_language_emitter/config.py`: validated `DRMConfig` schema.

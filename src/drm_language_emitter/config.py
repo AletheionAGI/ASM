@@ -117,6 +117,30 @@ class DRMConfig:
     metric_u_basis_size: int = 0
     bptt_truncate_interval: int = 0
     compact_streaming_inference: bool = False
+    addressable_memory: bool = False
+    addressable_memory_backend: str = "slots"
+    addressable_memory_slots: int = 32
+    addressable_memory_dim: int = 128
+    addressable_memory_heads: int = 1
+    addressable_memory_read_scale: float = 0.1
+    addressable_memory_write_bias: float = -2.0
+    addressable_memory_temperature: float = 1.0
+    addressable_memory_usage_decay: float = 0.99
+    addressable_memory_age_bias: float = 1.0
+    addressable_memory_read_enabled: bool = True
+    addressable_memory_write_enabled: bool = True
+    addressable_memory_shuffle_on_eval: bool = False
+    addressable_memory_read_top_k: int = 0
+    addressable_memory_write_top_k: int = 0
+    addressable_memory_use_previous_token_key: bool = False
+    fast_weight_durable_memory: bool = False
+    fast_weight_state_fp32: bool = False
+    fast_weight_compute_fp32: bool = False
+    fast_weight_hard_write_threshold: float = 0.0
+    fast_weight_consolidation_scale: float = 0.25
+    fast_weight_slow_read_scale: float = 1.0
+    lambda_addressable_read_entropy: float = 0.0
+    lambda_addressable_write_entropy: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -166,6 +190,11 @@ class DRMConfig:
             ("direction_basis_size", 0, None),
             ("metric_u_basis_size", 0, None),
             ("bptt_truncate_interval", 0, None),
+            ("addressable_memory_slots", 1, None),
+            ("addressable_memory_dim", 1, None),
+            ("addressable_memory_heads", 1, None),
+            ("addressable_memory_read_top_k", 0, None),
+            ("addressable_memory_write_top_k", 0, None),
         ]
         for name, min_val, max_val in int_fields:
             val = getattr(self, name)
@@ -228,6 +257,16 @@ class DRMConfig:
             ("directional_refinement_scale", 0.0, None),
             ("selective_memory_scale", 0.0, None),
             ("selective_memory_forget_bias", -10.0, 10.0),
+            ("addressable_memory_read_scale", 0.0, None),
+            ("addressable_memory_write_bias", -10.0, 10.0),
+            ("addressable_memory_temperature", 0.01, None),
+            ("addressable_memory_usage_decay", 0.0, 1.0),
+            ("addressable_memory_age_bias", 0.0, None),
+            ("fast_weight_hard_write_threshold", 0.0, 1.0),
+            ("fast_weight_consolidation_scale", 0.0, 1.0),
+            ("fast_weight_slow_read_scale", 0.0, None),
+            ("lambda_addressable_read_entropy", 0.0, None),
+            ("lambda_addressable_write_entropy", 0.0, None),
             ("lambda_block_consistency", 0.0, None),
             ("block_consistency_weight", 0.0, None),
             ("lambda_sampled_block_consistency", 0.0, None),
@@ -262,6 +301,14 @@ class DRMConfig:
             "emitter_residual",
             "use_torch_compile",
             "compact_streaming_inference",
+            "addressable_memory",
+            "addressable_memory_read_enabled",
+            "addressable_memory_write_enabled",
+            "addressable_memory_shuffle_on_eval",
+            "addressable_memory_use_previous_token_key",
+            "fast_weight_durable_memory",
+            "fast_weight_state_fp32",
+            "fast_weight_compute_fp32",
         ]
         for name in bool_fields:
             val = getattr(self, name)
@@ -333,6 +380,21 @@ class DRMConfig:
             raise ValueError(
                 "direct state transitions require a cumsum/block-cumsum sequence mode"
             )
+        if self.addressable_memory and (
+            not self.compact_streaming_inference
+            or self.sequence_mode != "directional_block_cumsum"
+        ):
+            raise ValueError(
+                "addressable memory requires compact directional_block_cumsum inference"
+            )
+        if self.addressable_memory_backend not in {"slots", "fast_weight"}:
+            raise ValueError("addressable_memory_backend must be 'slots' or 'fast_weight'")
+        if self.addressable_memory_heads != 1:
+            raise ValueError("addressable_memory_heads currently supports only 1")
+        for name in ("addressable_memory_read_top_k", "addressable_memory_write_top_k"):
+            value = getattr(self, name)
+            if value > self.addressable_memory_slots:
+                raise ValueError(f"{name} cannot exceed addressable_memory_slots")
 
     def __post_init__(self) -> None:  # pragma: no cover
         """Automatically validate configuration on instantiation."""

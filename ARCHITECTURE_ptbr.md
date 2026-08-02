@@ -17,6 +17,15 @@ em vez do prefixo completo. Ela não substitui o ASM-R promovido antes de passar
 nos critérios de validação em 32K. Consulte
 [a arquitetura ASM-C](docs/ARCHITECTURE_ASM_C.md).
 
+ASM-C2 acrescenta ao ASM-C memória endereçável por conteúdo e de capacidade
+fixa. Ele permanece um experimento de segunda geração não promovido; veja
+[a arquitetura ASM-C2](docs/ARCHITECTURE_ASM_C2.md).
+
+ASM-C2-FW substitui o roteador de slots aprendido, que falhou, por uma matriz
+associativa fast-weight limitada. O controle isolado de armazenamento atingiu
+100% no MQAR, mas a variante completa com controlador aprendido permanece não
+promovida até passar pelos gates de ponta a ponta.
+
 ## Arquitetura promovida: ASM-R
 
 ASM-R — Aletheion Relational State Model — é a arquitetura promovida para
@@ -46,6 +55,8 @@ nas duas seeds adicionais antes de 70M tokens. Consulte o
 | J_NO_* | componente removido ou contornado | forget/write | ablações causais da geometria |
 | SSM_CONTROL | nenhuma | forget/write ampliada | controle pareado por parâmetros |
 | ASM-C | transição relacional ASM-R | forget/write | experimento de inferência streaming compacta |
+| ASM-C2 | transição relacional ASM-R | forget/write + slots fixos de chave/valor | experimento streaming endereçável |
+| ASM-C2-FW | transição relacional ASM-R | forget/write + matriz fast-weight | candidata streaming associativa limitada |
 
 A variante J é híbrida. Sua memória seletiva foi adicionada depois que o DRM
 original mostrou baixa eficiência amostral; ela não deve ser apresentada como

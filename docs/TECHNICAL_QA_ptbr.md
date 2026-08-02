@@ -216,6 +216,25 @@ throughput até 32K. Ela falhou no controle curto de MQAR (`32,25%` contra
 associativa de longo alcance. Veja o
 [benchmark](benchmarks/asm_c_streaming_32k/README.md).
 
+## O que é ASM-C2?
+
+ASM-C2 é o sucessor experimental do ASM-C com memória compacta endereçável.
+Ele acrescenta um número fixo de slots de chave/valor para recuperar informação
+por conteúdo sem reter o prefixo completo. Trata-se de endereçamento semelhante
+a attention sobre slots limitados, não self-attention sobre tokens. ASM-C2 não
+está promovido nem pré-treinado para linguagem; antes deverá passar nos gates de
+MQAR curto, ablações causais, streaming, paridade e regressão de CE.
+
+### O que é ASM-C2-FW?
+
+ASM-C2-FW é a correção fast-weight do ASM-C2. Ela usa uma matriz associativa
+limitada e um codificador compartilhado de chaves, em vez de exigir que
+roteadores aprendidos separados escolham o mesmo slot discreto na escrita e na
+leitura. O controle isolado atingiu 100% no MQAR, contra 12,18% dos slots
+densos após 10 mil passos. Como esse controle recebeu as fases explícitas de
+leitura e escrita, ASM-C2-FW está autorizado para teste de ponta a ponta, mas
+ainda não está promovido.
+
 ## Qual é o benchmark histórico 36M/37M?
 
 ```text

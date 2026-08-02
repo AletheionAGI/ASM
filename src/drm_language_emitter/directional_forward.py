@@ -4,6 +4,10 @@ from typing import Any
 
 import torch
 
+from .addressable_memory import AddressableMemoryState
+from .fast_weight_memory import FastWeightMemoryState
+
+MemoryState = AddressableMemoryState | FastWeightMemoryState
 from .losses import combine_losses, metric_diversity, next_token_cross_entropy, recurrence_proxy, stability_proxy
 
 
@@ -42,7 +46,15 @@ class DirectionalForwardMixin:
         consistency_values = []
         sampled_consistency_values = []
         z_block = z0
+        addressable_state: MemoryState | None = None
+        addressable_before_last_block: MemoryState | None = None
+        addressable_diagnostics: dict[str, list[torch.Tensor]] = {}
+        if self.addressable_memory is not None:
+            addressable_state = self.addressable_memory.initial_state(
+                batch, token_embeddings.device, token_embeddings.dtype
+            )
         for block_index, block_start in enumerate(range(0, seq_len, block_size)):
+            addressable_before_last_block = addressable_state
             block_tokens = token_embeddings[:, block_start : block_start + block_size]
             (
                 states_block,
@@ -65,6 +77,12 @@ class DirectionalForwardMixin:
                 block_index,
                 collect_diagnostics,
             )
+            if self.addressable_memory is not None:
+                states_block, addressable_state, memory_diagnostics = self.addressable_memory.forward_sequence(
+                    states_block, block_tokens, addressable_state
+                )
+                for name, value in memory_diagnostics.items():
+                    addressable_diagnostics.setdefault(name, []).append(value)
             block_states.append(states_block)
             action_values.append(action_block)
             dim_values.append(dim_block)
@@ -183,6 +201,17 @@ class DirectionalForwardMixin:
                     "risk_mass_max": risk_tensor.max(),
                 }
             )
+        if addressable_diagnostics:
+            for name, values in addressable_diagnostics.items():
+                diagnostics[f"addressable_{name}_mean"] = torch.cat(values, dim=1).mean()
+            read_entropy_loss = diagnostics["addressable_read_entropy_mean"]
+            write_entropy_loss = diagnostics["addressable_write_entropy_mean"]
+            if self.config.lambda_addressable_read_entropy:
+                total_loss = total_loss + self.config.lambda_addressable_read_entropy * read_entropy_loss
+            if self.config.lambda_addressable_write_entropy:
+                total_loss = total_loss + self.config.lambda_addressable_write_entropy * write_entropy_loss
+            aux_losses["addressable_read_entropy"] = read_entropy_loss
+            aux_losses["addressable_write_entropy"] = write_entropy_loss
 
         out: dict[str, Any] = {
             "logits": logits,
@@ -192,6 +221,9 @@ class DirectionalForwardMixin:
         }
         if return_states:
             out["states"] = states
+        if addressable_state is not None:
+            out["addressable_final_memory"] = addressable_state
+            out["addressable_before_last_block"] = addressable_before_last_block
         return out
 
     def _directional_cumsum_block(

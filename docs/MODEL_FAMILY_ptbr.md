@@ -15,7 +15,7 @@ Directional Relational Manifolds
 Aletheion State Models
  programa de pesquisa
           ↓
-ASM-X, ASM-R, ASM-C, ASM-S, ASM-F...
+ASM-X, ASM-R, ASM-C, ASM-C2, ASM-C2-FW, ASM-S, ASM-F...
  variantes arquiteturais
 ```
 
@@ -74,6 +74,8 @@ seeds adicionais.
 | ASM-F | Relational Frame State Model | frame direcional normalizado pela métrica |
 | ASM-R | Relational State Model | transição direta condicionada pela métrica |
 | ASM-C | Compact State Model | pesos ASM-R com estado de inferência streaming limitado |
+| ASM-C2 | Compact Addressable State Model | ASM-C com slots limitados de chave/valor |
+| ASM-C2-FW | Compact Fast-Weight State Model | ASM-C com matriz associativa limitada por regra delta |
 | ASM-D | Direct State Model | transição neural direta sem geometria |
 | ASM-S | Selective State Model | capacidade concentrada em memória seletiva |
 | ASM-M | Causal Memory State Model | mixer, residual e memória seletiva estreita |
@@ -221,6 +223,35 @@ de streaming, incluindo cache retido constante de 6.144 bytes e retenção de
 99,6% do throughput entre 4K e 32K. Ela falhou no controle curto de MQAR
 (32,25% contra o gate de 80%); portanto, a execução compacta foi validada, mas
 a retenção associativa não. ASM-C permanece experimental.
+
+### 7.2 ASM-C2 — Aletheion Compact Addressable State Model
+
+ASM-C2 acrescenta ao ASM-C slots de chave/valor endereçáveis por conteúdo e de
+capacidade fixa. O objetivo é preservar streaming limitado e permitir
+recuperação explícita. Ele usa endereçamento semelhante a attention sobre slots
+fixos, não self-attention sobre o prefixo de tokens. ASM-C2 permanece não
+promovido até passar nos gates de MQAR, ablação, streaming, paridade e regressão
+de linguagem.
+
+### 7.3 ASM-C2-FW — Aletheion Compact Fast-Weight State Model
+
+ASM-C2-FW é a candidata corrigida de memória associativa. Ela remove a
+necessidade de concordância entre roteadores discretos e usa uma projeção de
+chave compartilhada para escrever e ler uma matriz de tamanho fixo. Uma regra
+delta com gate grava o resíduo entre o valor candidato e o valor já previsto
+pela chave. Gates de leitura, escrita e retenção são aprendidos causalmente a
+partir do estado, token atual e token anterior.
+
+O probe fast-weight isolado e com fases controladas atingiu 100% no MQAR,
+enquanto a memória densa com slots aprendidos chegou a 12,18% após 10 mil
+passos. Isso autoriza o teste completo, não a promoção: no probe isolado, os
+momentos de leitura e escrita eram conhecidos; no ASM-C2-FW, o controlador deve
+aprendê-los usando apenas entradas causais.
+
+A forma durável experimental separa memória rápida de trabalho e uma matriz
+lenta consolidada, treinando com currículo MQAR atrasado e replay de linguagem.
+Ela não recebe um novo código de família promovido: é a próxima etapa de
+validação do ASM-C2-FW.
 
 ## 8. ASM-D — Direct State Model
 

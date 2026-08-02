@@ -27,6 +27,15 @@ Its first 32K validation passed bounded-cache, peak-VRAM, and throughput gates,
 but failed the short MQAR control; long-range associative memory is therefore
 not established.
 
+ASM-C2 is an unpromoted second-generation experiment that adds bounded
+content-addressable slots. Its new memory parameters have not been language
+pretrained, and MQAR success must not be presented as language-model quality.
+
+ASM-C2-FW is the follow-up candidate using bounded fast-weight associative
+memory. Its isolated storage probe reached 100% MQAR accuracy; this does not
+yet establish end-to-end recall because read/write timing was explicit in the
+probe. Promotion requires the complete causal-controller suite.
+
 ## Training Data
 
 The default script uses a tiny local text file or fallback corpus. This is only a smoke test and has no meaningful coverage.

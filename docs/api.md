@@ -10,6 +10,8 @@ The neutral public namespace is `aletheion_state_models`:
 from aletheion_state_models import StateModel
 from aletheion_state_models.variants import (
     build_compact_streaming,
+    build_compact_addressable,
+    build_compact_fast_weight,
     build_direct_state,
     build_explicit_drm,
     build_metric_subspace,
@@ -21,6 +23,14 @@ from aletheion_state_models.variants import (
 `build_compact_streaming(config)` constructs ASM-C, the compact inference form
 of ASM-R. It enables bounded fixed-block streaming state while preserving the
 ASM-R parameterization and checkpoint keys.
+
+`build_compact_addressable(config, slots=32)` constructs ASM-C2 with a bounded
+content-addressable memory. `read_enabled` and `write_enabled` expose causal
+ablations without changing the surrounding ASM-C transition.
+
+`build_compact_fast_weight(config)` constructs ASM-C2-FW with a bounded
+delta-rule associative matrix and learned causal read, write, and retention
+gates.
 
 `StateModel` is currently an alias of `DRMEmitterModel`, not a subclass. This
 preserves exact state-dict keys and checkpoint behavior during migration.
@@ -42,6 +52,10 @@ Main fields:
 - `use_torch_compile`: opt-in compilation of the DRM forward path with fallback to eager execution.
 - `compact_streaming_inference`: enables the ASM-C inference state; it requires
   a supported fixed-block sequence mode and fails explicitly otherwise.
+- `addressable_memory` and `addressable_memory_*`: enable and configure the
+  ASM-C2 read/write memory. `addressable_memory_backend` selects `slots` or
+  `fast_weight`. The current implementation supports one
+  read/write head and requires compact fixed-block inference.
 
 `DRMConfig.from_dict(data)` rejects unknown keys. This is intentional: experiment config typos should fail before training starts.
 

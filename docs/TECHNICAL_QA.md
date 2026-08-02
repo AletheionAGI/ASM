@@ -201,6 +201,24 @@ through 32K. It failed the short MQAR control (`32.25%` versus `80%`), so ASM-C
 has demonstrated compact streaming but not long-range associative retention.
 See the [benchmark](benchmarks/asm_c_streaming_32k/README.md).
 
+## What is ASM-C2?
+
+ASM-C2 is the experimental compact addressable-memory successor to ASM-C. It
+adds a fixed number of key/value slots so a token can retrieve information by
+content without retaining the complete prefix. This is attention-like
+addressing over bounded slots, not token-prefix self-attention. ASM-C2 is not
+promoted or language-pretrained; it must first pass short MQAR, causal
+ablations, streaming, parity, and CE-regression gates.
+
+### What is ASM-C2-FW?
+
+ASM-C2-FW is the fast-weight correction to ASM-C2. It uses a bounded
+associative matrix and a shared key encoder instead of requiring separate
+learned write and read routers to select the same discrete slot. The isolated
+control reached 100% MQAR accuracy, compared with 12.18% for dense slots after
+10,000 steps. Because that control supplied explicit read/write phases,
+ASM-C2-FW is authorized for end-to-end testing but is not yet promoted.
+
 ## What is the historical 36M/37M benchmark?
 
 The historical public artifact is:

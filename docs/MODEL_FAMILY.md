@@ -15,7 +15,7 @@ Directional Relational Manifolds
 Aletheion State Models
     research program
           ↓
-ASM-X, ASM-R, ASM-C, ASM-S, ASM-F...
+ASM-X, ASM-R, ASM-C, ASM-C2, ASM-C2-FW, ASM-S, ASM-F...
  architectural variants
 ```
 
@@ -64,6 +64,8 @@ seed confirmation.
 | ASM-F | Relational Frame State Model | directional frame normalized by the metric |
 | ASM-R | Relational State Model | direct transition conditioned by the metric |
 | ASM-C | Compact State Model | ASM-R weights with bounded streaming inference state |
+| ASM-C2 | Compact Addressable State Model | ASM-C with bounded key/value memory slots |
+| ASM-C2-FW | Compact Fast-Weight State Model | ASM-C with a bounded delta-rule associative matrix |
 | ASM-D | Direct State Model | direct neural transition without geometry |
 | ASM-S | Selective State Model | capacity concentrated in selective memory |
 | ASM-M | Causal Memory State Model | mixer, residual, and narrow selective memory |
@@ -210,6 +212,33 @@ criteria, including a constant 6,144-byte retained cache and 99.6% throughput
 retention from 4K to 32K. It failed the short MQAR control (32.25% versus the
 80% gate), so compact execution is validated but associative retention is not.
 ASM-C remains experimental.
+
+### 7.2 ASM-C2 — Aletheion Compact Addressable State Model
+
+ASM-C2 adds fixed-capacity, content-addressable key/value slots to ASM-C. It is
+designed to preserve bounded streaming while supporting explicit retrieval.
+It uses attention-like addressing over fixed slots, not token-prefix
+self-attention. ASM-C2 is unpromoted until MQAR, ablation, streaming, parity,
+and language-regression gates pass.
+
+### 7.3 ASM-C2-FW — Aletheion Compact Fast-Weight State Model
+
+ASM-C2-FW is the corrected associative-memory candidate. It removes learned
+discrete slot agreement and uses one shared key projection for writing and
+reading a fixed-size matrix. A gated delta rule writes the residual between a
+candidate value and the value already predicted by that key. Read, write, and
+retention gates are learned causally from the current state, current token, and
+previous token.
+
+The isolated, phase-controlled fast-weight probe reached 100% MQAR accuracy,
+whereas dense learned-slot memory reached 12.18% after 10,000 steps. This
+authorizes end-to-end testing, not promotion: the isolated probe was told when
+to write and read, while ASM-C2-FW must learn that control from causal inputs.
+
+The durable experimental form separates fast working memory from a slow
+consolidated matrix and trains with delayed-MQAR curriculum plus language
+replay. It is not a new promoted family code; it is the next validation stage
+of ASM-C2-FW.
 
 ## 8. ASM-D — Direct State Model
 

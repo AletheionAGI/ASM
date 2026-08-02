@@ -7,6 +7,7 @@ ASM — Aletheion State Models
    api
    MODEL_FAMILY
    ARCHITECTURE_ASM_C
+   ARCHITECTURE_ASM_C2
    math
    limitations
    competition

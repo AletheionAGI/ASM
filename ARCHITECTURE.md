@@ -16,6 +16,15 @@ ASM-R. It emits from the latest state and retains a bounded open block instead
 of the full prefix. It does not replace promoted ASM-R until the 32K validation
 criteria pass. See [ASM-C architecture](docs/ARCHITECTURE_ASM_C.md).
 
+ASM-C2 adds a fixed-capacity content-addressable memory to ASM-C. It remains an
+unpromoted second-generation experiment; see
+[ASM-C2 architecture](docs/ARCHITECTURE_ASM_C2.md).
+
+ASM-C2-FW replaces the unsuccessful learned slot router with a bounded
+fast-weight associative matrix. Its isolated storage control reached 100%
+MQAR accuracy, but the complete learned-controller variant remains an
+unpromoted candidate until the end-to-end gates pass.
+
 ## Promoted Architecture: ASM-R
 
 ASM-R — Aletheion Relational State Model — is the promoted architecture for
@@ -45,6 +54,8 @@ diverged in both additional seeds before 70M tokens. See
 | J_NO_* | component removed or bypassed | forget/write | causal geometry ablations |
 | SSM_CONTROL | none | widened forget/write | parameter-matched control |
 | ASM-C | ASM-R relational transition | forget/write | compact streaming inference experiment |
+| ASM-C2 | ASM-R relational transition | forget/write + fixed key/value slots | addressable streaming experiment |
+| ASM-C2-FW | ASM-R relational transition | forget/write + fast-weight matrix | bounded associative streaming candidate |
 
 Variant J is a hybrid. Its selective memory was added after the original DRM
 showed weak sample efficiency; it must not be presented as part of the original

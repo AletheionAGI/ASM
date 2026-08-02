@@ -25,6 +25,25 @@ from scripts.evaluate_frozen_test import load_gpt2
 
 
 VARIANT_NAMES = (
+    "ASM_C_PRETRAINED",
+    "ASM_C_MEMORY_2X",
+    "ASM_C2_16",
+    "ASM_C2_32",
+    "ASM_C2_64",
+    "ASM_C2_NOREAD",
+    "ASM_C2_NOWRITE",
+    "ASM_C2_SHUFFLED",
+    "ASM_C2_SPARSE_16",
+    "ASM_C2_SPARSE_32",
+    "ASM_C2_SPARSE_64",
+    "ASM_C2_FW",
+    "ASM_C2_FW_NOREAD",
+    "ASM_C2_FW_NOWRITE",
+    "ASM_C2_FW_SHUFFLED",
+    "ASM_C2_FW_DURABLE",
+    "ASM_C2_FW_DURABLE_NOREAD",
+    "ASM_C2_FW_DURABLE_NOWRITE",
+    "ASM_C2_FW_DURABLE_SHUFFLED",
     "ASM_R_PRETRAINED",
     "ASM_R_RANDOM",
     "ASM_R_NO_MEMORY",
@@ -84,6 +103,75 @@ def load_asm_r_without_memory(path: Path) -> tuple[DRMEmitterModel, list[str]]:
     return model, unexpected
 
 
+def load_asm_c_with_wider_memory(
+    path: Path,
+    multiplier: int = 2,
+) -> tuple[DRMEmitterModel, list[str]]:
+    """Reuse pretrained ASM-R weights while widening and resetting only memory."""
+    payload = torch.load(path, map_location="cpu", weights_only=True)
+    config = DRMConfig.from_dict(payload["config"])
+    config.compact_streaming_inference = True
+    config.selective_memory_hidden_size *= multiplier
+    model = DRMEmitterModel(config.validated_copy())
+    shared = {
+        key: value
+        for key, value in payload["model"].items()
+        if not key.startswith("selective_memory.")
+    }
+    incompatible = model.load_state_dict(shared, strict=False)
+    missing = sorted(incompatible.missing_keys)
+    unexpected = sorted(incompatible.unexpected_keys)
+    if unexpected or any(not key.startswith("selective_memory.") for key in missing):
+        raise ValueError(
+            f"unexpected wider-memory migration mismatch: missing={missing}, "
+            f"unexpected={unexpected}"
+        )
+    return model, missing
+
+
+def load_asm_c2(
+    path: Path,
+    *,
+    slots: int,
+    read_enabled: bool = True,
+    write_enabled: bool = True,
+    shuffle_on_eval: bool = False,
+    sparse: bool = False,
+    backend: str = "slots",
+    durable: bool = False,
+) -> tuple[DRMEmitterModel, list[str]]:
+    payload = torch.load(path, map_location="cpu", weights_only=True)
+    config = DRMConfig.from_dict(payload["config"])
+    config.compact_streaming_inference = True
+    config.addressable_memory = True
+    config.addressable_memory_backend = backend
+    config.fast_weight_durable_memory = durable
+    config.fast_weight_state_fp32 = durable
+    config.fast_weight_compute_fp32 = durable
+    config.fast_weight_hard_write_threshold = 0.5 if durable else 0.0
+    config.addressable_memory_slots = slots
+    config.addressable_memory_read_enabled = read_enabled
+    config.addressable_memory_write_enabled = write_enabled
+    config.addressable_memory_shuffle_on_eval = shuffle_on_eval
+    if sparse:
+        config.addressable_memory_temperature = 0.25
+        config.addressable_memory_read_top_k = min(2, slots)
+        config.addressable_memory_write_top_k = 1
+        config.addressable_memory_use_previous_token_key = True
+        config.lambda_addressable_read_entropy = 0.001
+        config.lambda_addressable_write_entropy = 0.001
+    model = DRMEmitterModel(config.validated_copy())
+    incompatible = model.load_state_dict(payload["model"], strict=False)
+    missing = sorted(incompatible.missing_keys)
+    unexpected = sorted(incompatible.unexpected_keys)
+    if unexpected or any(not key.startswith("addressable_memory.") for key in missing):
+        raise ValueError(
+            f"unexpected ASM-C2 migration mismatch: missing={missing}, "
+            f"unexpected={unexpected}"
+        )
+    return model, missing
+
+
 def build_variant(
     name: str,
     asm_r_checkpoint: Path,
@@ -91,8 +179,85 @@ def build_variant(
     transformer_checkpoint: Path | None,
     asm_r_config: dict[str, Any],
     max_seq_len: int,
+    asm_c2_ablation_slots: int,
 ) -> tuple[torch.nn.Module, dict[str, Any]]:
-    if name == "ASM_R_PRETRAINED":
+    if name == "ASM_C_PRETRAINED":
+        model = load_model(asm_r_checkpoint)
+        model.config.compact_streaming_inference = True
+        metadata = {
+            "initialization": "Wikipedia 100M ASM-R checkpoint",
+            "geometry": True,
+            "selective_memory": True,
+            "compact_streaming": True,
+            "memory_width_multiplier": 1,
+        }
+    elif name == "ASM_C_MEMORY_2X":
+        model, reset = load_asm_c_with_wider_memory(asm_r_checkpoint, multiplier=2)
+        metadata = {
+            "initialization": "Wikipedia 100M shared weights; selective memory reset",
+            "geometry": True,
+            "selective_memory": True,
+            "compact_streaming": True,
+            "memory_width_multiplier": 2,
+            "reset_keys": reset,
+        }
+    elif name.startswith("ASM_C2_"):
+        specification = {
+            "ASM_C2_16": (16, True, True),
+            "ASM_C2_32": (32, True, True),
+            "ASM_C2_64": (64, True, True),
+            "ASM_C2_NOREAD": (asm_c2_ablation_slots, False, True, False),
+            "ASM_C2_NOWRITE": (asm_c2_ablation_slots, True, False, False),
+            "ASM_C2_SHUFFLED": (asm_c2_ablation_slots, True, True, True),
+            "ASM_C2_SPARSE_16": (16, True, True, False, True),
+            "ASM_C2_SPARSE_32": (32, True, True, False, True),
+            "ASM_C2_SPARSE_64": (64, True, True, False, True),
+            "ASM_C2_FW": (32, True, True, False, False, "fast_weight"),
+            "ASM_C2_FW_NOREAD": (32, False, True, False, False, "fast_weight"),
+            "ASM_C2_FW_NOWRITE": (32, True, False, False, False, "fast_weight"),
+            "ASM_C2_FW_SHUFFLED": (32, True, True, True, False, "fast_weight"),
+            "ASM_C2_FW_DURABLE": (32, True, True, False, False, "fast_weight", True),
+            "ASM_C2_FW_DURABLE_NOREAD": (32, False, True, False, False, "fast_weight", True),
+            "ASM_C2_FW_DURABLE_NOWRITE": (32, True, False, False, False, "fast_weight", True),
+            "ASM_C2_FW_DURABLE_SHUFFLED": (32, True, True, True, False, "fast_weight", True),
+        }[name]
+        if len(specification) == 3:
+            slots, read_enabled, write_enabled = specification
+            shuffle_on_eval = False
+            sparse = False
+        elif len(specification) == 4:
+            slots, read_enabled, write_enabled, shuffle_on_eval = specification
+            sparse = False
+        else:
+            slots, read_enabled, write_enabled, shuffle_on_eval, sparse, *backend_values = specification
+        backend = backend_values[0] if 'backend_values' in locals() and backend_values else "slots"
+        durable = bool(backend_values[1]) if 'backend_values' in locals() and len(backend_values) > 1 else False
+        model, initialized = load_asm_c2(
+            asm_r_checkpoint,
+            slots=slots,
+            read_enabled=read_enabled,
+            write_enabled=write_enabled,
+            shuffle_on_eval=shuffle_on_eval,
+            sparse=sparse,
+            backend=backend,
+            durable=durable,
+        )
+        metadata = {
+            "initialization": "Wikipedia 100M ASM-R weights; addressable memory new",
+            "geometry": True,
+            "selective_memory": True,
+            "compact_streaming": True,
+            "addressable_memory": True,
+            "addressable_slots": slots,
+            "addressable_read_enabled": read_enabled,
+            "addressable_write_enabled": write_enabled,
+            "addressable_shuffle_on_eval": shuffle_on_eval,
+            "addressable_sparse": sparse,
+            "addressable_backend": backend,
+            "fast_weight_durable": durable,
+            "initialized_keys": initialized,
+        }
+    elif name == "ASM_R_PRETRAINED":
         model = load_model(asm_r_checkpoint)
         metadata = {"initialization": "Wikipedia 100M checkpoint", "geometry": True, "selective_memory": True}
     elif name == "ASM_R_RANDOM":
@@ -221,11 +386,23 @@ def summarize(results: list[dict[str, Any]], args: argparse.Namespace) -> dict[s
             )
             for threshold in thresholds
         }
+    short_gate = {
+        result["variant"]: {
+            "passed": result["rows"][-1]["validation_accuracy"] >= 0.8,
+            "final_accuracy": result["rows"][-1]["validation_accuracy"],
+            "first_passing_step": next(
+                (row["step"] for row in result["rows"] if row["validation_accuracy"] >= 0.8),
+                None,
+            ),
+        }
+        for result in results
+    }
     return {
         "final_ranking": ranking,
         "steps_to_accuracy": threshold_steps,
         "random_full_vocab_accuracy": 1.0 / 256,
         "random_value_set_accuracy": 1.0 / args.value_vocab_size,
+        "short_control_gate": {"threshold": 0.8, "variants": short_gate},
     }
 
 
@@ -248,6 +425,10 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
 - `ASM_R_NO_MEMORY` preserves compatible 100M pretrained weights and removes only selective-memory parameters.
 - `TRANSFORMER_PRETRAINED`, when selected, uses the parameter-near 100M-token Wikipedia checkpoint.
 - `TRANSFORMER_RANDOM` isolates the same architecture without language pretraining.
+- `ASM_C_MEMORY_2X` reuses all compatible pretrained weights but intentionally
+  resets a selective-memory module with twice the hidden width.
+- The 80% short-control gate must pass before any long-distance MQAR retention
+  result is interpreted.
 - This is supervised MQAR adaptation, not zero-shot corpus recall.
 - Results measure sample efficiency on this synthetic task, not general language quality.
 """
@@ -275,6 +456,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--precision", choices=("fp32", "bf16"), default="bf16")
     parser.add_argument("--output-root", type=Path, required=True)
+    parser.add_argument("--save-final-checkpoints", action="store_true")
+    parser.add_argument("--asm-c2-ablation-slots", type=int, default=32)
     return parser.parse_args()
 
 
@@ -309,9 +492,14 @@ def main() -> None:
             args.transformer_checkpoint,
             config,
             sequence_len,
+            args.asm_c2_ablation_slots,
         )
         result = train_variant(name, model, metadata, args, milestones, device)
         results.append(result)
+        if args.save_final_checkpoints and isinstance(model, DRMEmitterModel):
+            checkpoint_path = args.output_root / f"{name.lower()}_final.pt"
+            torch.save(model.state_dict_with_config(), checkpoint_path)
+            result["final_checkpoint"] = str(checkpoint_path)
         partial = {"results": results}
         (args.output_root / "partial.json").write_text(json.dumps(partial, indent=2) + "\n", encoding="utf-8")
         del model

@@ -143,6 +143,8 @@ O tokenizer padrão opera sobre bytes UTF-8.
 | ASM-F | Relational Frame State Model | J_METRIC_ORTHONORMAL_DIRECTION |
 | ASM-R | Relational State Model | J_NO_DIRECTION |
 | ASM-C | Compact State Model | pesos ASM-R + inferência streaming compacta |
+| ASM-C2 | Compact Addressable State Model | ASM-C + slots limitados de chave/valor |
+| ASM-C2-FW | Compact Fast-Weight State Model | ASM-C + matriz associativa limitada com regra delta |
 | ASM-D | Direct State Model | J_DIRECT_CONTROL |
 | ASM-S | Selective State Model | J_DIRECT_CONTROL_MATCHED |
 | ASM-M | Causal Memory State Model | SSM_CONTROL |
@@ -161,7 +163,7 @@ memória associativa de longo alcance ainda não foi demonstrada. Veja o
 
 - `src/aletheion_state_models/core/`: interfaces neutras de estado, transição, memória, mixer e emitter.
 - `src/aletheion_state_models/geometry/`: métrica, base direcional e naturalização opcionais.
-- `src/aletheion_state_models/variants/`: construtores nomeados ASM-X, ASM-U, ASM-F, ASM-R, ASM-C, ASM-D, ASM-S e ASM-M.
+- `src/aletheion_state_models/variants/`: construtores nomeados ASM-X, ASM-U, ASM-F, ASM-R, ASM-C, ASM-C2, ASM-C2-FW, ASM-D, ASM-S e ASM-M.
 - `src/drm_language_emitter/`: implementação legada compatível com checkpoints durante a migração.
 
 - `src/drm_language_emitter/config.py`: schema validado do `DRMConfig`.

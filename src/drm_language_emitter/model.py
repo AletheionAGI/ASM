@@ -8,6 +8,8 @@ import torch
 from torch import nn
 
 from .config import DRMConfig
+from .addressable_memory import AddressableMemory
+from .fast_weight_memory import FastWeightMemory
 from .direction_field import DirectionField
 from .directional_blocks import DirectionalBlocksMixin
 from .directional_forward import DirectionalForwardMixin
@@ -98,6 +100,19 @@ class DRMEmitterModel(
         self.selective_memory = (
             _seeded_module(config, 110, lambda: SelectiveStateMemory(config))
             if config.selective_memory
+            else None
+        )
+        self.addressable_memory = (
+            _seeded_module(
+                config,
+                113,
+                lambda: (
+                    FastWeightMemory(config)
+                    if config.addressable_memory_backend == "fast_weight"
+                    else AddressableMemory(config)
+                ),
+            )
+            if config.addressable_memory
             else None
         )
         self.refinement_layers = _seeded_module(

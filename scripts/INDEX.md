@@ -251,6 +251,36 @@ Commit: pending
 20. `run_asm_c_validation_suite.sh` — executes all five ASM-C validation phases.
 21. `plot_asm_c_validation.py` — generates versioned ASM-C/ASM-R/Transformer
     streaming, memory, context, decode, and MQAR charts and CSV tables.
+22. `run_asm_c_mqar_diagnostic.sh` — compares 5K/10K/20K MQAR learning for
+    ASM-C, ASM-C with 2x memory width, ASM-S, and the matched Transformer.
+23. `plot_mqar_architecture_comparison.py` — plots paired MQAR accuracy and CE
+    learning curves and exports their source CSV.
+24. `compare_asm_c2_controls.py` — applies short MQAR, causal-ablation, cache,
+    VRAM, throughput, and long-retention promotion gates.
+25. `plot_asm_c2_results.py` — renders ASM-C2 short-learning and long-streaming
+    figures.
+26. `run_asm_c2_mqar_suite.sh` — runs the gated ASM-C2 protocol end to end and
+    blocks expensive long evaluation when short or causal-ablation gates fail.
+27. `probe_addressable_memory.py` — compares oracle routing, the dense-slot
+    learning curve, and fixed-capacity fast-weight memory on isolated MQAR.
+28. `run_asm_c2_memory_learnability.sh` — runs the oracle, extended dense, and
+    fast-weight isolated gate; reintegration remains blocked unless the
+    non-oracle fast-weight control reaches 95% accuracy.
+29. `run_asm_c2_sparse_probe.sh` — compatibility alias for the memory
+    learnability runner formerly limited to sparse-slot controls.
+30. `run_asm_c2_fw_suite.sh` — runs the gated ASM-C2-FW short MQAR, causal
+    ablations, and 32K compact-streaming validation.
+31. `train_asm_c2_fw_durable.py` — trains fast/slow ASM-C2-FW with delayed-MQAR
+    curriculum, selective consolidation, FP32 memory, and language replay.
+32. `summarize_asm_c2_fw_durable.py` — applies multiseed, real long-retention,
+    streaming, language, and BF16 gates.
+33. `run_asm_c2_fw_durable_suite.sh` — executes the complete durable-memory
+    protocol and blocks expensive stages when the curriculum gate fails.
+34. `train_asm_c2_fw_lm.py` — specializes ASM-R into ASM-C2-FW-LM using an
+    80/20 language/MQAR mixture, ASM-R logit distillation, and separate
+    backbone and fast-weight learning rates.
+35. `run_asm_c2_fw_lm_suite.sh` — runs the three-seed compatibility protocol
+    and repeats language CE, 32K MQAR, bounded-streaming, and BF16 gates.
 
 ## Naming guidance
 

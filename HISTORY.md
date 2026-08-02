@@ -2,6 +2,11 @@
 
 ## 0.2.0 — Aletheion State Models
 
+On 2026-08-01, the experimental ASM-C2-FW bounded fast-weight associative
+memory was added after its isolated storage probe reached 100% MQAR accuracy.
+Promotion remains gated by causal, multiseed, streaming, parity, and language
+checks.
+
 The project was renamed from **DRM Language Emitter** to **ASM — Aletheion
 State Models** after component ablations showed that its scientific identity
 needed to be broader than one geometric hypothesis.
@@ -24,6 +29,7 @@ The initial ASM taxonomy is:
 | ASM-F | Relational Frame State Model |
 | ASM-R | Relational State Model |
 | ASM-C | Compact State Model |
+| ASM-C2 | Compact Addressable State Model |
 | ASM-D | Direct State Model |
 | ASM-S | Selective State Model |
 | ASM-M | Causal Memory State Model |

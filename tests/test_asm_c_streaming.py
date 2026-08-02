@@ -3,6 +3,7 @@ import torch
 
 from aletheion_state_models.variants import build_compact_streaming
 from drm_language_emitter import DRMConfig, DRMEmitterModel
+from scripts.run_mqar_architecture_comparison import load_asm_c_with_wider_memory
 
 
 def config() -> DRMConfig:
@@ -39,6 +40,18 @@ def test_compact_streaming_rejects_non_block_fallback():
     cfg=config(); cfg.sequence_mode="directional_cumsum"; cfg.compact_streaming_inference=True
     model=DRMEmitterModel(cfg.validated_copy()).eval()
     with pytest.raises(RuntimeError,match="fixed block boundaries"): model.prefill(torch.randint(0,17,(1,3)))
+
+
+def test_wider_mqar_memory_reuses_every_non_memory_weight(tmp_path):
+    base = build_compact_streaming(config())
+    checkpoint = tmp_path / "asm_c.pt"
+    torch.save({"config": base.config.to_dict(), "model": base.state_dict()}, checkpoint)
+    widened, reset = load_asm_c_with_wider_memory(checkpoint)
+    assert widened.config.selective_memory_hidden_size == 24
+    assert reset and all(key.startswith("selective_memory.") for key in reset)
+    for key, value in base.state_dict().items():
+        if not key.startswith("selective_memory."):
+            assert torch.equal(widened.state_dict()[key], value)
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(),reason="CUDA BF16 required")
