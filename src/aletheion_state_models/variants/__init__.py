@@ -7,6 +7,7 @@ from .compact_addressable import (
     build_compact_addressable_sparse,
     build_compact_fast_weight,
     build_compact_durable_fast_weight,
+    build_compact_epistemic_memory,
 )
 from .direct_state import build_direct_state
 from .explicit_drm import build_explicit_drm
@@ -22,6 +23,7 @@ __all__ = [
     "build_compact_addressable_sparse",
     "build_compact_fast_weight",
     "build_compact_durable_fast_weight",
+    "build_compact_epistemic_memory",
     "build_direct_state",
     "build_explicit_drm",
     "build_metric_subspace",

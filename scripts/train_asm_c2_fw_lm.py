@@ -93,6 +93,11 @@ def main() -> None:
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
     parser.add_argument("--seed", type=int, default=1234)
     parser.add_argument("--device", default="cuda")
+    parser.add_argument(
+        "--epistemic-memory-gating",
+        action="store_true",
+        help="train ASM-CM-E confidence gates on fast-weight reads and writes",
+    )
     args = parser.parse_args()
     if not 0.0 < args.language_probability < 1.0:
         raise ValueError("language probability must be in (0, 1)")
@@ -104,7 +109,11 @@ def main() -> None:
     device = torch.device(args.device)
     stages = parse_curriculum(args.curriculum)
     student, initialized = load_asm_c2(
-        args.checkpoint, slots=32, backend="fast_weight", durable=True
+        args.checkpoint,
+        slots=32,
+        backend="fast_weight",
+        durable=True,
+        epistemic_memory_gating=args.epistemic_memory_gating,
     )
     student.config.fast_weight_compute_fp32 = True
     assert student.addressable_memory is not None
@@ -229,7 +238,7 @@ def main() -> None:
     }
     protocol["curriculum"] = stages
     payload = {
-        "variant": "ASM-C2-FW-LM",
+        "variant": "ASM-CM-E" if args.epistemic_memory_gating else "ASM-C2-FW-LM",
         "protocol": protocol,
         "initialized_keys": initialized,
         "parameter_count": sum(p.numel() for p in student.parameters()),

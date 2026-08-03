@@ -8,6 +8,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from .utils.epistemic_softmax import EpistemicConfidenceGate
+
 
 @dataclass(frozen=True)
 class FastWeightMemoryState:
@@ -48,6 +50,28 @@ class FastWeightMemory(nn.Module):
         self.read_gate = nn.Linear(feature_dim, 1)
         self.forget_gate = nn.Linear(feature_dim, 1)
         self.consolidate_gate = nn.Linear(feature_dim, 1)
+        self.epistemic_read_gate = (
+            EpistemicConfidenceGate(
+                feature_dim,
+                config.epistemic_gate_hidden_dim,
+                config.epistemic_gate_num_layers,
+                config.epistemic_gate_dropout,
+                config.epistemic_gate_initial_confidence,
+            )
+            if config.epistemic_memory_gating
+            else None
+        )
+        self.epistemic_write_gate = (
+            EpistemicConfidenceGate(
+                feature_dim,
+                config.epistemic_gate_hidden_dim,
+                config.epistemic_gate_num_layers,
+                config.epistemic_gate_dropout,
+                config.epistemic_gate_initial_confidence,
+            )
+            if config.epistemic_memory_gating
+            else None
+        )
         self.read_output = nn.Linear(self.d_value, self.d_state, bias=False)
         write_bias = 0.0 if self.durable else float(config.addressable_memory_write_bias)
         nn.init.constant_(self.write_gate.bias, write_bias)
@@ -120,6 +144,16 @@ class FastWeightMemory(nn.Module):
             if self.read_enabled
             else state.new_zeros(state.shape[0], 1)
         )
+        if self.epistemic_read_gate is not None:
+            read_confidence, read_uncertainty, read_q_local, read_q_consensus = (
+                self.epistemic_read_gate(features)
+            )
+            read_gate = read_gate * read_confidence.unsqueeze(-1)
+        else:
+            read_confidence = read_gate.new_ones(read_gate.shape[0])
+            read_uncertainty = read_gate.new_zeros(read_gate.shape[0])
+            read_q_local = read_confidence
+            read_q_consensus = read_confidence
         next_state = state + self.read_scale * read_gate * self.read_output(read.to(state.dtype))
 
         write_gate = (
@@ -128,6 +162,16 @@ class FastWeightMemory(nn.Module):
             else state.new_zeros(state.shape[0], 1)
         )
         write_gate = self._selective_gate(write_gate)
+        if self.epistemic_write_gate is not None:
+            write_confidence, write_uncertainty, write_q_local, write_q_consensus = (
+                self.epistemic_write_gate(features)
+            )
+            write_gate = write_gate * write_confidence.unsqueeze(-1)
+        else:
+            write_confidence = write_gate.new_ones(write_gate.shape[0])
+            write_uncertainty = write_gate.new_zeros(write_gate.shape[0])
+            write_q_local = write_confidence
+            write_q_consensus = write_confidence
         retention = torch.sigmoid(self.forget_gate(features)).float()
         candidate = torch.tanh(
             self.value(torch.cat([state, token_embedding], dim=-1))
@@ -175,6 +219,14 @@ class FastWeightMemory(nn.Module):
             "slot_usage": next_matrix.float().square().mean(dim=(-2, -1)).sqrt(),
             "consolidated_norm": consolidated.square().mean(dim=(-2, -1)).sqrt(),
             "read_norm": read.float().norm(dim=-1),
+            "epistemic_read_confidence": read_confidence.float(),
+            "epistemic_read_uncertainty": read_uncertainty.float(),
+            "epistemic_read_local_evidence": read_q_local.float(),
+            "epistemic_read_consensus": read_q_consensus.float(),
+            "epistemic_write_confidence": write_confidence.float(),
+            "epistemic_write_uncertainty": write_uncertainty.float(),
+            "epistemic_write_local_evidence": write_q_local.float(),
+            "epistemic_write_consensus": write_q_consensus.float(),
         }
         return next_state.to(output_dtype), next_memory, diagnostics
 

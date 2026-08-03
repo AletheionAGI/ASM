@@ -56,6 +56,11 @@ Main fields:
   ASM-C2 read/write memory. `addressable_memory_backend` selects `slots` or
   `fast_weight`. The current implementation supports one
   read/write head and requires compact fixed-block inference.
+- `epistemic_memory_gating`: enables the experimental ASM-CM-E reliability
+  gates on fast-weight reads and writes. `epistemic_gate_hidden_dim`,
+  `epistemic_gate_num_layers`, `epistemic_gate_dropout`, and
+  `epistemic_gate_initial_confidence` configure them. This option does not
+  replace language cross-entropy or mix uncertain memories uniformly.
 
 `DRMConfig.from_dict(data)` rejects unknown keys. This is intentional: experiment config typos should fail before training starts.
 

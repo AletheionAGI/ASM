@@ -299,6 +299,10 @@ Commit: pending
 42. `plot_asm_cm_post_fp32.py` — generates dependency-free SVG charts and CSV
     source data for frozen CE, retained state, allocated VRAM, and streaming
     throughput.
+43. `run_asm_cm_e_suite.sh` — trains the experimental ASM-CM-E on three paired
+    lineages and evaluates frozen language CE, MQAR 32K, and bounded cache.
+44. `summarize_asm_cm_e.py` — compares ASM-CM-E with promoted ASM-CM and
+    applies the preregistered CE, recall, curriculum, and cache gates.
 
 ## Naming guidance
 

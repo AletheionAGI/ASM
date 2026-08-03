@@ -109,9 +109,29 @@ def build_compact_durable_fast_weight(
     return DRMEmitterModel(config.validated_copy())
 
 
+def build_compact_epistemic_memory(
+    base: DRMConfig,
+    *,
+    read_enabled: bool = True,
+    write_enabled: bool = True,
+    shuffle_on_eval: bool = False,
+) -> DRMEmitterModel:
+    """Build ASM-CM-E: durable ASM-CM with epistemic read/write abstention."""
+    model = build_compact_durable_fast_weight(
+        base,
+        read_enabled=read_enabled,
+        write_enabled=write_enabled,
+        shuffle_on_eval=shuffle_on_eval,
+    )
+    config = model.config
+    config.epistemic_memory_gating = True
+    return DRMEmitterModel(config.validated_copy())
+
+
 __all__ = [
     "build_compact_addressable",
     "build_compact_addressable_sparse",
     "build_compact_fast_weight",
     "build_compact_durable_fast_weight",
+    "build_compact_epistemic_memory",
 ]

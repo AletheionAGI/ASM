@@ -139,6 +139,11 @@ class DRMConfig:
     fast_weight_hard_write_threshold: float = 0.0
     fast_weight_consolidation_scale: float = 0.25
     fast_weight_slow_read_scale: float = 1.0
+    epistemic_memory_gating: bool = False
+    epistemic_gate_hidden_dim: int = 64
+    epistemic_gate_num_layers: int = 2
+    epistemic_gate_dropout: float = 0.0
+    epistemic_gate_initial_confidence: float = 0.9
     lambda_addressable_read_entropy: float = 0.0
     lambda_addressable_write_entropy: float = 0.0
 
@@ -193,6 +198,8 @@ class DRMConfig:
             ("addressable_memory_slots", 1, None),
             ("addressable_memory_dim", 1, None),
             ("addressable_memory_heads", 1, None),
+            ("epistemic_gate_hidden_dim", 1, None),
+            ("epistemic_gate_num_layers", 0, None),
             ("addressable_memory_read_top_k", 0, None),
             ("addressable_memory_write_top_k", 0, None),
         ]
@@ -265,6 +272,8 @@ class DRMConfig:
             ("fast_weight_hard_write_threshold", 0.0, 1.0),
             ("fast_weight_consolidation_scale", 0.0, 1.0),
             ("fast_weight_slow_read_scale", 0.0, None),
+            ("epistemic_gate_dropout", 0.0, 1.0),
+            ("epistemic_gate_initial_confidence", 0.000001, 0.999999),
             ("lambda_addressable_read_entropy", 0.0, None),
             ("lambda_addressable_write_entropy", 0.0, None),
             ("lambda_block_consistency", 0.0, None),
@@ -309,6 +318,7 @@ class DRMConfig:
             "fast_weight_durable_memory",
             "fast_weight_state_fp32",
             "fast_weight_compute_fp32",
+            "epistemic_memory_gating",
         ]
         for name in bool_fields:
             val = getattr(self, name)
@@ -389,6 +399,12 @@ class DRMConfig:
             )
         if self.addressable_memory_backend not in {"slots", "fast_weight"}:
             raise ValueError("addressable_memory_backend must be 'slots' or 'fast_weight'")
+        if self.epistemic_memory_gating and (
+            not self.addressable_memory or self.addressable_memory_backend != "fast_weight"
+        ):
+            raise ValueError(
+                "epistemic memory gating requires the fast_weight addressable memory backend"
+            )
         if self.addressable_memory_heads != 1:
             raise ValueError("addressable_memory_heads currently supports only 1")
         for name in ("addressable_memory_read_top_k", "addressable_memory_write_top_k"):

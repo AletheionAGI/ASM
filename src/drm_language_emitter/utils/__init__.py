@@ -1,3 +1,5 @@
+"""Reusable utilities for DRM/ASM implementations."""
+
 from __future__ import annotations
 
 import json
@@ -5,6 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import torch
+
+from .epistemic_softmax import EpistemicConfidenceGate, EpistemicSoftmax, GateNetwork
 
 
 def rms_norm(x: torch.Tensor, eps: float = 1e-6) -> torch.Tensor:
@@ -61,3 +65,14 @@ def _parse_simple_yaml(text: str) -> dict[str, Any]:
                     parsed = value.strip("\"'")
         out[key.strip()] = parsed
     return out
+
+
+__all__ = [
+    "EpistemicConfidenceGate",
+    "EpistemicSoftmax",
+    "GateNetwork",
+    "load_yaml_or_json",
+    "rms_norm",
+    "save_json",
+    "to_jsonable",
+]

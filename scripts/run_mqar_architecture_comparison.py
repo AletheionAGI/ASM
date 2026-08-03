@@ -139,6 +139,7 @@ def load_asm_c2(
     sparse: bool = False,
     backend: str = "slots",
     durable: bool = False,
+    epistemic_memory_gating: bool = False,
 ) -> tuple[DRMEmitterModel, list[str]]:
     payload = torch.load(path, map_location="cpu", weights_only=True)
     config = DRMConfig.from_dict(payload["config"])
@@ -149,6 +150,7 @@ def load_asm_c2(
     config.fast_weight_state_fp32 = durable
     config.fast_weight_compute_fp32 = durable
     config.fast_weight_hard_write_threshold = 0.5 if durable else 0.0
+    config.epistemic_memory_gating = epistemic_memory_gating
     config.addressable_memory_slots = slots
     config.addressable_memory_read_enabled = read_enabled
     config.addressable_memory_write_enabled = write_enabled
