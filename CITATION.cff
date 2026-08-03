@@ -3,7 +3,8 @@ message: "If you use Aletheion State Models in research, please cite this reposi
 title: "ASM: Aletheion State Models"
 abstract: "An experimental family of attention-free causal state models derived from Directional Relational Manifold research."
 authors:
-  - name: "Aletheion State Models contributors"
+  - family-names: "Muniz"
+    given-names: "Felipe Maya"
 license: "AGPL-3.0-only"
 version: "0.2.0"
 date-released: "2026-06-17"

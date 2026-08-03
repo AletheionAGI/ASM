@@ -28,4 +28,4 @@ This is experimental research software. Claims about performance, safety, geomet
 
 Project maintainers may remove comments, close issues, reject contributions, or restrict participation when this code of conduct is violated.
 
-For conduct or licensing concerns, contact: felupe@truthagi.ai
+For conduct or licensing concerns, contact: contact@aletheionagi.com

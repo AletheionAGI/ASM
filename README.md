@@ -23,6 +23,18 @@ scaling-law evaluation.
 
 This is a research scaffold, not a production model and not a claim of superiority over Transformers or general world models.
 
+## Authorship and licensing
+
+Copyright © 2026 Felipe Maya Muniz. ASM — Aletheion State Models and its
+original source code were created by Felipe Maya Muniz and derived from his
+Directional Relational Manifolds research. The project is distributed under
+AGPL-3.0-only, with alternative commercial licensing available from the
+copyright holder under a separate signed agreement. See [NOTICE](NOTICE),
+[COPYRIGHT](COPYRIGHT), and [LICENCE-COMMERCIAL.md](LICENCE-COMMERCIAL.md).
+
+Third-party materials and external contributions, if any, retain their
+respective notices and licensing terms.
+
 ## Quick Links
 
 - [Architecture](ARCHITECTURE.md)
@@ -513,4 +525,4 @@ This project is dual-licensed:
 - a separate commercial license.
 
 Commercial licensing and acquisition inquiries:
-[LICENCE-COMMERCIAL.md](LICENCE-COMMERCIAL.md) or contact `felupe@truthagi.ai`.
+[LICENCE-COMMERCIAL.md](LICENCE-COMMERCIAL.md) or contact `contact@aletheionagi.com`.

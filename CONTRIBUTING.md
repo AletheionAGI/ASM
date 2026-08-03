@@ -47,4 +47,4 @@ Documentation must be honest about experimental status. Do not claim:
 
 By contributing, you agree that your contribution is provided under the repository license, AGPL-3.0-only, unless a separate written commercial agreement is signed with the copyright holder.
 
-Commercial licensing inquiries: felupe@truthagi.ai
+Commercial licensing inquiries: contact@aletheionagi.com

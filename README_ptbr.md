@@ -26,6 +26,19 @@ models.
 
 Versão principal em inglês: [README.md](README.md).
 
+## Autoria e licenciamento
+
+Copyright © 2026 Felipe Maya Muniz. ASM — Aletheion State Models e seu código
+fonte original foram criados por Felipe Maya Muniz e derivados de sua pesquisa
+em Directional Relational Manifolds. O projeto é distribuído sob
+AGPL-3.0-only, com licenciamento comercial alternativo disponível diretamente
+com o titular dos direitos mediante contrato escrito e assinado. Consulte
+[NOTICE](NOTICE), [COPYRIGHT](COPYRIGHT) e
+[LICENCE-COMMERCIAL.md](LICENCE-COMMERCIAL.md).
+
+Materiais de terceiros e contribuições externas, quando existirem, preservam
+seus respectivos avisos e termos de licenciamento.
+
 ## Links rápidos
 
 - [Arquitetura em português](ARCHITECTURE_ptbr.md)

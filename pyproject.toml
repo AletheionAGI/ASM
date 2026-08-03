@@ -9,7 +9,7 @@ description = "Experimental attention-free causal state-model family derived fro
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "AGPL-3.0-only" }
-authors = [{ name = "Aletheion State Models contributors" }]
+authors = [{ name = "Felipe Maya Muniz", email = "contact@aletheionagi.com" }]
 dependencies = [
   "torch>=2.0",
 ]
