@@ -520,9 +520,11 @@ Not allowed:
 Copyright © 2026 Felipe Maya Muniz
 SPDX-License-Identifier: AGPL-3.0-only
 
-This project is dual-licensed:
-- GNU AGPL v3.0 only; or
-- a separate commercial license.
+This project is available under AGPL-3.0-only. Commercial use is permitted when
+the applicable AGPL obligations are satisfied. Alternative commercial
+licensing is available under a separate written agreement for organizations
+that require proprietary integration, closed-source modifications, alternative
+distribution terms, or contractual enterprise support.
 
 Commercial licensing and acquisition inquiries:
 [LICENCE-COMMERCIAL.md](LICENCE-COMMERCIAL.md) or contact `contact@aletheionagi.com`.

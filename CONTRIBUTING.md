@@ -45,6 +45,32 @@ Documentation must be honest about experimental status. Do not claim:
 
 ## Licensing
 
-By contributing, you agree that your contribution is provided under the repository license, AGPL-3.0-only, unless a separate written commercial agreement is signed with the copyright holder.
+The public repository remains AGPL-3.0-only. Commercial use of the public code
+is permitted when the applicable AGPL obligations are satisfied.
+
+By submitting a contribution, you represent that you have the right to submit
+it and grant Felipe Maya Muniz a perpetual, worldwide, non-exclusive,
+irrevocable, royalty-free copyright licence to use, reproduce, modify,
+distribute, sublicense, and relicense the contribution, including as part of
+commercially licensed versions of ASM.
+
+You retain copyright in your contribution. Every accepted contribution remains
+available to the public under AGPL-3.0-only in this repository.
+
+Add this attestation to the pull-request description:
+
+```text
+I have the right to submit this contribution and agree to the contributor
+licence grant in CONTRIBUTING.md.
+```
+
+Substantial contributions to the commercially licensed core may additionally
+require an individually signed contributor licence agreement, confirmation of
+employer authorization, or a copyright assignment before acceptance. The
+maintainer may decline or postpone a contribution when its chain of title is
+unclear.
+
+This contributor policy is an initial project safeguard and has not been
+presented as a substitute for jurisdiction-specific legal review.
 
 Commercial licensing inquiries: contact@aletheionagi.com

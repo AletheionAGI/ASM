@@ -452,9 +452,10 @@ Leia [roadmap_ptbr.md](roadmap_ptbr.md).
 Copyright © 2026 Felipe Maya Muniz
 SPDX-License-Identifier: AGPL-3.0-only
 
-Licenciamento duplo:
-
-- GNU AGPL v3.0 only; ou
-- licença comercial separada.
+Este projeto está disponível sob AGPL-3.0-only. O uso comercial é permitido
+quando as obrigações aplicáveis da AGPL são cumpridas. Termos comerciais
+alternativos estão disponíveis mediante contrato escrito para organizações que
+necessitem de integração proprietária, modificações fechadas, condições
+alternativas de distribuição ou suporte empresarial contratual.
 
 Consulte [LICENCE-COMMERCIAL.md](LICENCE-COMMERCIAL.md).
