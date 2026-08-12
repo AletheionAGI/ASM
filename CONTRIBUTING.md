@@ -1,76 +1,51 @@
-# Contributing
+# Contribution policy
 
-Thank you for considering a contribution to ASM — Aletheion State Models.
+ASM does not accept unsolicited external code, documentation, model,
+checkpoint, dataset, or benchmark contributions.
 
-## Scope
+Do not submit merge requests, patches, pull requests, or other materials with
+the expectation that they will be incorporated. Public discussion and issue
+reports do not grant the project permission to use submitted implementation
+material.
 
-Useful contributions include:
+## Funded research and development partnerships
 
-- CPU-runnable tests;
-- geometric diagnostics;
-- training and ablation scripts;
-- documentation that clarifies limitations;
-- bug fixes that preserve the non-Transformer design.
+Organizations or individuals may propose a funded research, integration, or
+development partnership. A partnership may begin only after a separate written
+commercial agreement is signed by Felipe Maya Muniz and all applicable fees
+are paid under that agreement.
 
-Do not add Transformer blocks, self-attention, Q/K/V attention, or `nn.MultiheadAttention`.
+Funding provides only the services, evaluation, integration, research scope,
+or license rights expressly identified in the agreement. It does not guarantee
+acceptance or merger of code, publication, attribution, support, a favorable
+technical or benchmark result, or access to the private repository.
 
-## Development Setup
+Funded partners receive no equity, shares, royalties, ownership, authorship,
+governance rights, or decision-making authority in ASM unless a separate
+written agreement expressly grants a specific right.
 
-```bash
-pip install -e .
-python -m pytest -q
-```
+The written agreement must be signed before work or confidential materials are
+submitted and must address, as applicable:
 
-## Before Opening A PR
+- scope, fees, services, delivery, and acceptance criteria;
+- confidentiality and handling of nonpublic research;
+- authorship and assignment or licensing of all necessary intellectual
+  property rights;
+- provenance and licensing of third-party material;
+- patent disclosures and warranties of originality;
+- the project's right to distribute the accepted work under
+  `AGPL-3.0-only`, alternative commercial terms, or both; and
+- deletion or return of confidential material at the end of the engagement.
 
-Run:
+Funding does not buy a technical conclusion or influence benchmark reporting.
+Positive, negative, and inconclusive results remain subject to the same
+methodological and disclosure standards.
 
-```bash
-python -m pytest -q
-python scripts/train_tiny.py --config configs/tiny.yaml --text data/tiny.txt --output-dir runs/contrib_smoke --steps 3 --batch-size 2
-```
+Payment alone does not transfer copyright, grant repository access, authorize
+incorporation, or modify ASM's licenses. No externally produced work will be
+reviewed or merged until the required written authorization,
+intellectual-property grant, and provenance review are complete.
 
-`runs/` is ignored and should not be committed.
-
-## Documentation Standard
-
-Documentation must be honest about experimental status. Do not claim:
-
-- production readiness;
-- safety certification;
-- AGI;
-- alignment;
-- superiority over Transformers without evidence;
-- exact geodesic solving unless implemented and tested.
-
-## Licensing
-
-The public repository remains AGPL-3.0-only. Commercial use of the public code
-is permitted when the applicable AGPL obligations are satisfied.
-
-By submitting a contribution, you represent that you have the right to submit
-it and grant Felipe Maya Muniz a perpetual, worldwide, non-exclusive,
-irrevocable, royalty-free copyright licence to use, reproduce, modify,
-distribute, sublicense, and relicense the contribution, including as part of
-commercially licensed versions of ASM.
-
-You retain copyright in your contribution. Every accepted contribution remains
-available to the public under AGPL-3.0-only in this repository.
-
-Add this attestation to the pull-request description:
-
-```text
-I have the right to submit this contribution and agree to the contributor
-licence grant in CONTRIBUTING.md.
-```
-
-Substantial contributions to the commercially licensed core may additionally
-require an individually signed contributor licence agreement, confirmation of
-employer authorization, or a copyright assignment before acceptance. The
-maintainer may decline or postpone a contribution when its chain of title is
-unclear.
-
-This contributor policy is an initial project safeguard and has not been
-presented as a substitute for jurisdiction-specific legal review.
-
-Commercial licensing inquiries: contact@aletheionagi.com
+To propose a funded research or development partnership, contact Felipe Maya
+Muniz at
+`contact@aletheionagi.com`.

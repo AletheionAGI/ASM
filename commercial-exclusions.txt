@@ -1,0 +1,12 @@
+# Machine-readable denylist for commercial delivery assembly.
+# Paths use repository-relative glob syntax.
+data/**
+docs/benchmarks/**
+runs/**
+**/*.pt
+**/*.pth
+**/*.ckpt
+**/*.safetensors
+**/*.bin
+**/*.onnx
+**/*.pdf

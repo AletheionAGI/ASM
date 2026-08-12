@@ -1,0 +1,13 @@
+include LICENSE
+include NOTICE
+include COPYRIGHT
+include AUTHORS.md
+include CONTRIBUTING.md
+include LICENCE-COMMERCIAL.md
+include README.md
+include README_ptbr.md
+
+prune data
+prune docs/benchmarks
+prune runs
+global-exclude *.pt *.pth *.ckpt *.safetensors *.bin *.onnx *.pdf

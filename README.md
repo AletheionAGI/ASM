@@ -35,6 +35,14 @@ copyright holder under a separate signed agreement. See [NOTICE](NOTICE),
 Third-party materials and external contributions, if any, retain their
 respective notices and licensing terms.
 
+The project does not accept unsolicited contributions. Funded research,
+integration, or development partnerships may be considered only under a prior
+written commercial agreement and grant no implied equity, royalties,
+ownership, authorship, or governance rights; see
+[CONTRIBUTING.md](CONTRIBUTING.md). Author identity aliases are recorded in
+[AUTHORS.md](AUTHORS.md) and `.mailmap`. Commercial builds must follow
+[the commercial distribution policy](docs/commercial_distribution.md).
+
 ## Quick Links
 
 - [Architecture](ARCHITECTURE.md)

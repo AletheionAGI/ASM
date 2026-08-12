@@ -36,6 +36,14 @@ com o titular dos direitos mediante contrato escrito e assinado. Consulte
 [NOTICE](NOTICE), [COPYRIGHT](COPYRIGHT) e
 [LICENCE-COMMERCIAL.md](LICENCE-COMMERCIAL.md).
 
+O projeto não aceita contribuições externas não solicitadas. Parcerias
+financiadas de pesquisa, integração ou desenvolvimento poderão ser avaliadas
+somente mediante contrato comercial escrito e não concedem participação
+societária, royalties, propriedade, autoria ou governança implícitas; veja
+[CONTRIBUTING.md](CONTRIBUTING.md). As identidades autorais estão registradas
+em [AUTHORS.md](AUTHORS.md) e `.mailmap`. Builds comerciais devem seguir a
+[política de distribuição comercial](docs/commercial_distribution.md).
+
 Materiais de terceiros e contribuições externas, quando existirem, preservam
 seus respectivos avisos e termos de licenciamento.
 
