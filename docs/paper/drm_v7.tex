@@ -184,7 +184,7 @@ integration into the chain
 The principal results are:
 \begin{enumerate}[label=(\roman*)]
 \item a precise stratified DRM structure based on effective quotient fibers;
-\item an ordered hybrid transport law for paths crossing rank strata;
+\item an ordered hybrid transport law for paths visiting multiple rank strata;
 \item a transition-holonomy semigroup for closed hybrid loops;
 \item a dimensional holonomy theorem forcing rank-deficient loop transport
 whenever a genuine rank-reducing transition occurs;
@@ -254,12 +254,12 @@ Sub-Riemannian geometry equips a distribution of admissible directions with a
 positive-definite metric. On a constant-rank stratum with injective effective
 anchor, a DRM induces a sub-Riemannian structure. DRM additionally permits the
 effective distribution rank to change through metric degeneration and
-incorporates explicit maps across rank boundaries.
+incorporates explicit reset maps between rank strata.
 
 \subsection{Information geometry}
 
 Information geometry equips regular statistical models with the Fisher metric
-\cite{AmariNagaoka2000,Nielsen2020}. Rank-deficient Fisher matrices occur in
+\cite{AmariNagaoka2000,Chentsov1982,Nielsen2020}. Rank-deficient Fisher matrices occur in
 non-identifiable or singular models. DRM interprets the metric rank as an
 effective relational dimension and treats passages through singular rank loci
 using stratification and transition maps. Fisher--Rao geometry is recovered in
@@ -381,7 +381,8 @@ g^\flat:E|_S\to E^*|_S,
 \qquad g^\flat_p(v)=g_p(v,\cdot).
 \]
 Its rank is constantly $r$ on $S$. The constant-rank theorem for vector-bundle
-morphisms implies that $\Ker g^\flat=K|_S$ is a smooth subbundle.
+morphisms \cite{Lee2013} implies that $\Ker g^\flat=K|_S$ is a smooth
+subbundle.
 \end{proof}
 
 \begin{corollary}[Effective quotient bundle]
@@ -405,20 +406,30 @@ An anchor is a smooth vector-bundle morphism $\rho:E\to TM$ covering the
 identity on $M$.
 \end{definition}
 
-\begin{assumption}[Kernel compatibility]
+\begin{assumption}[Kernel compatibility and stratum tangency]
 For every $p\in M$,
 \[
 K_p\subseteq\Ker\rho_p.
 \]
+Moreover, for every rank stratum $S$ and every $p\in S$,
+\[
+\rho_p(E_p)\subseteq T_pS\subseteq T_pM.
+\]
 \end{assumption}
 
-\begin{proposition}[Effective anchor]
+\begin{proposition}[Effective stratum anchor]
 Kernel compatibility defines a unique map
 \[
 \overline\rho_p:\overline E_p\to T_pM,
 \qquad \overline\rho_p([v])=\rho_p(v).
 \]
-On each stratum these maps form a smooth bundle morphism.
+On every stratum $S$, the tangency assumption makes these maps a smooth
+bundle morphism
+\[
+\overline\rho^{(S)}:\overline E^{(S)}\to TS.
+\]
+Consequently, $\overline\rho(U)[f]$ is intrinsically defined for
+$U\in\Gamma(\overline E^{(S)})$ and $f\in C^\infty(S)$.
 \end{proposition}
 
 \begin{definition}[Admissible curve]
@@ -525,14 +536,16 @@ is the ordinary stratumwise holonomy.
 \section{Hybrid Paths and Ordered Transport}
 \label{sec:hybrid}
 
-\begin{definition}[Rank-transition map]
-Suppose a trajectory crosses from a rank-$r$ stratum to a rank-$s$ stratum.
-A rank-transition map is a linear map
+\begin{definition}[Rank-transition event]
+Let $p_-\in S_-$ and $p_+\in S_+$ lie in strata of ranks $r$ and $s$,
+respectively. A rank-transition event consists of the ordered base reset
+$p_-\rightsquigarrow p_+$ together with a linear map
 \[
-J_{r\to s}:V_-\to V_+,
+J_{r\to s}:\overline E_{p_-}\to\overline E_{p_+}.
 \]
-where $V_-$ and $V_+$ are the incoming and outgoing effective fibers. The map
-need not be invertible.
+The points $p_-$ and $p_+$ need not coincide, and the map need not be
+invertible. Thus an event records both the reset of the base state and the
+reset of the effective relational state.
 \end{definition}
 
 \begin{definition}[Hybrid DRM path]
@@ -540,9 +553,16 @@ A hybrid DRM path is a finite sequence
 \[
 \gamma=(\gamma_1,J_1,\gamma_2,J_2,\ldots,J_{m-1},\gamma_m),
 \]
-where every $\gamma_i$ is a smooth admissible path contained in one rank
-stratum and every $J_i$ maps the terminal effective fiber of $\gamma_i$ to the
-initial effective fiber of $\gamma_{i+1}$.
+where each $\gamma_i:[a_i,b_i]\to S_i$ is a smooth admissible path contained
+in one rank stratum and each $J_i$ is a transition event
+\[
+J_i:\overline E_{\gamma_i(b_i)}
+\longrightarrow\overline E_{\gamma_{i+1}(a_{i+1})}.
+\]
+No continuity of the base path is imposed at a transition event. A continuous
+crossing of a rank boundary can instead be treated only after specifying
+one-sided trace fibers and limiting parallel transports; those additional
+analytic data are not assumed in the present finite-event framework.
 \end{definition}
 
 Let $P_i$ denote parallel transport along $\gamma_i$.
@@ -713,7 +733,7 @@ h_F(\gamma):=
 \label{thm:flat-hysteresis}
 Let $\gamma$ be a closed hybrid DRM loop. Assume:
 \begin{enumerate}[label=(\roman*)]
-\item every regular stratum crossed by $\gamma$ is flat along the path;
+\item every regular stratum visited by $\gamma$ is flat along its regular segments;
 \item every intrastatum transport is the identity;
 \item at least one transition map has rank below the initial fiber dimension
 $n$.
@@ -1011,11 +1031,20 @@ K_0=\Span\{e_2\},
 \]
 Define
 \[
-\rho_x(ae_1+be_2)=a\,\partial_x.
+\rho_x(ae_1+be_2)=xa\,\partial_x.
 \]
-Then $K_0\subseteq\Ker\rho_0$. A passage through $x=0$ is represented by the
-two maps above, not by a single ambiguous one-sided map. The second component
-is discarded at entry and is not reconstructed at exit.
+For $x\ne0$ the image lies in the tangent bundle of the corresponding open
+rank-two stratum. At $x=0$, $\rho_0=0$, so both
+$K_0\subseteq\Ker\rho_0$ and
+$\rho_0(E_0)\subseteq T_0\{0\}=\{0\}$ hold.
+
+In the finite-event hybrid model, choose $x_-<0$ and $x_+>0$. The passage is
+represented by a reset from $x_-$ to $0$ with
+$J_{2\to1}(a,b)=a$, followed by a reset from $0$ to $x_+$ with
+$J_{1\to2}(a)=(a,0)$. This is a hybrid idealization of passage through the
+rank boundary, not a claim that a compact path lying in one open stratum has
+$0$ as an endpoint. The second component is discarded at entry and is not
+reconstructed at exit.
 
 \subsection{Two noncommuting collapse directions}
 
@@ -1201,6 +1230,13 @@ methods may be required in greater generality.
 Transition maps are prescribed data. A theory deriving them canonically from
 local metric degeneration, dynamics, or a variational principle remains open.
 
+\paragraph{Continuous rank-boundary crossings.}
+The finite-event model uses explicit base resets between points in different
+strata. A genuinely continuous crossing requires one-sided trace fibers,
+limiting parallel transports, and hypotheses ensuring that those limits exist
+and are independent of auxiliary trivializations. That extension is not
+developed here.
+
 \paragraph{Relation to singular foliation holonomy.}
 A detailed comparison with holonomy groupoids of singular foliations is still
 needed. DRM explicitly admits non-invertible interstratum maps, but the exact
@@ -1249,8 +1285,8 @@ The effective fiber and dimension are
 \qquad
 d_{\mathrm{DRM}}(p)=\rank g_p.
 \]
-Inside a stratum, ordinary metric vector-bundle geometry applies. Across rank
-boundaries, explicit transition maps replace a nonexistent globally smooth
+Inside a stratum, ordinary metric vector-bundle geometry applies. Between
+rank strata, explicit transition events replace a nonexistent globally smooth
 fixed-rank connection.
 
 For a closed hybrid loop,
@@ -1368,6 +1404,14 @@ diffeomorphic to the $n$-torus.
 \end{proof}
 
 % ==============================================================================
+\section*{Acknowledgments}
+
+Generative artificial intelligence tools were used during the preparation of
+this manuscript to assist with drafting, language refinement, structural
+review, mathematical consistency checks, and \LaTeX{} editing. The author
+reviewed and revised the resulting material and remains fully responsible for
+the content, arguments, and conclusions of the work.
+
 \section*{Funding}
 
 This research received no external funding.
