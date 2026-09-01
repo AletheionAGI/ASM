@@ -6,6 +6,18 @@ from .losses import dimension_entropy
 
 
 class DirectionalBlocksMixin:
+    def _project_block_states(
+        self,
+        states: torch.Tensor,
+        projection_mask: torch.Tensor | None,
+    ) -> torch.Tensor:
+        """Project one state edge without retaining mutable rank context."""
+        if projection_mask is None:
+            return states
+        if self.variable_rank_core is None:
+            raise RuntimeError("rank projection requires a variable-rank core")
+        return self.variable_rank_core.project(states, projection_mask)
+
     def _directional_superblock_cumsum_block(
         self,
         z_start: torch.Tensor,
@@ -167,6 +179,7 @@ class DirectionalBlocksMixin:
         global_step: int | None,
         block_index: int = 0,
         collect_diagnostics: bool = False,
+        projection_mask: torch.Tensor | None = None,
     ) -> tuple[
         torch.Tensor,
         torch.Tensor,
@@ -290,10 +303,13 @@ class DirectionalBlocksMixin:
         else:
             flat_next = self._directional_candidate_step(flat_z, dz, directions, gates, metric_diag, metric_u)
         local_delta = (flat_next - flat_z).reshape(batch, block_len, -1)
+        local_delta = self._project_block_states(local_delta, projection_mask)
         states = self._bound_state(z_start.unsqueeze(1) + torch.cumsum(local_delta, dim=1))
+        states = self._project_block_states(states, projection_mask)
         states = self._apply_endpoint_correction(z_start, token_embeddings, states, global_step)
         states = self._apply_block_fixed_point(z_start, token_embeddings, states, global_step)
         states = self._apply_block_anderson(z_start, token_embeddings, states, global_step, block_index)
+        states = self._project_block_states(states, projection_mask)
         velocity = (flat_next - flat_z) / max(self.config.dt, 1e-8)
         need_action = self.config.lambda_action != 0 or collect_diagnostics
         if need_action and self.metric is not None:
@@ -312,12 +328,15 @@ class DirectionalBlocksMixin:
         risk_mass = risk_mass_flat.reshape(batch, block_len)
         if self.local_mixer is not None:
             states = self._bound_state(self.local_mixer(z_start, states, token_embeddings, local_delta, dim, risk_mass))
+            states = self._project_block_states(states, projection_mask)
         if self.token_state_residual is not None:
             states = self._bound_state(self.token_state_residual(states, token_embeddings))
+            states = self._project_block_states(states, projection_mask)
         if self.selective_memory is not None:
             states = self._bound_state(
                 self.selective_memory(z_start, states, token_embeddings)
             )
+            states = self._project_block_states(states, projection_mask)
         for refinement_layer in self.refinement_layers:
             states = self._bound_state(
                 refinement_layer(
@@ -327,6 +346,7 @@ class DirectionalBlocksMixin:
                     self._naturalization_strength(global_step),
                 )
             )
+            states = self._project_block_states(states, projection_mask)
         consistency = self._block_consistency(z_start, token_embeddings, states, global_step)
         sampled_consistency = self._sampled_block_consistency(
             z_start,

@@ -1,0 +1,13 @@
+{
+  "cache_retains_ambient_state": false,
+  "cache_retains_prefix": false,
+  "controller_policy": "first-block-token-only",
+  "discarded_complement_jacobian_norm": 0.0,
+  "frame": "fixed-identity",
+  "maximum_cached_inactive_coordinate": 0.0,
+  "paired_logit_difference": 0.0,
+  "paired_state_difference": 0.0,
+  "passed": true,
+  "streaming_maximum_error": 1.043081283569336e-07,
+  "transition_memory_enabled": false
+}

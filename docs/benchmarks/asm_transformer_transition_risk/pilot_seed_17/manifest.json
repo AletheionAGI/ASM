@@ -1,0 +1,104 @@
+{
+  "experiment": "ATTR P1 train-validation pilot",
+  "status": "completed_test_sealed",
+  "seed": 17,
+  "data": {
+    "train": 64,
+    "validation": 16,
+    "episodes_per_world": 4
+  },
+  "horizons": [
+    1,
+    4,
+    8,
+    16
+  ],
+  "event_prevalence": {
+    "train": {
+      "episodes": 256,
+      "transitions": 3117,
+      "unsafe_episodes": 88,
+      "by_horizon": {
+        "1": {
+          "positives": 88,
+          "prevalence": 0.0282322745770216
+        },
+        "4": {
+          "positives": 283,
+          "prevalence": 0.09079242497682571
+        },
+        "8": {
+          "positives": 448,
+          "prevalence": 0.14372794330120087
+        },
+        "16": {
+          "positives": 570,
+          "prevalence": 0.1828681379556656
+        }
+      }
+    },
+    "validation": {
+      "episodes": 64,
+      "transitions": 815,
+      "unsafe_episodes": 19,
+      "by_horizon": {
+        "1": {
+          "positives": 19,
+          "prevalence": 0.023312883451581
+        },
+        "4": {
+          "positives": 70,
+          "prevalence": 0.08588957041501999
+        },
+        "8": {
+          "positives": 107,
+          "prevalence": 0.1312883496284485
+        },
+        "16": {
+          "positives": 130,
+          "prevalence": 0.15950919687747955
+        }
+      }
+    }
+  },
+  "alarm_thresholds": {
+    "asm_x_directional": 0.2869619131088257,
+    "tiny_transformer_220k": 0.2804516851902008,
+    "asm_cm_durable": 0.28613781929016113,
+    "asm_vr_s_full64": 0.28199684619903564,
+    "asm_vr_s_fixed32": 0.2909158170223236,
+    "asm_r_240k_control": 0.2780669629573822
+  },
+  "threshold_selection": "validation_only_at_fpr_0.05",
+  "registered_gates_unchanged": {
+    "g2_min_auprc_gain": 0.03,
+    "g2_max_brier_degradation": 0.01,
+    "g3_min_useful_lead_steps": 2,
+    "g4_min_absolute_risk_reduction": 0.05,
+    "g4_min_relative_risk_reduction": 0.2,
+    "g4_max_utility_degradation": 0.05
+  },
+  "test_worlds_generated": false,
+  "implementation_files": [
+    "world_model/hazard_world.py",
+    "world_model/hazard_world_types.py",
+    "world_model/hazard_world_io.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/baselines.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/dataset.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/labels.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/leakage.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/metrics.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/model_adapters.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/model_heads.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/pilot.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/training.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/runner.py",
+    "src/aletheion_state_models/benchmarks/transition_risk/supplementary.py",
+    "src/aletheion_state_models/benchmarks/purpose_variants.py",
+    "src/aletheion_state_models/variants/relational_state.py",
+    "src/aletheion_state_models/variants/variable_rank.py",
+    "transformer/tiny_transformer.py"
+  ],
+  "implementation_sha256": "4cd040cb26854a8781f2eacbe4798d74b6df8194d8be21d0d76334aa77176286",
+  "claims": "train-validation pilot only; no safety or superiority claim"
+}

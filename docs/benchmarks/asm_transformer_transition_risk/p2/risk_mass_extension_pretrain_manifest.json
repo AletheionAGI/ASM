@@ -1,0 +1,87 @@
+{
+  "payload": {
+    "experiment": "ATTR P2 post-hoc native-risk-mass diagnostic",
+    "confirmatory_status": "posthoc_exploratory_not_registered_p2_arm",
+    "public_names": {
+      "asm_x_directional": "ASM-X Base",
+      "asm_x_directional_risk_mass": "ASM-X + Native Risk Mass"
+    },
+    "selection_timing": "requested after sealed P2 results were observed",
+    "training_seeds": [
+      29,
+      43,
+      71,
+      89,
+      107
+    ],
+    "updates_per_arm": 1000,
+    "data_and_heads": "identical to sealed P2; calibration remains validation-only",
+    "sole_config_delta": {
+      "use_powerlaw_risk": {
+        "baseline": false,
+        "variant": true
+      }
+    },
+    "parameter_parity": {
+      "baseline_parameters": 219610,
+      "variant_parameters": 219610,
+      "identical_initial_tensors": true,
+      "only_config_delta": "use_powerlaw_risk: false -> true"
+    },
+    "baseline_checkpoints": [
+      {
+        "seed": 29,
+        "path": "seed_29__asm_x_directional.pt",
+        "sha256": "81f8912e035696626d9211d20b0ac50d04f5b2742532c56f7ebdc616a56498f7"
+      },
+      {
+        "seed": 43,
+        "path": "seed_43__asm_x_directional.pt",
+        "sha256": "09ca02076c3ee924b29e433409c6b9e19304072e276080591d9c548db255b871"
+      },
+      {
+        "seed": 71,
+        "path": "seed_71__asm_x_directional.pt",
+        "sha256": "d86c604831444f926133f04c14fbc750ebf31837497b10c8510195740e4a2e0b"
+      },
+      {
+        "seed": 89,
+        "path": "seed_89__asm_x_directional.pt",
+        "sha256": "8af06dd38e13fd96554562196768801b46766f058ca4195fe8260ca17c0be8da"
+      },
+      {
+        "seed": 107,
+        "path": "seed_107__asm_x_directional.pt",
+        "sha256": "ddaccc86df5c1663e8da0ba62f32e11ba3aa86aa774727939e3c94564a6a2c4c"
+      }
+    ],
+    "extension_checkpoint_ids": [
+      "seed_29__asm_x_directional_risk_mass.pt",
+      "seed_43__asm_x_directional_risk_mass.pt",
+      "seed_71__asm_x_directional_risk_mass.pt",
+      "seed_89__asm_x_directional_risk_mass.pt",
+      "seed_107__asm_x_directional_risk_mass.pt"
+    ],
+    "original_preseal_sha256": "e476b6647dbf3a55b630f84d4ea43663f2a978ebe72b734856d1be20b646c1f3",
+    "original_dataset_seal_sha256": "1433211b08dfd646068e0b8b10a237306446271dfebcfa99a8aad1089323b927",
+    "original_test_open_event_sha256": "72a0c0da93ae58c0e25980376dd6a4a8b447c471b9520fe02fd1c4d27581162e",
+    "test_already_open_before_selection": true,
+    "test_access_during_extension_training": false,
+    "training_source_sha256": {
+      "configs/tiny_drm_stronger.yaml": "b94de4354ffbafa6071aff987010630da8bbca07f58878ba61f2e075a1a59c77",
+      "src/drm_language_emitter/config.py": "8f60cf904373c7192b0decfce7905691dc43cf9801acbf56fea0d7a8ebb0cb5e",
+      "src/drm_language_emitter/geometric_steps.py": "267689656c5d7df474e5faa94c27ee0a607880384a2f4d346ef9ebecd1f61a92",
+      "src/drm_language_emitter/metric.py": "e6a100b8d0c13392b480e3f1c26dc1e149e627e16ac9183cf210d5b16b104dbc",
+      "src/drm_language_emitter/model.py": "7b1329f3c8071125b05265210b2ef32bc3f41f8fcc76e68190bec9c88dc1127a",
+      "src/drm_language_emitter/risk.py": "01115a2b5b23960faebbede09258bde0c5e7543040aacde7e427740181486f0b",
+      "src/aletheion_state_models/benchmarks/transition_risk/dataset.py": "ca64a476a422ab3a2ae8bd2d8334166716ce2e05ed72cd2cc80a0d1ffd0006e6",
+      "src/aletheion_state_models/benchmarks/transition_risk/model_adapters.py": "f4f46d92aaacc70295770e37374cba680e0696d8bc295d39d1af19ac910f0acd",
+      "src/aletheion_state_models/benchmarks/transition_risk/model_heads.py": "6193cc5770887b90f28dabcea05b754646019ce978f11c959fc8c7ab8098c9bb",
+      "src/aletheion_state_models/benchmarks/transition_risk/training.py": "d7160d13ed58814cfb56105bde5d524792dc76b12bd808eea8c0fd2d08847c16",
+      "src/aletheion_state_models/benchmarks/transition_risk/p2_risk_mass_models.py": "bca9c7730a1d1e47bab33117eb83a7d2a0efeaeca7761a9536e3365bb20e2a36",
+      "src/aletheion_state_models/benchmarks/transition_risk/p2_risk_mass_runner.py": "8fd531bcbf1d0d3af32ab5cc1b7183b1184e13aa35d2816bbf92b7cd3157f2b2"
+    },
+    "claim_limit": "diagnostic comparison only; cannot revise registered G2 or claim confirmatory superiority"
+  },
+  "sha256": "0760d265dab2af640d74b4c8cf8064b23d1d4c3a6cdae633e818dd7e53d459d3"
+}

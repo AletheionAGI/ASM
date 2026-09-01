@@ -1,0 +1,14 @@
+{
+  "collapsed_state_difference": 0.0,
+  "discarded_complement_jacobian_norm": 0.0,
+  "initial_discarded_difference": 1.876005282333891,
+  "maximum_future_output_difference": 0.0,
+  "maximum_future_state_difference": 0.0,
+  "passed": true,
+  "ranks": [
+    3,
+    5,
+    8
+  ],
+  "transition_memory_enabled": false
+}

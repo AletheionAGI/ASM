@@ -1,0 +1,5 @@
+{
+  "seal_sha256": "f47f0ca2a40401daf650db80424f2c8a8b5a5134b39a1faab77e71e56343985b",
+  "checkpoint_count": 30,
+  "test_opened_after_all_checkpoints": true
+}

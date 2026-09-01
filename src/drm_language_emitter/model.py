@@ -122,6 +122,25 @@ class DRMEmitterModel(
                 DRMRefinementLayer(config) for _ in range(config.directional_refinement_layers)
             ),
         )
+        self.variable_rank_core = None
+        if config.variable_rank_mode != "off":
+            from aletheion_state_models.geometry.variable_rank.block_core import (
+                VariableRankBlockCore,
+            )
+
+            self.variable_rank_core = _seeded_module(
+                config,
+                114,
+                lambda: VariableRankBlockCore(
+                    config.d_token,
+                    config.d_state,
+                    threshold=config.variable_rank_threshold,
+                    minimum_rank=config.variable_rank_min_rank,
+                    estimator=(
+                        "ste" if config.variable_rank_mode in {"phase2_input_ste", "phase3a1_projected"} else "hard"
+                    ),
+                ),
+            )
         self._compiled_forward = None
         if config.use_torch_compile and hasattr(torch, "compile"):
             try:

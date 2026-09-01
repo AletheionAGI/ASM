@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import torch
 
 from .addressable_memory import AddressableMemoryState
 from .fast_weight_memory import FastWeightMemoryState
+from .rank_aware_memory import apply_rank_aware_memory
 
 MemoryState = AddressableMemoryState | FastWeightMemoryState
+
+if TYPE_CHECKING:
+    from aletheion_state_models.geometry.variable_rank.batch_state import VariableRankBatchState
 
 
 @dataclass(frozen=True)
@@ -27,6 +32,7 @@ class InferenceState:
     tokens_seen: int = 0
     compact: bool = False
     addressable_memory: MemoryState | None = None
+    variable_rank_state: VariableRankBatchState | None = None
 
     @property
     def batch_size(self) -> int:
@@ -40,7 +46,7 @@ class InferenceState:
     def uses_block_cache(self) -> bool:
         return (
             self.block_size > 0
-            and self.completed_state is not None
+            and (self.completed_state is not None or self.variable_rank_state is not None)
             and self.block_tokens is not None
         )
 
@@ -77,6 +83,7 @@ class InferenceMixin:
         states: torch.Tensor,
         final_memory: MemoryState | None = None,
         memory_before_last_block: MemoryState | None = None,
+        variable_rank_masks: torch.Tensor | None = None,
     ) -> InferenceState:
         block_size = self._inference_block_size()
         compact = bool(self.config.compact_streaming_inference)
@@ -96,15 +103,30 @@ class InferenceMixin:
             if prefix.shape[1] % block_size == 0
             else memory_before_last_block
         )
+        variable_rank_state = None
+        if self.variable_rank_core is not None:
+            if variable_rank_masks is None:
+                raise RuntimeError("ASM-VR forward did not return hard rank masks")
+            if prefix.shape[1] % block_size == 0:
+                cache_source = states[:, -1]
+                cache_mask = variable_rank_masks[:, -1]
+            else:
+                cache_source = completed_state
+                cache_mask = variable_rank_masks[:, block_start]
+            variable_rank_state = self.variable_rank_core.cache_state(
+                cache_source, cache_mask
+            ).detach()
+            completed_state = None
         return InferenceState(
             input_ids=(prefix[:, :0].detach() if compact else prefix),
-            completed_state=completed_state.detach(),
+            completed_state=(completed_state.detach() if completed_state is not None else None),
             block_tokens=prefix[:, block_start:].detach(),
             block_index=block_start // block_size,
             block_size=block_size,
             tokens_seen=int(prefix.shape[1]),
             compact=compact,
             addressable_memory=(completed_memory.detach() if completed_memory is not None else None),
+            variable_rank_state=variable_rank_state,
         )
 
     @torch.no_grad()
@@ -139,6 +161,7 @@ class InferenceMixin:
             output["states"],
             output.get("addressable_final_memory"),
             output.get("addressable_before_last_block"),
+            output.get("variable_rank_masks"),
         )
 
     @torch.no_grad()
@@ -154,27 +177,70 @@ class InferenceMixin:
         if state.batch_size != input_ids.shape[0]:
             raise ValueError("inference state batch size does not match input_ids")
         if not state.uses_block_cache:
+            if self.variable_rank_core is not None:
+                raise RuntimeError("ASM-VR decode requires its compact block cache")
             logits, next_state = self.prefill(input_ids, state)
             return logits[:, -1], next_state
 
         open_tokens = torch.cat([state.block_tokens, input_ids], dim=1)
         token_embeddings = self.token_embedding(open_tokens)
+        rank_observation = None
+        block_start_state = state.completed_state
+        if self.variable_rank_core is not None:
+            if state.variable_rank_state is None:
+                raise RuntimeError("ASM-VR cache is missing its effective rank state")
+            rank_observation = self.variable_rank_core.observe_block(
+                token_embeddings, state.block_index
+            )
+            if state.block_tokens.shape[1] and not torch.equal(
+                rank_observation.active_mask, state.variable_rank_state.active_mask
+            ):
+                raise RuntimeError("ASM-VR open-block mask changed during replay")
+            block_start_state = self.variable_rank_core.begin_block(
+                state.variable_rank_state.effective_coordinates,
+                rank_observation,
+            )
+        assert block_start_state is not None
+        observed_block_length = token_embeddings.shape[1]
+        block_input = token_embeddings
+        if self.config.variable_rank_scaffold_projection:
+            block_size = self.config.directional_cumsum_block_size
+            if observed_block_length < block_size:
+                block_input = torch.nn.functional.pad(
+                    token_embeddings,
+                    (0, 0, 0, block_size - observed_block_length),
+                )
         block_output = self._directional_cumsum_block(
-            state.completed_state,
-            token_embeddings,
+            block_start_state,
+            block_input,
             global_step=None,
             block_index=state.block_index,
             collect_diagnostics=False,
+            projection_mask=(
+                rank_observation.mask_for_projection()
+                if rank_observation is not None
+                and self.config.variable_rank_scaffold_projection
+                else None
+            ),
         )
-        block_states = block_output[0]
+        block_states = block_output[0][:, :observed_block_length]
+        if rank_observation is not None:
+            block_states = self.variable_rank_core.finish_block(
+                block_states, rank_observation
+            )
         next_memory = state.addressable_memory
         if self.addressable_memory is not None:
             if next_memory is None:
                 next_memory = self.addressable_memory.initial_state(
                     input_ids.shape[0], input_ids.device, block_states.dtype
                 )
-            block_states, recomputed_memory, _ = self.addressable_memory.forward_sequence(
-                block_states, token_embeddings, next_memory
+            block_states, recomputed_memory, _ = apply_rank_aware_memory(
+                self.addressable_memory,
+                block_states,
+                token_embeddings,
+                next_memory,
+                variable_rank_core=self.variable_rank_core,
+                rank_observation=rank_observation,
             )
         if state.compact:
             prefix = state.input_ids
@@ -189,13 +255,23 @@ class InferenceMixin:
             )
             emitter_states[:, -block_states.shape[1] :] = block_states
             next_logits = self.emitter(emitter_states)[:, -1]
+        next_variable_rank_state = state.variable_rank_state
         if open_tokens.shape[1] == state.block_size:
             completed_state = block_states[:, -1].detach()
+            if rank_observation is not None:
+                next_variable_rank_state = self.variable_rank_core.cache_state(
+                    completed_state, rank_observation.active_mask
+                ).detach()
+                completed_state = None
             block_tokens = open_tokens[:, :0].detach()
             block_index = state.block_index + 1
             next_memory = recomputed_memory.detach() if self.addressable_memory is not None else next_memory
         else:
             completed_state = state.completed_state
+            if rank_observation is not None and state.block_tokens.shape[1] == 0:
+                next_variable_rank_state = self.variable_rank_core.cache_state(
+                    block_start_state, rank_observation.active_mask
+                ).detach()
             block_tokens = open_tokens.detach()
             block_index = state.block_index
         next_state = InferenceState(
@@ -207,5 +283,6 @@ class InferenceMixin:
             tokens_seen=state.sequence_length + 1,
             compact=state.compact,
             addressable_memory=next_memory,
+            variable_rank_state=next_variable_rank_state,
         )
         return next_logits, next_state

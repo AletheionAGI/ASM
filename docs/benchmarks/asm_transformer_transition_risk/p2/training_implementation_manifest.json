@@ -1,0 +1,33 @@
+{
+  "experiment": "ATTR P2 training implementation freeze",
+  "process_pid": 1506929,
+  "preseal_sha256": "5a2f30d6e4dff18175f50454de9522d38d243179d4a9439ab8003eeb4718b77f",
+  "files": {
+    "world_model/hazard_world.py": "86013f94ce6780429c189ba8bbcdf3868277784fc4fadb572019ab1b85c6dbe5",
+    "world_model/hazard_world_types.py": "bf1aa077a39d781975ff7c1cf61dbd191176b64a854a601d1e8ebf508bf4b791",
+    "world_model/hazard_world_io.py": "898973a0b4a5ac3a10eb9052d43c37c7f627f89c8258c6b9cd3cba998bbf0ee3",
+    "src/aletheion_state_models/benchmarks/transition_risk/dataset.py": "ca64a476a422ab3a2ae8bd2d8334166716ce2e05ed72cd2cc80a0d1ffd0006e6",
+    "src/aletheion_state_models/benchmarks/transition_risk/model_adapters.py": "f4f46d92aaacc70295770e37374cba680e0696d8bc295d39d1af19ac910f0acd",
+    "src/aletheion_state_models/benchmarks/transition_risk/model_heads.py": "6193cc5770887b90f28dabcea05b754646019ce978f11c959fc8c7ab8098c9bb",
+    "src/aletheion_state_models/benchmarks/transition_risk/training.py": "d7160d13ed58814cfb56105bde5d524792dc76b12bd808eea8c0fd2d08847c16",
+    "src/aletheion_state_models/benchmarks/transition_risk/p2_models.py": "433344ca420c729ae358cb120630837c156745543a1d7c62358d46ce59ba0cd9",
+    "src/aletheion_state_models/benchmarks/transition_risk/p2_runner.py": "b2589986768d4a8c2722bc6b00bb9edd693e00b9b20533c7c9eed16e66a93915",
+    "src/aletheion_state_models/benchmarks/transition_risk/supplementary.py": "a267c5caced063d023d2c3febfa67e5cdeab98206f2821f4f84240667777274b",
+    "src/aletheion_state_models/benchmarks/purpose_variants.py": "08fa07505586c26133c3df0397752b23cbdd45d41b6620306cb0d40b95a8e511",
+    "src/aletheion_state_models/variants/relational_state.py": "2548713a5d96e484dece82f98477714c391fcc306110020b1d0920c74d322c70",
+    "src/aletheion_state_models/variants/variable_rank.py": "cf1031df244f762757121e9ee97696ae1f3d513b99b1b961f6097d50c1c66626",
+    "configs/tiny_drm_stronger.yaml": "b94de4354ffbafa6071aff987010630da8bbca07f58878ba61f2e075a1a59c77",
+    "transformer/tiny_transformer.py": "eefc8f68120b8009df371b5abbb8107d47da726d00c8f15f805eec7ea9c113c7",
+    "transformer/tiny_transformer_220k.yaml": "37b9f91d074a5e19af9ba265802c07b894e4c12de5d334acdce1d4b79ef42255"
+  },
+  "combined_sha256": "d110f69a64c322dc717289d55afee33082546ce1abdb9a9ca59bf29b62905613",
+  "test_opened": false,
+  "post_training_evaluation_patch": {
+    "file": "src/aletheion_state_models/benchmarks/transition_risk/p2_runner.py",
+    "training_sha256": "b2589986768d4a8c2722bc6b00bb9edd693e00b9b20533c7c9eed16e66a93915",
+    "evaluation_sha256": "e3d26eb611260de4805f39d76cf3e82545aaf6fc4a77f161ef6bcd0c625e0e7f",
+    "reason": "adapt evaluate_opened to sealed API returning a dict; checkpoint/model/head states unchanged",
+    "first_evaluation_exit_code": 1,
+    "predictions_written_before_patch": 0
+  }
+}

@@ -1,0 +1,206 @@
+{
+  "status": "train_only_pilot_test_sealed",
+  "seed": 17,
+  "updates": 1000,
+  "device": "cuda",
+  "test_worlds_generated": false,
+  "worlds": {
+    "train": 64,
+    "validation": 16,
+    "episodes_per_world": 4
+  },
+  "horizons": [
+    1,
+    4,
+    8,
+    16
+  ],
+  "features": [
+    "agent",
+    "velocity",
+    "energy_sensor",
+    "goal_delta",
+    "local_hazard_distance",
+    "action"
+  ],
+  "audits": {
+    "feature_leakage": true,
+    "episode_split": true,
+    "threshold_selection": "validation_only"
+  },
+  "parameter_mismatch_fraction": 0.0059962249242790045,
+  "controls": {
+    "persistence_next_state_mse": 0.09229685366153717,
+    "kalman_next_state_mse": 0.08253516256809235,
+    "markov_h8": {
+      "auprc": 0.1394582883457908,
+      "brier": 0.11422393058011929
+    }
+  },
+  "arms": [
+    {
+      "arm": "asm_x_directional",
+      "backbone_parameters": 219610,
+      "head_parameters": 6834,
+      "trainable_parameters": 226444,
+      "final_train_loss": 0.1535070389509201,
+      "validation_auprc_h8": 0.20873942501125645,
+      "validation_brier_h8": 0.11281519346336848,
+      "validation_recall_at_fpr": 0.056074766355140186,
+      "validation_threshold": 0.2869619131088257,
+      "comparison_role": "registered_main_pair",
+      "backbone_trainable_parameters": 219610,
+      "total_parameters": 226444,
+      "updates_per_second": 3.3772591821711955,
+      "arm_train_elapsed_sec": 296.0980919910071
+    },
+    {
+      "arm": "tiny_transformer_220k",
+      "backbone_parameters": 220208,
+      "head_parameters": 7602,
+      "trainable_parameters": 227810,
+      "final_train_loss": -0.298929899930954,
+      "validation_auprc_h8": 0.22261087632296925,
+      "validation_brier_h8": 0.1099236542349735,
+      "validation_recall_at_fpr": 0.12149532710280374,
+      "validation_threshold": 0.2804516851902008,
+      "comparison_role": "registered_main_pair",
+      "backbone_trainable_parameters": 220208,
+      "total_parameters": 227810,
+      "updates_per_second": 228.59450062772623,
+      "arm_train_elapsed_sec": 4.374558430994512
+    },
+    {
+      "arm": "asm_cm_durable",
+      "backbone_parameters": 274058,
+      "head_parameters": 6834,
+      "total_parameters": 280892,
+      "trainable_parameters": 280892,
+      "final_train_loss": -0.2857411801815033,
+      "validation_auprc_h8": 0.23763749298534825,
+      "validation_brier_h8": 0.10994108397195682,
+      "validation_recall_at_fpr": 0.11214953271028037,
+      "validation_threshold": 0.28613781929016113,
+      "arm_train_elapsed_sec": 92.86204025799816,
+      "updates_per_second": 10.768662816600893,
+      "comparison_role": "supplementary_unmatched",
+      "logical_rank": null,
+      "explicit_associative_memory": true,
+      "backbone_trainable_parameters": 274058
+    },
+    {
+      "arm": "asm_vr_s_full64",
+      "backbone_parameters": 274135,
+      "head_parameters": 6834,
+      "total_parameters": 280969,
+      "trainable_parameters": 276809,
+      "final_train_loss": -0.2719797194004059,
+      "validation_auprc_h8": 0.22422518487424734,
+      "validation_brier_h8": 0.10983703755339697,
+      "validation_recall_at_fpr": 0.102803738317757,
+      "validation_threshold": 0.28199684619903564,
+      "arm_train_elapsed_sec": 6.618160327008809,
+      "updates_per_second": 151.0993917628416,
+      "comparison_role": "supplementary_unmatched",
+      "logical_rank": 64,
+      "explicit_associative_memory": false,
+      "backbone_trainable_parameters": 269975
+    },
+    {
+      "arm": "asm_vr_s_fixed32",
+      "backbone_parameters": 274135,
+      "head_parameters": 6834,
+      "total_parameters": 280969,
+      "trainable_parameters": 276809,
+      "final_train_loss": -0.1993832290172577,
+      "validation_auprc_h8": 0.2341729917775963,
+      "validation_brier_h8": 0.10998132914918964,
+      "validation_recall_at_fpr": 0.11214953271028037,
+      "validation_threshold": 0.2909158170223236,
+      "arm_train_elapsed_sec": 6.7304730040050345,
+      "updates_per_second": 148.5779676116285,
+      "comparison_role": "supplementary_unmatched",
+      "logical_rank": 32,
+      "explicit_associative_memory": false,
+      "backbone_trainable_parameters": 269975
+    },
+    {
+      "arm": "asm_r_240k_control",
+      "backbone_parameters": 240390,
+      "head_parameters": 6834,
+      "total_parameters": 247224,
+      "trainable_parameters": 247224,
+      "final_train_loss": -0.2625585198402405,
+      "validation_auprc_h8": 0.2328147303882842,
+      "validation_brier_h8": 0.10968380668580219,
+      "validation_recall_at_fpr": 0.102803738317757,
+      "validation_threshold": 0.2780669629573822,
+      "arm_train_elapsed_sec": 7.323638330999529,
+      "updates_per_second": 136.5441539852119,
+      "comparison_role": "supplementary_unmatched",
+      "logical_rank": null,
+      "explicit_associative_memory": false,
+      "backbone_trainable_parameters": 240390
+    }
+  ],
+  "event_prevalence": {
+    "train": {
+      "episodes": 256,
+      "transitions": 3117,
+      "unsafe_episodes": 88,
+      "by_horizon": {
+        "1": {
+          "positives": 88,
+          "prevalence": 0.0282322745770216
+        },
+        "4": {
+          "positives": 283,
+          "prevalence": 0.09079242497682571
+        },
+        "8": {
+          "positives": 448,
+          "prevalence": 0.14372794330120087
+        },
+        "16": {
+          "positives": 570,
+          "prevalence": 0.1828681379556656
+        }
+      }
+    },
+    "validation": {
+      "episodes": 64,
+      "transitions": 815,
+      "unsafe_episodes": 19,
+      "by_horizon": {
+        "1": {
+          "positives": 19,
+          "prevalence": 0.023312883451581
+        },
+        "4": {
+          "positives": 70,
+          "prevalence": 0.08588957041501999
+        },
+        "8": {
+          "positives": 107,
+          "prevalence": 0.1312883496284485
+        },
+        "16": {
+          "positives": 130,
+          "prevalence": 0.15950919687747955
+        }
+      }
+    }
+  },
+  "runtime": {
+    "total_sec": 304.3198878340045,
+    "final_updates_per_second": {
+      "asm_x_directional": 3.3772591821711955,
+      "tiny_transformer_220k": 228.59450062772623
+    }
+  },
+  "supplementary_comparisons": {
+    "cm_vs_vr_s_full_total_parameter_mismatch": 0.0002808835063016397,
+    "cm_vs_vr_s_fixed32_total_parameter_mismatch": 0.0002808835063016397,
+    "interpretation": "descriptive validation-only supplementary arms; not the registered ATTR gate pair"
+  }
+}

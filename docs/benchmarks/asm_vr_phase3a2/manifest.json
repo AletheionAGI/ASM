@@ -1,0 +1,113 @@
+{
+  "asm_s_memory_hidden_size": 308,
+  "batch_size": 16,
+  "corpus": {
+    "bytes": {
+      "test": 2342253,
+      "train": 45626267,
+      "validation": 2186467
+    },
+    "documents": {
+      "test": 102,
+      "train": 2067,
+      "validation": 103
+    },
+    "sha256": {
+      "test": "2091120ff0a7393ea38bdaa9a8e368f8233c358b6fa90e0e032187c3b0abf7d1",
+      "train": "7ea04cd77e978e33d769e2a30337c0667098a015d48088a379517740b07367cb",
+      "validation": "b405fc7c935727d9a734b08a1d2d528138f7c2f4c882928bc18534b0163de46e"
+    },
+    "source": "data/wikipedia_en_20231101_sample.txt",
+    "source_sha256": "d67db4f34c20a0be723a1606cb3699253eb198c2b9dfbb9c4cb833eed2b891e0",
+    "split_method": "sha256(document) first 64 bits modulo 20; 18/1/1"
+  },
+  "optimizer": "AdamW",
+  "parameter_counts": {
+    "vr_r": {
+      "total": 223814,
+      "trainable": 219654
+    },
+    "vr_s": {
+      "total": 223738,
+      "trainable": 219578
+    }
+  },
+  "phase": "3A.2",
+  "provenance": {
+    "final_implementation": {
+      "files": [
+        "src/drm_language_emitter/directional_blocks.py",
+        "src/drm_language_emitter/directional_forward.py",
+        "src/aletheion_state_models/variants/variable_rank.py",
+        "src/aletheion_state_models/variants/selective_state.py",
+        "src/aletheion_state_models/benchmarks/phase3a2_variants.py",
+        "src/aletheion_state_models/benchmarks/phase3a2_calibration.py",
+        "src/aletheion_state_models/benchmarks/phase3a2_summary.py",
+        "src/aletheion_state_models/benchmarks/phase3a2_plots.py",
+        "scripts/run_asm_vr_phase3a2.py",
+        "scripts/finalize_asm_vr_phase3a2.py"
+      ],
+      "sha256": "f2bc9a46fb13fc8771620692f140fbea01cc8bda455817a94bc9bbd6f2d728fc"
+    },
+    "implementation": {
+      "files": [
+        "src/drm_language_emitter/directional_blocks.py",
+        "src/aletheion_state_models/variants/variable_rank.py",
+        "src/aletheion_state_models/variants/selective_state.py",
+        "src/aletheion_state_models/benchmarks/phase3a2_variants.py",
+        "src/aletheion_state_models/benchmarks/phase3a2_calibration.py",
+        "src/aletheion_state_models/benchmarks/phase3a2_summary.py",
+        "scripts/run_asm_vr_phase3a2.py"
+      ],
+      "sha256": "b44072445614f3d8cf7b3ccf184723f966cd8c7ab77b2c564ea6fbefdb91bd4e"
+    },
+    "note": "training path unchanged by post-run fixed-shape streaming finalization; repository dirty; no commit created",
+    "repository_dirty": true
+  },
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "sequence_length": 256,
+  "steps": 489,
+  "streaming_fix": "configured block size with zero-padded causal open block",
+  "test_protocol": {
+    "opened_after_validation_freeze": true
+  },
+  "thresholds": {
+    "vr_r": 0.674,
+    "vr_s": 0.6890000000000001
+  },
+  "tokens_per_run": 2002944,
+  "validation_policy_selection": {
+    "common_policy": "full",
+    "mean_ranks": {
+      "adaptive_32": 32.036702473958336,
+      "fixed_16": 16.0,
+      "fixed_32": 32.0,
+      "fixed_48": 48.0,
+      "full": 64.0
+    },
+    "rule": "within 0.01 nat of best across bases, choose lower rank",
+    "scores": {
+      "adaptive_32": 2.6371129751205444,
+      "fixed_16": 2.6286393801371255,
+      "fixed_32": 2.5727305014928183,
+      "fixed_48": 2.554955760637919,
+      "full": 2.544697403907776
+    }
+  },
+  "variants": [
+    "vr_r_full",
+    "vr_r_fixed_16",
+    "vr_r_fixed_32",
+    "vr_r_fixed_48",
+    "vr_r_adaptive_32",
+    "vr_s_full",
+    "vr_s_fixed_16",
+    "vr_s_fixed_32",
+    "vr_s_fixed_48",
+    "vr_s_adaptive_32"
+  ]
+}

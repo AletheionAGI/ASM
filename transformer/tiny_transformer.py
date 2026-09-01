@@ -49,19 +49,33 @@ class TinyTransformerLM(nn.Module):
         self.norm = nn.LayerNorm(config.d_model)
         self.lm_head = nn.Linear(config.d_model, config.vocab_size)
 
-    def forward(self, input_ids: torch.Tensor, targets: torch.Tensor | None = None) -> dict[str, Any]:
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        targets: torch.Tensor | None = None,
+        return_hidden_states: bool = False,
+    ) -> dict[str, Any]:
         batch, seq_len = input_ids.shape
-        positions = torch.arange(seq_len, device=input_ids.device).unsqueeze(0).expand(batch, -1)
+        positions = (
+            torch.arange(seq_len, device=input_ids.device)
+            .unsqueeze(0)
+            .expand(batch, -1)
+        )
         x = self.token_embedding(input_ids) + self.position_embedding(positions)
         mask = torch.triu(
             torch.ones(seq_len, seq_len, device=input_ids.device, dtype=torch.bool),
             diagonal=1,
         )
         x = self.encoder(x, mask=mask)
-        logits = self.lm_head(self.norm(x))
+        hidden_states = self.norm(x)
+        logits = self.lm_head(hidden_states)
         out: dict[str, Any] = {"logits": logits}
+        if return_hidden_states:
+            out["hidden_states"] = hidden_states
         if targets is not None:
-            ce = F.cross_entropy(logits.reshape(-1, logits.shape[-1]), targets.reshape(-1))
+            ce = F.cross_entropy(
+                logits.reshape(-1, logits.shape[-1]), targets.reshape(-1)
+            )
             out["loss"] = ce
             out["aux_losses"] = {"ce": ce, "total": ce}
         return out
@@ -79,7 +93,9 @@ def generate_transformer(
     top_k: int | None = None,
 ) -> torch.Tensor:
     model.eval()
-    temperature = model.config.generation_temperature if temperature is None else temperature
+    temperature = (
+        model.config.generation_temperature if temperature is None else temperature
+    )
     top_k = model.config.top_k if top_k is None else top_k
     out = input_ids
     for _ in range(max_new_tokens):

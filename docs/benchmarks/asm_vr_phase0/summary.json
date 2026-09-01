@@ -1,0 +1,13 @@
+{
+  "cycle_frobenius_deviation": 0.7905694150420948,
+  "cycle_minimum_dissipation_eigenvalue": 0.0,
+  "cycle_numerical_rank": 3,
+  "cycle_rank_bound": 3,
+  "cycle_rank_deficit": 5,
+  "effective_probe_recovery": 0.0001124092436157742,
+  "external_memory_probe_recovery": 1.0,
+  "passed": true,
+  "projector_idempotence_error": 0.0,
+  "samples": 2048,
+  "soft_filter_non_idempotence": 2.5913430029491997
+}

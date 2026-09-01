@@ -1,0 +1,64 @@
+{
+  "status": "smoke_only_not_sealed",
+  "seed": 17,
+  "updates": 1,
+  "device": "cpu",
+  "test_worlds_generated": false,
+  "worlds": {
+    "train": 8,
+    "validation": 4,
+    "episodes_per_world": 2
+  },
+  "horizons": [
+    1,
+    4,
+    8,
+    16
+  ],
+  "features": [
+    "agent",
+    "velocity",
+    "energy_sensor",
+    "goal_delta",
+    "local_hazard_distance",
+    "action"
+  ],
+  "audits": {
+    "feature_leakage": true,
+    "episode_split": true,
+    "threshold_selection": "validation_only"
+  },
+  "parameter_mismatch_fraction": 0.0059962249242790045,
+  "controls": {
+    "persistence_next_state_mse": 0.09507185220718384,
+    "kalman_next_state_mse": 0.08727852255105972,
+    "markov_h8": {
+      "auprc": 0.22990168546603576,
+      "brier": 0.1363979614040171
+    }
+  },
+  "arms": [
+    {
+      "arm": "asm_x_directional",
+      "backbone_parameters": 219610,
+      "head_parameters": 6834,
+      "trainable_parameters": 226444,
+      "final_train_loss": 1.229088306427002,
+      "validation_auprc_h8": 0.4811580615152044,
+      "validation_brier_h8": 0.2448541807506706,
+      "validation_recall_at_fpr": 0.16666666666666666,
+      "validation_threshold": 0.49855518341064453
+    },
+    {
+      "arm": "tiny_transformer_220k",
+      "backbone_parameters": 220208,
+      "head_parameters": 7602,
+      "trainable_parameters": 227810,
+      "final_train_loss": 1.2830969095230103,
+      "validation_auprc_h8": 0.14679205225223255,
+      "validation_brier_h8": 0.26775418147406854,
+      "validation_recall_at_fpr": 0.0,
+      "validation_threshold": 1.0
+    }
+  ]
+}

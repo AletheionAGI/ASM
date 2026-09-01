@@ -1,0 +1,33 @@
+{
+  "arms": {
+    "cm_vr_fixed32": 32,
+    "cm_vr_full64": 64
+  },
+  "controller": "input-only, prefix mask, frozen",
+  "execution": {
+    "duration_sec": 214.5,
+    "exit_code": 0,
+    "status": "completed"
+  },
+  "experiment": "ASM-CM-VR fixed-32 Phase 1",
+  "hardware": "NVIDIA GeForce RTX 4090",
+  "implementation": {
+    "files": [
+      "src/drm_language_emitter/config.py",
+      "src/drm_language_emitter/fast_weight_memory.py",
+      "src/drm_language_emitter/rank_aware_memory.py",
+      "src/drm_language_emitter/directional_forward.py",
+      "src/drm_language_emitter/inference.py",
+      "src/aletheion_state_models/variants/compact_variable_rank.py",
+      "src/aletheion_state_models/variants/__init__.py",
+      "src/aletheion_state_models/benchmarks/cmvr_phase1.py",
+      "src/aletheion_state_models/benchmarks/cmvr_phase1_plots.py",
+      "scripts/run_asm_cm_vr_fixed32_phase1.py"
+    ],
+    "sha256": "d604e72271cc4a9ee52cc7d34f41be80f0c6e48df0300acb9dbd39d04e88273d"
+  },
+  "memory_contract": "state and fast-weight value payload projected before write and after read; token/key control plane allowed",
+  "seed": 17,
+  "steps": 1000,
+  "test_protocol": "fixed terminal checkpoint and held-out deterministic MQAR streams"
+}

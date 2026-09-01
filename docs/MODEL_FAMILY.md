@@ -6,6 +6,9 @@ DRM Language Emitter began as a partial computational translation of
 Directional Relational Manifolds. Recent ablations produced architectures that
 retain different parts of that proposal.
 
+For an operational model-selection guide, see
+[`MODEL_FAMILY_PURPOSE.md`](MODEL_FAMILY_PURPOSE.md).
+
 This document separates three levels of identity:
 
 ```text
@@ -15,7 +18,7 @@ Directional Relational Manifolds
 Aletheion State Models
     research program
           ↓
-ASM-X, ASM-R, ASM-C, ASM-C2, ASM-C2-FW, ASM-S, ASM-F...
+ASM-X, ASM-R, ASM-C, ASM-C2, ASM-C2-FW, ASM-S, ASM-VR-S, ASM-F...
  architectural variants
 ```
 
@@ -63,12 +66,15 @@ seed confirmation.
 | ASM-U | Metric Subspace State Model | naturalized movement inside the subspace |
 | ASM-F | Relational Frame State Model | directional frame normalized by the metric |
 | ASM-R | Relational State Model | direct transition conditioned by the metric |
+| ASM-RS | Relational Selective State Emitter | explicit ASM-R + ASM-S composition |
 | ASM-C | Compact State Model | ASM-R weights with bounded streaming inference state |
 | ASM-C2 | Compact Addressable State Model | ASM-C with bounded key/value memory slots |
 | ASM-C2-FW | Compact Fast-Weight State Model | ASM-C with a bounded delta-rule associative matrix |
 | ASM-CM | Aletheion Compact Memory Model | promoted public identity of ASM-C2-FW-LM |
+| ASM-CM-VR | Variable-Rank Compact Memory State Model | experimental rank-aware ASM-CM; fixed-32 long multiseed gate failed |
 | ASM-D | Direct State Model | direct neural transition without geometry |
 | ASM-S | Selective State Model | capacity concentrated in selective memory |
+| ASM-VR-S | Variable-Rank Selective State Emitter | ASM-S with projected state and variable/fixed effective rank |
 | ASM-M | Causal Memory State Model | mixer, residual, and narrow selective memory |
 
 The letters identify mechanisms, not quality rankings.
@@ -261,6 +267,34 @@ VRAM `363.66 MiB`, and mean throughput `80.68 tok/s`. Transformer CE remains
 lower, so promotion is specifically for durable associative memory, bounded
 state, and language compatibility.
 
+### 7.5 ASM-CM-VR — Variable-Rank Compact Memory State Model
+
+**ASM-CM-VR** applies a strict fixed Variable Rank policy to the durable
+fast-weight payload of ASM-CM. The value axis is aligned with `d_state`; state,
+write candidate, read vector, matrix, and consolidated memory are projected by
+the same prefix mask. Token/key control remains a causal address plane and is
+not described as logical state rank.
+
+The fixed-32 Phase 1 control passed structural no-bypass, Jacobian,
+shrink→grow, full/stream parity, MQAR-40, read/write ablation, and 4K streaming
+gates in seed 17. In the long seeds 17/29/43 curriculum, fixed-32 and full-64
+passed in 2/3 seeds; both had non-finite 32K failures in seed 29. Adaptive-32
+varied rank and received gradients but also passed the 32K quality threshold in
+only 2/3 seeds. Fixed-32 is not promoted. All arms retained the same 66,112
+bytes, so there is no physical efficiency claim.
+
+## 7A. ASM-RS — Relational Selective State Emitter
+
+**ASM-RS** explicitly combines ASM-R and ASM-S: it retains relational metric
+naturalization and adds selective state memory. This is mechanically the recipe
+used by the historical practical ASM-R, while RS makes the composition clear.
+
+**ASM-VR-RS** applies Variable Rank to ASM-RS. Its full name is:
+
+> Variable-Rank Relational Selective State Emitter
+
+VR remains “Variable Rank”; this model does not claim variational inference.
+
 ## 8. ASM-D — Direct State Model
 
 `ASM-D` is the structural direct control without geometry:
@@ -299,6 +333,27 @@ Suggested public name:
 
 This name becomes appropriate if the scaling law shows that allocating
 capacity to memory is more useful than modeling geometry.
+
+## 9A. ASM-VR-S — Variable-Rank Selective State Emitter
+
+**ASM-VR-S** applies Variable Rank to the ASM-S core. The direct transition,
+causal mixer, token-state residual, and selective memory operate only on
+projected state. Hard projection is also applied to `local_delta` before the
+mixer. The model has no parallel memory, addressable memory, or Transition
+Memory.
+
+Full name:
+
+> Variable-Rank Selective State Emitter
+
+`VR` means **Variable Rank**, not “Variational”. Phase 3A.2 promoted the
+ASM-VR-S base on quality: it beat ASM-VR-R in all 15 paired comparisons and was
+confirmed in 3/3 new AdamM seeds. Full and fixed-rank controls are validated.
+The current adaptive controller remains experimental because it did not beat
+the fixed-rank frontier.
+
+Artifacts and charts:
+[`benchmarks/asm_vr_phase3a2/`](benchmarks/asm_vr_phase3a2/).
 
 ## 10. ASM-M — Causal Memory State Model
 

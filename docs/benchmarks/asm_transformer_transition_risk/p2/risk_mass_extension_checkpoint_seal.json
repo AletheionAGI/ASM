@@ -1,0 +1,33 @@
+{
+  "payload": {
+    "manifest_sha256": "0760d265dab2af640d74b4c8cf8064b23d1d4c3a6cdae633e818dd7e53d459d3",
+    "checkpoints": [
+      {
+        "seed": 29,
+        "path": "seed_29__asm_x_directional_risk_mass.pt",
+        "sha256": "c9ccd8e1be5957a573f9b74f3368fddf30392bfcf2317b29c3e9d1cdc41aacc2"
+      },
+      {
+        "seed": 43,
+        "path": "seed_43__asm_x_directional_risk_mass.pt",
+        "sha256": "e35c84f2ebce4e9aaa5190fe6af9111c09b743ddcf88d8823c5933bc801fe4ab"
+      },
+      {
+        "seed": 71,
+        "path": "seed_71__asm_x_directional_risk_mass.pt",
+        "sha256": "ff3911e130b60c35ac3defb6d1c1b027de5c11075f9961d9f442a80132ba50ed"
+      },
+      {
+        "seed": 89,
+        "path": "seed_89__asm_x_directional_risk_mass.pt",
+        "sha256": "992a42865639aea3f9946dcbc6ed4d274f12da1a0f34880233e69ada1fb10a2b"
+      },
+      {
+        "seed": 107,
+        "path": "seed_107__asm_x_directional_risk_mass.pt",
+        "sha256": "0839b49c16c9f073f5275c133322a65d130c5be569e59ce9ebc08fd14a637958"
+      }
+    ]
+  },
+  "sha256": "88f2b93967b6e5e4ffbe97ab3b6232fa890e6812dbe0c6fa4064cac602182ee0"
+}

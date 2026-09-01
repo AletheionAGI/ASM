@@ -1,0 +1,42 @@
+{
+  "corpus": {
+    "bytes": {
+      "test": 2342253,
+      "train": 45626267,
+      "validation": 2186467
+    },
+    "documents": {
+      "test": 102,
+      "train": 2067,
+      "validation": 103
+    },
+    "sha256": {
+      "test": "2091120ff0a7393ea38bdaa9a8e368f8233c358b6fa90e0e032187c3b0abf7d1",
+      "train": "7ea04cd77e978e33d769e2a30337c0667098a015d48088a379517740b07367cb",
+      "validation": "b405fc7c935727d9a734b08a1d2d528138f7c2f4c882928bc18534b0163de46e"
+    },
+    "source": "data/wikipedia_en_20231101_sample.txt",
+    "source_sha256": "d67db4f34c20a0be723a1606cb3699253eb198c2b9dfbb9c4cb833eed2b891e0",
+    "split_method": "sha256(document) first 64 bits modulo 20; 18/1/1"
+  },
+  "historical_note": "formalizes the relational+selective recipe already used by practical ASM-R",
+  "name": "ASM-VR-RS \u2014 Variable-Rank Relational Selective State Emitter",
+  "parameter_count": 244550,
+  "parameter_matched_to_r_s": false,
+  "phase": "3A.3",
+  "provenance": {
+    "files": [
+      "src/aletheion_state_models/variants/relational_selective_state.py",
+      "src/aletheion_state_models/benchmarks/phase3a3_variants.py",
+      "scripts/run_asm_vr_phase3a3_rs.py"
+    ],
+    "implementation_sha256": "681d054927e0b5b31e795886084a3701a6c32ce33db94419b84cf86aa987e325",
+    "repository_dirty": true
+  },
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "tokens_per_run": 2002944
+}

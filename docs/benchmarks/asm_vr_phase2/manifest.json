@@ -1,0 +1,88 @@
+{
+  "acceptance": {
+    "adaptive_accuracy_gap_vs_fixed_mid": -0.05,
+    "finite": true,
+    "mean_rank_range": [
+      5,
+      11
+    ],
+    "minimum_controller_gradient_fraction": 0.9,
+    "minimum_rank_difficulty_correlation_mean": 0.1,
+    "minimum_rank_std": 0.5,
+    "three_adaptive_seeds": true
+  },
+  "adaptive": {
+    "budget_ramp_steps": 60,
+    "hardening_steps": 80,
+    "lambda_binary": 0.01,
+    "lambda_budget": 0.02,
+    "lambda_switch": 0.0,
+    "mask_family": "prefix-nested",
+    "minimum_rank": 4,
+    "target_rank": 8,
+    "temperature": [
+      2.0,
+      0.5
+    ],
+    "warmup_steps": 20
+  },
+  "development_disclosure": [
+    "An exploratory free-mask matrix with minimum rank 2 failed the quality gate.",
+    "An exploratory prefix-mask matrix with minimum rank 2 failed the quality gate.",
+    "The final protocol raised minimum rank to the existing fixed-low control rank 4 because workload item count is not a mathematical rank lower bound."
+  ],
+  "environment": {
+    "device": "cpu",
+    "platform": "Linux-6.18.48-1-lts-x86_64-with-glibc2.44",
+    "python": "3.14.7",
+    "torch": "2.13.0+cu130"
+  },
+  "evaluation_batches": 16,
+  "fixed_ranks": {
+    "vr_fixed_low": 4,
+    "vr_fixed_mid": 8,
+    "vr_full": 16
+  },
+  "model": {
+    "d_state": 16,
+    "d_token": 16,
+    "hidden_size": 32,
+    "metric_rank": 4,
+    "vocab_size": 32
+  },
+  "protocol": "asm-vr-phase2-synthetic-v1",
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "status": "frozen-after-two-documented-development-matrices",
+  "task": {
+    "block_size": 4,
+    "capacity_markers": {
+      "high": 2,
+      "low": 1
+    },
+    "difficulty_levels": [
+      1,
+      3
+    ],
+    "loss": "masked next-token cross-entropy on copied payload only",
+    "name": "variable-capacity-copy",
+    "sequence_tokens": 8
+  },
+  "training": {
+    "batch_size": 64,
+    "learning_rate": 0.003,
+    "optimizer": "AdamW",
+    "steps": 200,
+    "weight_decay": 0.0
+  },
+  "variants": [
+    "asm_r",
+    "vr_full",
+    "vr_fixed_low",
+    "vr_fixed_mid",
+    "vr_adaptive"
+  ]
+}

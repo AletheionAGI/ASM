@@ -1,0 +1,101 @@
+{
+  "payload": {
+    "experiment": "ATTR P2 sealed predictive benchmark",
+    "training_seeds": [
+      29,
+      43,
+      71,
+      89,
+      107
+    ],
+    "arms": [
+      "asm_x_directional",
+      "tiny_transformer_220k",
+      "asm_cm_durable",
+      "asm_vr_s_full64",
+      "asm_vr_s_fixed32",
+      "asm_r_240k_control"
+    ],
+    "updates_per_arm": 1000,
+    "train_worlds": 64,
+    "validation_worlds": 16,
+    "episodes_per_world": 4,
+    "test_specs": [
+      {
+        "test_id": "test_id",
+        "seed": 170001,
+        "world_count": 32,
+        "episodes_per_world": 4,
+        "dynamic_family": "baseline",
+        "max_steps": 16,
+        "sensor_noise": 0.04,
+        "forcing": 0.1,
+        "failure_delay": 3,
+        "recovery_window": 3
+      },
+      {
+        "test_id": "test_shift",
+        "seed": 170002,
+        "world_count": 32,
+        "episodes_per_world": 4,
+        "dynamic_family": "shift",
+        "max_steps": 16,
+        "sensor_noise": 0.12,
+        "forcing": 0.22,
+        "failure_delay": 3,
+        "recovery_window": 3
+      },
+      {
+        "test_id": "test_ood",
+        "seed": 170003,
+        "world_count": 32,
+        "episodes_per_world": 4,
+        "dynamic_family": "ood",
+        "max_steps": 16,
+        "sensor_noise": 0.18,
+        "forcing": 0.16,
+        "failure_delay": 1,
+        "recovery_window": 2
+      }
+    ],
+    "checkpoint_ids": [
+      "seed_29__asm_x_directional.pt",
+      "seed_29__tiny_transformer_220k.pt",
+      "seed_29__asm_cm_durable.pt",
+      "seed_29__asm_vr_s_full64.pt",
+      "seed_29__asm_vr_s_fixed32.pt",
+      "seed_29__asm_r_240k_control.pt",
+      "seed_43__asm_x_directional.pt",
+      "seed_43__tiny_transformer_220k.pt",
+      "seed_43__asm_cm_durable.pt",
+      "seed_43__asm_vr_s_full64.pt",
+      "seed_43__asm_vr_s_fixed32.pt",
+      "seed_43__asm_r_240k_control.pt",
+      "seed_71__asm_x_directional.pt",
+      "seed_71__tiny_transformer_220k.pt",
+      "seed_71__asm_cm_durable.pt",
+      "seed_71__asm_vr_s_full64.pt",
+      "seed_71__asm_vr_s_fixed32.pt",
+      "seed_71__asm_r_240k_control.pt",
+      "seed_89__asm_x_directional.pt",
+      "seed_89__tiny_transformer_220k.pt",
+      "seed_89__asm_cm_durable.pt",
+      "seed_89__asm_vr_s_full64.pt",
+      "seed_89__asm_vr_s_fixed32.pt",
+      "seed_89__asm_r_240k_control.pt",
+      "seed_107__asm_x_directional.pt",
+      "seed_107__tiny_transformer_220k.pt",
+      "seed_107__asm_cm_durable.pt",
+      "seed_107__asm_vr_s_full64.pt",
+      "seed_107__asm_vr_s_fixed32.pt",
+      "seed_107__asm_r_240k_control.pt"
+    ],
+    "calibration": "per-seed validation threshold at FPR<=0.05",
+    "g1_next_state_nll_noninferiority_margin": 0.02,
+    "g2_min_auprc_gain": 0.03,
+    "g2_max_brier_degradation": 0.01,
+    "g5_min_positive_training_seeds": 4,
+    "test_opened": false
+  },
+  "sha256": "5a2f30d6e4dff18175f50454de9522d38d243179d4a9439ab8003eeb4718b77f"
+}

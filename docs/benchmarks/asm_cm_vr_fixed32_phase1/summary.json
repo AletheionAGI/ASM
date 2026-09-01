@@ -1,0 +1,211 @@
+{
+  "arms": [
+    {
+      "arm": "cm_vr_full64",
+      "elapsed_sec": 72.07011458499619,
+      "finite": true,
+      "history": [
+        {
+          "step": 1,
+          "train_ce": 5.631838798522949,
+          "validation_accuracy": 0.0048828125,
+          "validation_ce": 5.551962912082672
+        },
+        {
+          "step": 100,
+          "train_ce": 4.313039779663086,
+          "validation_accuracy": 0.0166015625,
+          "validation_ce": 4.294040381908417
+        },
+        {
+          "step": 250,
+          "train_ce": 3.782938003540039,
+          "validation_accuracy": 0.2216796875,
+          "validation_ce": 3.7612494826316833
+        },
+        {
+          "step": 500,
+          "train_ce": 0.3595277667045593,
+          "validation_accuracy": 1.0,
+          "validation_ce": 0.32393108680844307
+        },
+        {
+          "step": 750,
+          "train_ce": 0.01896587572991848,
+          "validation_accuracy": 1.0,
+          "validation_ce": 0.01930232299491763
+        },
+        {
+          "step": 1000,
+          "train_ce": 0.007163687143474817,
+          "validation_accuracy": 1.0,
+          "validation_ce": 0.007633839559275657
+        }
+      ],
+      "logical_rank": 64,
+      "no_read": {
+        "accuracy": 0.0322265625,
+        "ce": 4.825886428356171,
+        "ce_finite": true,
+        "correct": 66,
+        "length": 40,
+        "targets": 2048
+      },
+      "no_write": {
+        "accuracy": 0.0322265625,
+        "ce": 4.825886428356171,
+        "ce_finite": true,
+        "correct": 66,
+        "length": 40,
+        "targets": 2048
+      },
+      "parameters_total": 265866,
+      "parameters_trainable": 261706,
+      "seed": 17,
+      "steps": 1000,
+      "streaming": [
+        {
+          "cuda_peak_mb": 20.84716796875,
+          "latency_ms_p50": 8.109925660136241,
+          "latency_ms_p95": 8.119772591388141,
+          "length": 512,
+          "open_block_tokens": 0,
+          "retained_state_bytes": 66112,
+          "segment_elapsed_sec": 3.6316079309981433,
+          "segment_tokens": 448,
+          "tokens_per_second": 123.36133429383378
+        },
+        {
+          "cuda_peak_mb": 20.83935546875,
+          "latency_ms_p50": 8.109450171872368,
+          "latency_ms_p95": 8.24546405585238,
+          "length": 4096,
+          "open_block_tokens": 0,
+          "retained_state_bytes": 66112,
+          "segment_elapsed_sec": 29.105704381996475,
+          "segment_tokens": 3584,
+          "tokens_per_second": 123.1373737931904
+        }
+      ],
+      "streaming_error": 2.86102294921875e-06,
+      "test": {
+        "accuracy": 1.0,
+        "ce": 0.007471561635611579,
+        "ce_finite": true,
+        "correct": 2048,
+        "length": 40,
+        "targets": 2048
+      }
+    },
+    {
+      "arm": "cm_vr_fixed32",
+      "elapsed_sec": 71.74506788899453,
+      "finite": true,
+      "history": [
+        {
+          "step": 1,
+          "train_ce": 5.610954284667969,
+          "validation_accuracy": 0.0009765625,
+          "validation_ce": 5.537373483181
+        },
+        {
+          "step": 100,
+          "train_ce": 4.3223676681518555,
+          "validation_accuracy": 0.015625,
+          "validation_ce": 4.332727909088135
+        },
+        {
+          "step": 250,
+          "train_ce": 4.109737873077393,
+          "validation_accuracy": 0.056640625,
+          "validation_ce": 4.112390041351318
+        },
+        {
+          "step": 500,
+          "train_ce": 1.8179852962493896,
+          "validation_accuracy": 0.8642578125,
+          "validation_ce": 1.802976369857788
+        },
+        {
+          "step": 750,
+          "train_ce": 0.0985088124871254,
+          "validation_accuracy": 1.0,
+          "validation_ce": 0.0944085344672203
+        },
+        {
+          "step": 1000,
+          "train_ce": 0.01653892546892166,
+          "validation_accuracy": 1.0,
+          "validation_ce": 0.016559853218495846
+        }
+      ],
+      "logical_rank": 32,
+      "no_read": {
+        "accuracy": 0.015625,
+        "ce": 5.843685209751129,
+        "ce_finite": true,
+        "correct": 32,
+        "length": 40,
+        "targets": 2048
+      },
+      "no_write": {
+        "accuracy": 0.015625,
+        "ce": 5.843685209751129,
+        "ce_finite": true,
+        "correct": 32,
+        "length": 40,
+        "targets": 2048
+      },
+      "parameters_total": 265866,
+      "parameters_trainable": 261706,
+      "seed": 17,
+      "steps": 1000,
+      "streaming": [
+        {
+          "cuda_peak_mb": 20.84716796875,
+          "latency_ms_p50": 8.116272656224055,
+          "latency_ms_p95": 8.374224962480525,
+          "length": 512,
+          "open_block_tokens": 0,
+          "retained_state_bytes": 66112,
+          "segment_elapsed_sec": 3.6628214009979274,
+          "segment_tokens": 448,
+          "tokens_per_second": 122.31008584746813
+        },
+        {
+          "cuda_peak_mb": 20.83935546875,
+          "latency_ms_p50": 8.087403488246991,
+          "latency_ms_p95": 8.15212430820793,
+          "length": 4096,
+          "open_block_tokens": 0,
+          "retained_state_bytes": 66112,
+          "segment_elapsed_sec": 28.972731829999248,
+          "segment_tokens": 3584,
+          "tokens_per_second": 123.70252211733163
+        }
+      ],
+      "streaming_error": 2.86102294921875e-06,
+      "test": {
+        "accuracy": 1.0,
+        "ce": 0.01626647205557674,
+        "ce_finite": true,
+        "correct": 2048,
+        "length": 40,
+        "targets": 2048
+      }
+    }
+  ],
+  "experiment": "ASM-CM-VR fixed-32 Phase 1",
+  "gates": {
+    "fixed_memory_read_required": true,
+    "fixed_memory_write_required": true,
+    "fixed_rank_exact": true,
+    "fixed_short_mqar_95pct": true,
+    "fixed_streaming_4k_complete": true,
+    "fixed_streaming_parity": true,
+    "full_streaming_parity": true,
+    "parameter_match_trainable": true
+  },
+  "passed": true,
+  "seed": 17
+}

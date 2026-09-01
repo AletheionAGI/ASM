@@ -1,0 +1,15 @@
+{
+  "checkpoints_changed": false,
+  "issue": "trajectory_summary.load_matrix expected flat filenames while the sealed runner wrote split/seed_<seed>__<arm>.jsonl",
+  "kind": "ATTR-TG1 reporting-only compatibility view",
+  "metric_code_changed": false,
+  "occurred_after_test_open": true,
+  "prediction_manifest_sha256": "aa2bd2b2099540cbb3b28e4789f3b8ae7692c18793b3839e15e8312364841307",
+  "predictive_artifacts_changed": false,
+  "raw_prediction_root": "/home/gnai-creator/dev/ai/ASM/runs/attr_trajectory_grounded_tg1/predictions",
+  "resolution": "The unchanged presealed summarizer ran against temporary read-only symlinks that mapped its flat names to the exact 40 prediction files. Its built-in prediction-manifest verification passed before metrics were computed.",
+  "scores_changed": false,
+  "sealed_source_changed": false,
+  "summary_sha256": "8fb26b59eca516c1cb25fefa658434886339216768198e949608c8f7b429c468",
+  "temporary_view": "/tmp/tg1_summary_compat"
+}

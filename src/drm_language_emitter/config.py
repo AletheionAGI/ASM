@@ -121,6 +121,7 @@ class DRMConfig:
     addressable_memory_backend: str = "slots"
     addressable_memory_slots: int = 32
     addressable_memory_dim: int = 128
+    addressable_memory_value_dim: int = 0
     addressable_memory_heads: int = 1
     addressable_memory_read_scale: float = 0.1
     addressable_memory_write_bias: float = -2.0
@@ -144,6 +145,21 @@ class DRMConfig:
     epistemic_gate_num_layers: int = 2
     epistemic_gate_dropout: float = 0.0
     epistemic_gate_initial_confidence: float = 0.9
+    variable_rank_mode: str = "off"
+    variable_rank_threshold: float = 0.5
+    variable_rank_min_rank: int = 1
+    variable_rank_target_fraction: float = 0.5
+    variable_rank_temperature_initial: float = 2.0
+    variable_rank_temperature_final: float = 0.5
+    variable_rank_warmup_steps: int = 25
+    variable_rank_budget_ramp_steps: int = 75
+    variable_rank_hardening_steps: int = 100
+    lambda_variable_rank_budget: float = 1.0
+    lambda_variable_rank_binary: float = 0.01
+    lambda_variable_rank_switch: float = 0.01
+    variable_rank_open_probability: float = 0.95
+    variable_rank_scaffold_projection: bool = False
+    variable_rank_memory_policy: str = "forbid"
     lambda_addressable_read_entropy: float = 0.0
     lambda_addressable_write_entropy: float = 0.0
 
@@ -197,9 +213,14 @@ class DRMConfig:
             ("bptt_truncate_interval", 0, None),
             ("addressable_memory_slots", 1, None),
             ("addressable_memory_dim", 1, None),
+            ("addressable_memory_value_dim", 0, None),
             ("addressable_memory_heads", 1, None),
             ("epistemic_gate_hidden_dim", 1, None),
             ("epistemic_gate_num_layers", 0, None),
+            ("variable_rank_min_rank", 0, None),
+            ("variable_rank_warmup_steps", 0, None),
+            ("variable_rank_budget_ramp_steps", 0, None),
+            ("variable_rank_hardening_steps", 0, None),
             ("addressable_memory_read_top_k", 0, None),
             ("addressable_memory_write_top_k", 0, None),
         ]
@@ -274,6 +295,14 @@ class DRMConfig:
             ("fast_weight_slow_read_scale", 0.0, None),
             ("epistemic_gate_dropout", 0.0, 1.0),
             ("epistemic_gate_initial_confidence", 0.000001, 0.999999),
+            ("variable_rank_threshold", 0.0, 1.0),
+            ("variable_rank_target_fraction", 0.0, 1.0),
+            ("variable_rank_temperature_initial", 0.000001, None),
+            ("variable_rank_temperature_final", 0.000001, None),
+            ("lambda_variable_rank_budget", 0.0, None),
+            ("lambda_variable_rank_binary", 0.0, None),
+            ("lambda_variable_rank_switch", 0.0, None),
+            ("variable_rank_open_probability", 0.000001, 0.999999),
             ("lambda_addressable_read_entropy", 0.0, None),
             ("lambda_addressable_write_entropy", 0.0, None),
             ("lambda_block_consistency", 0.0, None),
@@ -310,6 +339,7 @@ class DRMConfig:
             "emitter_residual",
             "use_torch_compile",
             "compact_streaming_inference",
+            "variable_rank_scaffold_projection",
             "addressable_memory",
             "addressable_memory_read_enabled",
             "addressable_memory_write_enabled",
@@ -390,6 +420,46 @@ class DRMConfig:
             raise ValueError(
                 "direct state transitions require a cumsum/block-cumsum sequence mode"
             )
+        if self.variable_rank_mode not in {"off", "phase1_input_hard", "phase2_input_ste", "phase3a1_projected"}:
+            raise ValueError("invalid variable_rank_mode")
+        if self.variable_rank_memory_policy not in {"forbid", "project_io"}:
+            raise ValueError("invalid variable_rank_memory_policy")
+        rank_memory_is_aligned = self.variable_rank_mode != "off" and self.addressable_memory and self.addressable_memory_backend == "fast_weight" and (self.addressable_memory_value_dim or self.addressable_memory_dim) == self.d_state
+        if self.variable_rank_memory_policy == "project_io" and not rank_memory_is_aligned:
+            raise ValueError("project_io requires variable rank and state-aligned fast-weight memory")
+        if self.variable_rank_min_rank > self.d_state:
+            raise ValueError("variable_rank_min_rank cannot exceed d_state")
+        if self.variable_rank_mode == "off" and self.variable_rank_scaffold_projection:
+            raise ValueError("projected scaffold requires variable rank to be enabled")
+        if self.variable_rank_mode != "off":
+            if self.sequence_mode != "directional_block_cumsum":
+                raise ValueError("ASM-VR Phase 1 requires directional_block_cumsum")
+            if self.directional_cumsum_block_size <= 0:
+                raise ValueError("ASM-VR Phase 1 requires a positive block size")
+            if self.use_direction_field:
+                raise ValueError("ASM-VR Phase 1 requires the ASM-R direct transition")
+            scaffold_routes = (
+                self.directional_local_mixer != "none",
+                self.token_state_residual,
+                self.selective_memory,
+            )
+            forbidden_routes = (
+                self.addressable_memory and self.variable_rank_memory_policy == "forbid",
+                bool(self.directional_refinement_layers),
+                bool(self.directional_endpoint_correction_weight),
+                bool(self.directional_fixed_point_iterations),
+                bool(self.directional_anderson_iterations),
+            )
+            if any(forbidden_routes):
+                raise ValueError(
+                    "ASM-VR forbids unprojected addressable memory, refinement, and solver bypasses"
+                )
+            if any(scaffold_routes) and not self.variable_rank_scaffold_projection:
+                raise ValueError("ASM-VR forbids scaffold routes without projection after each component")
+            if self.variable_rank_scaffold_projection != (self.variable_rank_mode == "phase3a1_projected"):
+                raise ValueError("projected scaffold requires variable_rank_mode='phase3a1_projected'")
+            if not self.compact_streaming_inference:
+                raise ValueError("ASM-VR Phase 1 requires compact streaming inference")
         if self.addressable_memory and (
             not self.compact_streaming_inference
             or self.sequence_mode != "directional_block_cumsum"

@@ -6,6 +6,7 @@ import torch
 
 from .addressable_memory import AddressableMemoryState
 from .fast_weight_memory import FastWeightMemoryState
+from .rank_aware_memory import apply_rank_aware_memory
 
 MemoryState = AddressableMemoryState | FastWeightMemoryState
 from .losses import combine_losses, metric_diversity, next_token_cross_entropy, recurrence_proxy, stability_proxy
@@ -26,7 +27,9 @@ class DirectionalForwardMixin:
         batch, seq_len, d_token = token_embeddings.shape
         if self.config.sequence_mode == "directional_block_cumsum":
             block_size = self.config.directional_cumsum_block_size or seq_len
-            block_size = max(min(block_size, seq_len), 1)
+            block_size = max(block_size, 1)
+            if not self.config.variable_rank_scaffold_projection:
+                block_size = min(block_size, seq_len)
         elif self.config.sequence_mode == "directional_superblock_cumsum":
             block_size = self.config.directional_superblock_size or self.config.directional_cumsum_block_size or seq_len
             block_size = max(min(block_size, seq_len), 1)
@@ -45,6 +48,24 @@ class DirectionalForwardMixin:
         risk_values = []
         consistency_values = []
         sampled_consistency_values = []
+        variable_rank_masks = []
+        variable_rank_soft_gates = []
+        rank_curriculum = None
+        if self.config.variable_rank_mode in {"phase2_input_ste", "phase3a1_projected"}:
+            if self.training and global_step is None:
+                raise ValueError("Phase 2 training requires global_step")
+            from aletheion_state_models.geometry.variable_rank.rank_curriculum import (
+                phase2_rank_curriculum,
+            )
+
+            schedule_step = global_step
+            if schedule_step is None:
+                schedule_step = (
+                    self.config.variable_rank_warmup_steps
+                    + self.config.variable_rank_budget_ramp_steps
+                    + self.config.variable_rank_hardening_steps
+                )
+            rank_curriculum = phase2_rank_curriculum(schedule_step, self.config)
         z_block = z0
         addressable_state: MemoryState | None = None
         addressable_before_last_block: MemoryState | None = None
@@ -56,6 +77,25 @@ class DirectionalForwardMixin:
         for block_index, block_start in enumerate(range(0, seq_len, block_size)):
             addressable_before_last_block = addressable_state
             block_tokens = token_embeddings[:, block_start : block_start + block_size]
+            observed_block_length = block_tokens.shape[1]
+            block_input = block_tokens
+            if (
+                self.config.variable_rank_scaffold_projection
+                and observed_block_length < block_size
+            ):
+                block_input = torch.nn.functional.pad(
+                    block_tokens, (0, 0, 0, block_size - observed_block_length)
+                )
+            rank_observation = None
+            if self.variable_rank_core is not None:
+                rank_observation = self.variable_rank_core.observe_block(
+                    block_tokens,
+                    block_index,
+                    temperature=(
+                        rank_curriculum.temperature if rank_curriculum is not None else 1.0
+                    ),
+                )
+                z_block = self.variable_rank_core.begin_block(z_block, rank_observation)
             (
                 states_block,
                 action_block,
@@ -72,17 +112,55 @@ class DirectionalForwardMixin:
                 sampled_consistency_block,
             ) = self._directional_cumsum_block(
                 z_block,
-                block_tokens,
+                block_input,
                 global_step,
                 block_index,
                 collect_diagnostics,
+                projection_mask=(
+                    rank_observation.mask_for_projection()
+                    if rank_observation is not None
+                    and self.config.variable_rank_scaffold_projection
+                    else None
+                ),
             )
+            if block_input.shape[1] != observed_block_length:
+                states_block = states_block[:, :observed_block_length]
+                action_block = action_block[:, :observed_block_length]
+                dim_block = dim_block[:, :observed_block_length]
+                metric_diag_block = metric_diag_block[:, :observed_block_length]
+                condition_block = condition_block[:, :observed_block_length]
+                active_050_block = active_050_block[:, :observed_block_length]
+                gates_block = gates_block[:, :observed_block_length]
+                u_norm_block = u_norm_block[:, :observed_block_length]
+                risk_block = risk_block[:, :observed_block_length]
+                if consistency_block is not None:
+                    consistency_block = consistency_block[:, :observed_block_length]
+                if sampled_consistency_block is not None:
+                    sampled_consistency_block = sampled_consistency_block[:, :observed_block_length]
             if self.addressable_memory is not None:
-                states_block, addressable_state, memory_diagnostics = self.addressable_memory.forward_sequence(
-                    states_block, block_tokens, addressable_state
+                states_block, addressable_state, memory_diagnostics = (
+                    apply_rank_aware_memory(
+                        self.addressable_memory,
+                        states_block,
+                        block_tokens,
+                        addressable_state,
+                        variable_rank_core=self.variable_rank_core,
+                        rank_observation=rank_observation,
+                    )
                 )
                 for name, value in memory_diagnostics.items():
                     addressable_diagnostics.setdefault(name, []).append(value)
+            if rank_observation is not None:
+                states_block = self.variable_rank_core.finish_block(
+                    states_block, rank_observation
+                )
+                variable_rank_masks.append(
+                    rank_observation.active_mask.unsqueeze(1).expand(
+                        -1, states_block.shape[1], -1
+                    )
+                )
+                if rank_observation.soft_gates is not None:
+                    variable_rank_soft_gates.append(rank_observation.soft_gates)
             block_states.append(states_block)
             action_values.append(action_block)
             dim_values.append(dim_block)
@@ -159,6 +237,29 @@ class DirectionalForwardMixin:
         else:
             sampled_block_consistency = action_loss.new_tensor(0.0)
 
+        rank_soft_tensor = None
+        rank_regularization_value = action_loss.new_tensor(0.0)
+        rank_losses = None
+        if variable_rank_soft_gates and rank_curriculum is not None:
+            from aletheion_state_models.geometry.variable_rank.rank_objectives import (
+                rank_regularization,
+            )
+
+            rank_soft_tensor = torch.stack(variable_rank_soft_gates, dim=1)
+            rank_losses = rank_regularization(
+                rank_soft_tensor, target_rank=rank_curriculum.target_rank
+            )
+            rank_regularization_value = (
+                rank_curriculum.budget_weight * rank_losses.budget
+                + rank_curriculum.binary_weight * rank_losses.binary
+                + rank_curriculum.switch_weight * rank_losses.switch
+            )
+            total_loss = total_loss + rank_regularization_value
+            aux_losses["variable_rank_budget"] = rank_losses.budget
+            aux_losses["variable_rank_binary"] = rank_losses.binary
+            aux_losses["variable_rank_switch"] = rank_losses.switch
+            aux_losses["variable_rank_regularization"] = rank_regularization_value
+
         diagnostics = {
             "dimD_mean": dim_sparsity,
             "dimD_std": dim_std_value,
@@ -178,6 +279,17 @@ class DirectionalForwardMixin:
             "sampled_block_consistency": sampled_block_consistency,
             "metric_naturalization_strength": token_embeddings.new_tensor(float(self._naturalization_strength(global_step))),
         }
+        if rank_curriculum is not None:
+            diagnostics.update(
+                {
+                    "variable_rank_target": token_embeddings.new_tensor(rank_curriculum.target_rank),
+                    "variable_rank_temperature": token_embeddings.new_tensor(rank_curriculum.temperature),
+                    "variable_rank_budget_weight": token_embeddings.new_tensor(rank_curriculum.budget_weight),
+                    "variable_rank_binary_weight": token_embeddings.new_tensor(rank_curriculum.binary_weight),
+                    "variable_rank_switch_weight": token_embeddings.new_tensor(rank_curriculum.switch_weight),
+                    "variable_rank_regularization": rank_regularization_value,
+                }
+            )
         if collect_diagnostics:
             all_gates = torch.cat(gate_values, dim=1)
             flat_gates = all_gates.reshape(-1).float()
@@ -224,6 +336,15 @@ class DirectionalForwardMixin:
         if addressable_state is not None:
             out["addressable_final_memory"] = addressable_state
             out["addressable_before_last_block"] = addressable_before_last_block
+        if variable_rank_masks:
+            rank_masks = torch.cat(variable_rank_masks, dim=1)
+            out["variable_rank_masks"] = rank_masks
+            out["variable_rank_ranks"] = rank_masks.sum(dim=-1)
+            diagnostics["variable_rank_mean"] = out["variable_rank_ranks"].float().mean()
+            diagnostics["variable_rank_min"] = out["variable_rank_ranks"].min()
+            diagnostics["variable_rank_max"] = out["variable_rank_ranks"].max()
+        if rank_soft_tensor is not None:
+            out["variable_rank_soft_gates"] = rank_soft_tensor
         return out
 
     def _directional_cumsum_block(
@@ -233,6 +354,7 @@ class DirectionalForwardMixin:
         global_step: int | None,
         block_index: int = 0,
         collect_diagnostics: bool = False,
+        projection_mask: torch.Tensor | None = None,
     ) -> tuple[
         torch.Tensor,
         torch.Tensor,
@@ -266,6 +388,11 @@ class DirectionalForwardMixin:
                     global_step,
                     block_index,
                     collect_diagnostics,
+                    projection_mask=(
+                        projection_mask.float()
+                        if projection_mask is not None
+                        else None
+                    ),
                 )
         inner_block_size = int(self.config.directional_cumsum_inner_block_size)
         block_len = token_embeddings.shape[1]
@@ -315,6 +442,7 @@ class DirectionalForwardMixin:
                     global_step,
                     block_index * inner_count + inner_index,
                     collect_diagnostics,
+                    projection_mask=projection_mask,
                 )
                 states_parts.append(states_inner)
                 action_parts.append(action_inner)
@@ -355,4 +483,5 @@ class DirectionalForwardMixin:
             global_step,
             block_index,
             collect_diagnostics,
+            projection_mask=projection_mask,
         )

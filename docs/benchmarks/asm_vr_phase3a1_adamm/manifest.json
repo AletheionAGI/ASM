@@ -1,0 +1,106 @@
+{
+  "adamw_baseline": "docs/benchmarks/asm_vr_phase3a1/stage_b/summary.json",
+  "batch_size": 16,
+  "calibration": {
+    "fixed_threshold_sensitivity": 0.672,
+    "source": "combined AdamM validation score distributions; no test labels",
+    "threshold": 0.648
+  },
+  "corpus": {
+    "bytes": {
+      "test": 2342253,
+      "train": 45626267,
+      "validation": 2186467
+    },
+    "documents": {
+      "test": 102,
+      "train": 2067,
+      "validation": 103
+    },
+    "sha256": {
+      "test": "2091120ff0a7393ea38bdaa9a8e368f8233c358b6fa90e0e032187c3b0abf7d1",
+      "train": "7ea04cd77e978e33d769e2a30337c0667098a015d48088a379517740b07367cb",
+      "validation": "b405fc7c935727d9a734b08a1d2d528138f7c2f4c882928bc18534b0163de46e"
+    },
+    "source": "data/wikipedia_en_20231101_sample.txt",
+    "source_sha256": "d67db4f34c20a0be723a1606cb3699253eb198c2b9dfbb9c4cb833eed2b891e0",
+    "split_method": "sha256(document) first 64 bits modulo 20; 18/1/1"
+  },
+  "experiment": "3A.1-AdamM",
+  "optimizer": {
+    "adamw_state_bytes_by_variant": {
+      "selected_adaptive_32": {
+        "by_seed": [
+          1721976,
+          1721976,
+          1721976
+        ],
+        "mean": 1721976.0
+      },
+      "selected_fixed_32": {
+        "by_seed": [
+          1688688,
+          1688688,
+          1688688
+        ],
+        "mean": 1688688.0
+      }
+    },
+    "commit": "980d84ce96825c3d11d6bc8dd98f0c5168897643",
+    "parameters": {
+      "adapt_strength": 0.03,
+      "beta1_min": 0.5,
+      "betas": [
+        0.9,
+        0.999
+      ],
+      "lr": 0.0003,
+      "shock_ratio": 1.5,
+      "weight_decay": 0.01
+    },
+    "sha256": "79495581868147a5bed69acc3e3a85e838634c3ced0aeb9ab98b35223722c877",
+    "source": "../AdamM/adamm.py",
+    "state_bytes_by_variant": {
+      "adamm_adaptive_32": {
+        "by_seed": [
+          2582784,
+          2582784,
+          2582784
+        ],
+        "mean": 2582784
+      },
+      "adamm_fixed_32": {
+        "by_seed": [
+          2532864,
+          2532864,
+          2532864
+        ],
+        "mean": 2532864
+      }
+    }
+  },
+  "provenance": {
+    "adamm_commit": "980d84ce96825c3d11d6bc8dd98f0c5168897643",
+    "adamm_source_sha256": "79495581868147a5bed69acc3e3a85e838634c3ced0aeb9ab98b35223722c877",
+    "implementation_files": [
+      "scripts/run_asm_vr_phase3a1_adamm.py",
+      "src/aletheion_state_models/benchmarks/phase3a_training.py",
+      "src/aletheion_state_models/benchmarks/phase3a1_adamm_plots.py"
+    ],
+    "implementation_sha256": "1623b410fe0fe5e75c3648b07437efb212189595e07607aa8cdfcbe75ac5dafa",
+    "repository_dirty": true
+  },
+  "scaffold": "mixer_residual projected",
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "sequence_length": 256,
+  "steps": 489,
+  "tokens_per_run": 2002944,
+  "variants": [
+    "adamm_fixed_32",
+    "adamm_adaptive_32"
+  ]
+}

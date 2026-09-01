@@ -1,0 +1,45 @@
+{
+  "corpus": {
+    "bytes": {
+      "test": 2342253,
+      "train": 45626267,
+      "validation": 2186467
+    },
+    "documents": {
+      "test": 102,
+      "train": 2067,
+      "validation": 103
+    },
+    "sha256": {
+      "test": "2091120ff0a7393ea38bdaa9a8e368f8233c358b6fa90e0e032187c3b0abf7d1",
+      "train": "7ea04cd77e978e33d769e2a30337c0667098a015d48088a379517740b07367cb",
+      "validation": "b405fc7c935727d9a734b08a1d2d528138f7c2f4c882928bc18534b0163de46e"
+    },
+    "source": "data/wikipedia_en_20231101_sample.txt",
+    "source_sha256": "d67db4f34c20a0be723a1606cb3699253eb198c2b9dfbb9c4cb833eed2b891e0",
+    "split_method": "sha256(document) first 64 bits modulo 20; 18/1/1"
+  },
+  "optimizer": {
+    "commit": "980d84ce96825c3d11d6bc8dd98f0c5168897643",
+    "lr": 0.0003,
+    "name": "AdamM",
+    "sha256": "79495581868147a5bed69acc3e3a85e838634c3ced0aeb9ab98b35223722c877"
+  },
+  "policy": "full",
+  "provenance": {
+    "files": [
+      "scripts/run_asm_vr_phase3a2_adamm_confirm.py",
+      "src/aletheion_state_models/benchmarks/phase3a2_adamm_plots.py"
+    ],
+    "implementation_sha256": "416d2156fa737250e2c66c7418000ddea1c5fdef309aef468c987b563a8155a6",
+    "repository_dirty": true
+  },
+  "repository_dirty": true,
+  "seeds": [
+    71,
+    89,
+    107
+  ],
+  "test_role": "confirmation after AdamW selection",
+  "tokens_per_run": 2002944
+}

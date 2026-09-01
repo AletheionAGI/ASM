@@ -1,0 +1,89 @@
+{
+  "corpus": {
+    "bytes": {
+      "test": 2342253,
+      "train": 45626267,
+      "validation": 2186467
+    },
+    "documents": {
+      "test": 102,
+      "train": 2067,
+      "validation": 103
+    },
+    "sha256": {
+      "test": "2091120ff0a7393ea38bdaa9a8e368f8233c358b6fa90e0e032187c3b0abf7d1",
+      "train": "7ea04cd77e978e33d769e2a30337c0667098a015d48088a379517740b07367cb",
+      "validation": "b405fc7c935727d9a734b08a1d2d528138f7c2f4c882928bc18534b0163de46e"
+    },
+    "source": "data/wikipedia_en_20231101_sample.txt",
+    "source_sha256": "d67db4f34c20a0be723a1606cb3699253eb198c2b9dfbb9c4cb833eed2b891e0",
+    "split_method": "sha256(document) first 64 bits modulo 20; 18/1/1"
+  },
+  "execution_notes": [
+    "The initial 80% language / 20% MQAR sensitivity failed the short ASM-CM control and was excluded from the primary memory conclusion.",
+    "The primary memory-heavy curriculum completed for all nine arms.",
+    "Streaming failures were retained as measured gate failures; sentinels and solvers were not disabled."
+  ],
+  "experiment": "PMCS-64",
+  "hardware": {
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "outer_precision": "BF16 for training/evaluation/streaming; durable fast-weight recurrence follows FP32 configuration"
+  },
+  "language_steps": 489,
+  "language_tokens_per_run": 2002944,
+  "mqar_protocol": {
+    "curriculum": {
+      "1024": 100,
+      "160": 500,
+      "320": 300,
+      "40": 1000,
+      "4096": 25,
+      "512": 200,
+      "80": 500
+    },
+    "mix": "80% MQAR / 20% language replay",
+    "selection": "fixed terminal checkpoint; no test-based selection"
+  },
+  "mqar_steps": 1000,
+  "parameters": {
+    "asm_cm": {
+      "logical_rank": 64,
+      "total": 274058,
+      "trainable": 274058
+    },
+    "asm_vr_s_fixed_32": {
+      "logical_rank": 32,
+      "total": 274135,
+      "trainable": 269975
+    },
+    "asm_vr_s_full": {
+      "logical_rank": 64,
+      "total": 274135,
+      "trainable": 269975
+    }
+  },
+  "provenance": {
+    "implementation": {
+      "files": [
+        "src/aletheion_state_models/benchmarks/purpose_variants.py",
+        "src/aletheion_state_models/benchmarks/purpose_mqar.py",
+        "src/aletheion_state_models/benchmarks/purpose_streaming.py",
+        "src/aletheion_state_models/benchmarks/purpose_summary.py",
+        "src/aletheion_state_models/benchmarks/purpose_plots.py",
+        "scripts/run_asm_cm_vs_vr_s_pmcs64.py",
+        "scripts/resume_asm_cm_vs_vr_s_pmcs64.py"
+      ],
+      "sha256": "484449074f5178694b3aa8f320a2d103cfa913c4d2959ad8ff15fa13e512e29c"
+    },
+    "repository_dirty": true
+  },
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "test_protocol": {
+    "language_test_opened_after_all_checkpoints": true
+  }
+}
