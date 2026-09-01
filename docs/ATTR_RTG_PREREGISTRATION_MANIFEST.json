@@ -1,0 +1,93 @@
+{
+  "artifacts": [
+    {
+      "bytes": 36340,
+      "path": "docs/ATTR_RTG_PREREGISTRATION.md",
+      "sha256": "8aefc4ec9cc53d53f141a9026afa46c401966bfdc48a718269ae100a7812572c"
+    },
+    {
+      "bytes": 4626,
+      "path": "configs/rtg_asm_30k_seed29.yaml",
+      "sha256": "6538573d2128546659a9d3cf489c426913eb1b185aed4e774aade349d4df9fa5"
+    },
+    {
+      "bytes": 4626,
+      "path": "configs/rtg_asm_30k_seed43.yaml",
+      "sha256": "11fdcf9f0f5245511b2f2a3b8f4443354fec86f83ab4f57861b0921ed339b420"
+    },
+    {
+      "bytes": 4626,
+      "path": "configs/rtg_asm_30k_seed71.yaml",
+      "sha256": "d8e9be81215521f91780c7f699f10b06ca0f3db10e9cb25f94bab84f2d1bec55"
+    },
+    {
+      "bytes": 4626,
+      "path": "configs/rtg_asm_30k_seed89.yaml",
+      "sha256": "eb8c6670d581e8431b2763d7f46ac77d7325e542a8d7715240ec4faf276ebb13"
+    },
+    {
+      "bytes": 4627,
+      "path": "configs/rtg_asm_30k_seed107.yaml",
+      "sha256": "0515fecf3ff7b99bfdc758dec0e45a5ef70a7841200d72ec65f4278e0df8cc23"
+    },
+    {
+      "bytes": 143,
+      "path": "transformer/rtg_transformer_30k_seed29.yaml",
+      "sha256": "bbf04f4f0a21c7b43fec92922d7a79a3cc8790961fa6aa09656865bcdba173bf"
+    },
+    {
+      "bytes": 143,
+      "path": "transformer/rtg_transformer_30k_seed43.yaml",
+      "sha256": "93de5331e75885a56cf4883de3404b02a4c27cc697dc7e484819020b6ef14390"
+    },
+    {
+      "bytes": 143,
+      "path": "transformer/rtg_transformer_30k_seed71.yaml",
+      "sha256": "d0de7f2476c899c6c7187d61268507a6b27c50ec5b68dae7b1c6c9b7b3e7cd24"
+    },
+    {
+      "bytes": 143,
+      "path": "transformer/rtg_transformer_30k_seed89.yaml",
+      "sha256": "5a19c5c4ceb1703fe2815ef2136d8d8fa1313650f187051686690c3fb2ceb451"
+    },
+    {
+      "bytes": 144,
+      "path": "transformer/rtg_transformer_30k_seed107.yaml",
+      "sha256": "2a169abf555a9a42cd404f3b7a40cf8036fca945536dcc50cbc463699bb64ee8"
+    }
+  ],
+  "frozen_at_utc": "2026-09-01T22:26:56.297868Z",
+  "git_base_commit": "cc145fb271e455ee525606a146e874042eaba015",
+  "hash_contract": "This manifest hashes the frozen preregistration document and ten complete per-seed YAML configs. Source code and implementation artifacts belong only to the later IMPLEMENTATION SEAL.",
+  "protocol": "ATTR-RTG — Runtime Transition Governance",
+  "review_verdicts": [
+    {
+      "review": "mathematical/auditability",
+      "verdict": "READY TO FREEZE"
+    },
+    {
+      "review": "causal/semantic",
+      "verdict": "READY TO FREEZE"
+    }
+  ],
+  "schema_version": 1,
+  "scope": {
+    "backbone_parameters": {
+      "ASM-X": 30122,
+      "Transformer": 30120
+    },
+    "backbones": [
+      "ASM-X",
+      "Transformer"
+    ],
+    "seeds": [
+      29,
+      43,
+      71,
+      89,
+      107
+    ],
+    "tests_opened": false
+  },
+  "status": "FROZEN PREREGISTRATION"
+}

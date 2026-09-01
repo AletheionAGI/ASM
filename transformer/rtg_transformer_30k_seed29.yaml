@@ -7,4 +7,4 @@ max_seq_len: 64
 dropout: 0.0
 generation_temperature: 0.9
 top_k: 20
-seed: 1337
+seed: 29
