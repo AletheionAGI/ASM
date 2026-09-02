@@ -1,0 +1,20 @@
+{
+  "arm": null,
+  "elapsed_seconds": 1.332,
+  "eta_seconds": 0.0,
+  "heartbeat_unix": 1788376559.115007,
+  "output_paths": [
+    "summary.png",
+    "summary.svg",
+    "summary.html",
+    "manifest.json",
+    "manifest.csv",
+    "smoke_official_rows.json"
+  ],
+  "phase": "completed",
+  "rows": 3,
+  "seed": null,
+  "total_updates": 2,
+  "update": 2,
+  "vram_bytes": null
+}

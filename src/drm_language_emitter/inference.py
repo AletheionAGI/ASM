@@ -12,7 +12,9 @@ from .rank_aware_memory import apply_rank_aware_memory
 MemoryState = AddressableMemoryState | FastWeightMemoryState
 
 if TYPE_CHECKING:
-    from aletheion_state_models.geometry.variable_rank.batch_state import VariableRankBatchState
+    from aletheion_state_models.geometry.variable_rank.batch_state import (
+        VariableRankBatchState,
+    )
 
 
 @dataclass(frozen=True)
@@ -87,6 +89,13 @@ class InferenceMixin:
     ) -> InferenceState:
         block_size = self._inference_block_size()
         compact = bool(self.config.compact_streaming_inference)
+        if self.config.sequence_mode == "asm_z":
+            return InferenceState(
+                input_ids=prefix[:, :0].detach(),
+                completed_state=states[:, -1].detach(),
+                tokens_seen=int(prefix.shape[1]),
+                compact=True,
+            )
         if compact and (block_size <= 0 or not self.config.use_drm_geometry):
             raise RuntimeError(
                 "compact streaming requires DRM geometry with fixed block boundaries"
@@ -176,6 +185,8 @@ class InferenceMixin:
             raise ValueError("decode_step expects one token per batch item")
         if state.batch_size != input_ids.shape[0]:
             raise ValueError("inference state batch size does not match input_ids")
+        if self.config.sequence_mode == "asm_z":
+            return self._decode_asm_z(input_ids, state)
         if not state.uses_block_cache:
             if self.variable_rank_core is not None:
                 raise RuntimeError("ASM-VR decode requires its compact block cache")

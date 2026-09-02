@@ -229,3 +229,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Active official ATTR-RCMZ runtime outputs (mutable and local)
+/artifacts/attr_rtg_rcmz/official/

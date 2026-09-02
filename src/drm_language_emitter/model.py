@@ -7,15 +7,17 @@ from typing import Any
 import torch
 from torch import nn
 
-from .config import DRMConfig
 from .addressable_memory import AddressableMemory
-from .fast_weight_memory import FastWeightMemory
+from .asm_z_core import ASMZCore
+from .asm_z_forward import ASMZForwardMixin
+from .config import DRMConfig
 from .direction_field import DirectionField
 from .directional_blocks import DirectionalBlocksMixin
 from .directional_forward import DirectionalForwardMixin
 from .directional_solvers import DirectionalSolversMixin
 from .dynamics import DRMFlow, StateUpdater
 from .emitter import LanguageEmitter, TokenEmbedding
+from .fast_weight_memory import FastWeightMemory
 from .geometric_steps import GeometricStepsMixin
 from .inference import InferenceMixin
 from .losses import (
@@ -47,6 +49,7 @@ def _seeded_module(config: DRMConfig, offset: int, factory):
 
 
 class DRMEmitterModel(
+    ASMZForwardMixin,
     DirectionalForwardMixin,
     DirectionalBlocksMixin,
     DirectionalSolversMixin,
@@ -62,28 +65,33 @@ class DRMEmitterModel(
         self.initializer = _seeded_module(config, 102, lambda: DRMStateInitializer(config))
         self.direction_field = (
             _seeded_module(config, 103, lambda: DirectionField(config))
-            if config.use_drm_geometry and config.use_direction_field
+            if config.use_drm_geometry and config.use_direction_field and config.sequence_mode != "asm_z"
             else None
         )
         self.metric = (
             _seeded_module(config, 104, lambda: RelationalMetric(config))
-            if config.use_drm_geometry and config.use_relational_metric
+            if config.use_drm_geometry and config.use_relational_metric and config.sequence_mode != "asm_z"
             else None
         )
         self.flow = (
             _seeded_module(config, 105, lambda: DRMFlow(config))
-            if config.use_drm_geometry and config.use_direction_field
+            if config.use_drm_geometry and config.use_direction_field and config.sequence_mode != "asm_z"
             else None
         )
         self.direct_transition = (
             _seeded_module(config, 112, lambda: DirectStateTransition(config))
-            if config.use_drm_geometry and not config.use_direction_field
+            if config.use_drm_geometry and not config.use_direction_field and config.sequence_mode != "asm_z"
             else None
         )
-        self.updater = StateUpdater(config)
+        self.asm_z_core = (
+            _seeded_module(config, 115, lambda: ASMZCore(config))
+            if config.sequence_mode == "asm_z"
+            else None
+        )
+        self.updater = None if config.sequence_mode == "asm_z" else StateUpdater(config)
         self.risk = (
             _seeded_module(config, 106, lambda: RiskField(config))
-            if config.use_drm_geometry
+            if config.use_drm_geometry and config.sequence_mode != "asm_z"
             else None
         )
         self.emitter = _seeded_module(config, 107, lambda: LanguageEmitter(config))
@@ -163,6 +171,14 @@ class DRMEmitterModel(
     ) -> dict[str, Any]:
         batch, seq_len = input_ids.shape
         z = self.initializer(batch, input_ids.device)
+        if self.config.sequence_mode == "asm_z":
+            return self._asm_z_forward(
+                input_ids,
+                targets,
+                return_states,
+                collect_diagnostics,
+                initial_state=z,
+            )
         token_embeddings = self.token_embedding(input_ids)
         if not self.config.use_drm_geometry:
             return self._forward_selective_control(

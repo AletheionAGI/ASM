@@ -1,0 +1,28 @@
+{
+  "arm": null,
+  "elapsed_seconds": 2.405,
+  "eta_seconds": 0.0,
+  "heartbeat_unix": 1788378247.3972046,
+  "output_paths": [
+    "summary.png",
+    "summary.svg",
+    "summary.html",
+    "manifest.json",
+    "manifest.csv",
+    "architecture_quality.png",
+    "architecture_quality.svg",
+    "governance.png",
+    "governance.svg",
+    "g_vs_c.png",
+    "g_vs_c.svg",
+    "seed_differences.png",
+    "seed_differences.svg",
+    "smoke_official_rows.json"
+  ],
+  "phase": "completed",
+  "rows": 3,
+  "seed": null,
+  "total_updates": 2,
+  "update": 2,
+  "vram_bytes": null
+}

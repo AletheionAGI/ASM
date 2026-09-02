@@ -1,0 +1,14 @@
+{
+  "anchor_path": "src/attr_rtg_rcmz/lock_anchor.py",
+  "anchor_sha256": "fa925c212aef98d793c1c96d138635fe402ffe6f410da1c9cb17f5b3d64c3566",
+  "authorization_sha256": "0124100071e51de9516f7422cc0292ead6f351a3a3080e21caa00b75b87d048d",
+  "candidate_content_sha256": "cb1b7a2196783a6ed2d544e1d526d9880487ff73f1a82a217101b0d6fe8f1365",
+  "candidate_manifest_sha256": "282a7cc6fd545948a42934125d2b4d5b289414239c14bfab6f2f4f06d9e654c9",
+  "official_run_started": false,
+  "protocol_sha256": "c81b32e54a6a5213a5b571fe041bb5b1caa7317fd65f9d515ba19ba16e1c71ab",
+  "receipt_path": "locks/attr_rtg_rcmz_v1/LOCAL_PROTOCOL_LOCK.json",
+  "receipt_sha256": "f3d772784742307fe9939000f29e5b0dd09e7f0d82861df4897d0dd3bbb5c661",
+  "reviews_sha256": "d1f1094b66dd0258b539ab598ebce17dab529f0c38eed172c6daf1b64e5aa67d",
+  "state": "LOCAL PROTOCOL LOCK",
+  "verified": true
+}

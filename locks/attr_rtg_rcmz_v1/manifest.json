@@ -1,0 +1,38 @@
+{
+  "authorization": {
+    "path": "docs/review/attr_rtg_rcmz_v1/user_authorization_status_only_reseal_v3.md",
+    "sha256": "06c9fb584bb149c9f14c51ce3167959b75c0c4694c1f4777e32257f37d7a3cf5"
+  },
+  "candidate_manifest": {
+    "artifact_count": 107,
+    "content_sha256": "ec51589784d8320ad19999eca929aa84f57e56ac5bc47b7de0c7e4e6730614af",
+    "path": "docs/review/attr_rtg_rcmz_v1/local_lock_manifest_v5.json",
+    "sha256": "0edca10830c63363bbfe5dd1253f488b25e961f784610caefa7b017c607551a6"
+  },
+  "lock_receipt": {
+    "path": "locks/attr_rtg_rcmz_v1/LOCAL_PROTOCOL_LOCK.json",
+    "sha256": "6ed6bd2b39460695a891c27c51cc417453e59eb10ad519660219f84a8cb8950e"
+  },
+  "predecessor_lock": {
+    "path": "locks/attr_rtg_rcmz_v1/archive/LOCAL_PROTOCOL_LOCK_v4_f3d772784742307f.json",
+    "sha256": "f3d772784742307fe9939000f29e5b0dd09e7f0d82861df4897d0dd3bbb5c661"
+  },
+  "prior_scientific_reviews": {
+    "path": "docs/review/attr_rtg_rcmz_v1/final_review_verdicts_v4.json",
+    "ready": 4,
+    "sha256": "d1f1094b66dd0258b539ab598ebce17dab529f0c38eed172c6daf1b64e5aa67d",
+    "total": 4
+  },
+  "protocol": {
+    "path": "docs/ATTR_RTG_RCMZ_PREREGISTRATION.md",
+    "sha256": "c37fa09bdad9715d82d5cb6b6108ce5d2147462c79738674abb75ca50dbc0f84"
+  },
+  "reseal_scope": "STATUS_ONLY",
+  "schema": "ATTR-RTG-RCMZ-V1-LOCK-MANIFEST-V5",
+  "scientific_content_changed": false,
+  "source_anchor": {
+    "path": "src/attr_rtg_rcmz/lock_anchor.py",
+    "sha256": "ec9c2a117e8370a65a7858eb6a35a7424a4d14a7f05eac58235c873bead8f0ff"
+  },
+  "state": "LOCAL PROTOCOL LOCK"
+}

@@ -1,0 +1,13 @@
+{
+  "candidate_content_sha256": "cb1b7a2196783a6ed2d544e1d526d9880487ff73f1a82a217101b0d6fe8f1365",
+  "candidate_manifest_sha256": "282a7cc6fd545948a42934125d2b4d5b289414239c14bfab6f2f4f06d9e654c9",
+  "count_total": 4,
+  "count_yes": 4,
+  "protocol_sha256": "c81b32e54a6a5213a5b571fe041bb5b1caa7317fd65f9d515ba19ba16e1c71ab",
+  "verdicts": {
+    "architecture": "READY TO LOCAL LOCK: YES",
+    "gpu": "READY TO LOCAL LOCK: YES",
+    "leakage": "READY TO LOCAL LOCK: YES",
+    "statistics": "READY TO LOCAL LOCK: YES"
+  }
+}

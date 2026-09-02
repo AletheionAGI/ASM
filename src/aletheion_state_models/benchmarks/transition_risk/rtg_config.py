@@ -20,6 +20,14 @@ PREREGISTRATION_MANIFEST_SHA256 = (
     "4db4e22029431c6544a3d8c032cd75d45308250b3b601c0fe437ace4c51ee7f0"
 )
 
+POST_RTG_DRM_EXTENSION_FIELDS = frozenset({
+    "asm_z_eta",
+    "asm_z_lambda",
+    "asm_z_metric_d_min",
+    "asm_z_metric_d_max",
+    "asm_z_metric_u_bound",
+})
+
 ConfigT = TypeVar("ConfigT", DRMConfig, TinyTransformerConfig)
 
 
@@ -82,9 +90,14 @@ def load_registered_config(root: str | Path, kind: str, seed: int) -> ConfigT:
     if not isinstance(values, dict):
         raise TypeError(f"ATTR-RTG config is not a mapping: {path}")
     field_names = {field.name for field in fields(config_type)}
-    if set(values) != field_names:
-        missing = sorted(field_names - set(values))
-        extra = sorted(set(values) - field_names)
+    expected_fields = (
+        field_names - POST_RTG_DRM_EXTENSION_FIELDS
+        if kind == "asm"
+        else field_names
+    )
+    if set(values) != expected_fields:
+        missing = sorted(expected_fields - set(values))
+        extra = sorted(set(values) - expected_fields)
         raise ValueError(f"ATTR-RTG config fields differ; missing={missing}, extra={extra}")
     if values.get("seed") != seed:
         raise ValueError("ATTR-RTG config seed differs from filename")

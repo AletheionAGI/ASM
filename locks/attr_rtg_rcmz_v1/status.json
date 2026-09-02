@@ -1,0 +1,12 @@
+{
+  "agent_started_official_run": false,
+  "document_status": "LOCAL PROTOCOL LOCK",
+  "lock_sha256": "6ed6bd2b39460695a891c27c51cc417453e59eb10ad519660219f84a8cb8950e",
+  "lock_verified": true,
+  "official_execution_owner": "USER_IN_OTHER_TERMINAL",
+  "official_execution_status": "NOT_STARTED",
+  "protocol_status": "LOCAL PROTOCOL LOCK",
+  "reseal_scope": "STATUS_ONLY",
+  "schema": "ATTR-RTG-RCMZ-V1-STATUS-V5",
+  "scientific_content_changed": false
+}

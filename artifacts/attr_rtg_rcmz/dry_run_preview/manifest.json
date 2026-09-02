@@ -1,0 +1,154 @@
+{
+  "artifacts": [
+    "summary.svg",
+    "summary.png",
+    "summary.html",
+    "manifest.csv",
+    "manifest.json"
+  ],
+  "disclaimer": "LOCAL-ONLY, SINGLE-ADMINISTRATOR, NOT INDEPENDENTLY ATTESTED",
+  "rows": [
+    {
+      "arm": "R",
+      "h8_nll": 0.4,
+      "regime": "synthetic",
+      "seed": 29,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "CM",
+      "h8_nll": 0.425,
+      "regime": "synthetic",
+      "seed": 29,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "Z",
+      "h8_nll": 0.45,
+      "regime": "synthetic",
+      "seed": 29,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "T",
+      "h8_nll": 0.475,
+      "regime": "synthetic",
+      "seed": 29,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "R",
+      "h8_nll": 0.403,
+      "regime": "synthetic",
+      "seed": 43,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "CM",
+      "h8_nll": 0.428,
+      "regime": "synthetic",
+      "seed": 43,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "Z",
+      "h8_nll": 0.453,
+      "regime": "synthetic",
+      "seed": 43,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "T",
+      "h8_nll": 0.478,
+      "regime": "synthetic",
+      "seed": 43,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "R",
+      "h8_nll": 0.406,
+      "regime": "synthetic",
+      "seed": 71,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "CM",
+      "h8_nll": 0.431,
+      "regime": "synthetic",
+      "seed": 71,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "Z",
+      "h8_nll": 0.456,
+      "regime": "synthetic",
+      "seed": 71,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "T",
+      "h8_nll": 0.481,
+      "regime": "synthetic",
+      "seed": 71,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "R",
+      "h8_nll": 0.409,
+      "regime": "synthetic",
+      "seed": 89,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "CM",
+      "h8_nll": 0.434,
+      "regime": "synthetic",
+      "seed": 89,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "Z",
+      "h8_nll": 0.459,
+      "regime": "synthetic",
+      "seed": 89,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "T",
+      "h8_nll": 0.484,
+      "regime": "synthetic",
+      "seed": 89,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "R",
+      "h8_nll": 0.412,
+      "regime": "synthetic",
+      "seed": 107,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "CM",
+      "h8_nll": 0.437,
+      "regime": "synthetic",
+      "seed": 107,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "Z",
+      "h8_nll": 0.462,
+      "regime": "synthetic",
+      "seed": 107,
+      "status": "SYNTHETIC"
+    },
+    {
+      "arm": "T",
+      "h8_nll": 0.487,
+      "regime": "synthetic",
+      "seed": 107,
+      "status": "SYNTHETIC"
+    }
+  ],
+  "schema_version": 1,
+  "synthetic": true
+}

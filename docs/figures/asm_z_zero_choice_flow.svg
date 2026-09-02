@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">ASM-X direction selection versus ASM-Z single metric-conditioned flow</title>
+  <desc id="desc">ASM-X routes directional candidates through a selector. ASM-Z maps state and input to one scalar potential and one bounded SPD metric, computes one gradient, solves one linear system, and performs one state update.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#081426"/><stop offset="1" stop-color="#13233d"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#000" flood-opacity="0.3"/></filter>
+    <marker id="blueArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#62b6ff"/></marker>
+    <marker id="goldArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#ffc857"/></marker>
+    <style>
+      .heading{font:700 25px system-ui,sans-serif;fill:#f5f8ff}.sub{font:500 15px system-ui,sans-serif;fill:#b8c9df}.label{font:600 16px system-ui,sans-serif;fill:#ecf4ff}.tiny{font:500 13px system-ui,sans-serif;fill:#c6d4e7}.eq{font:600 17px ui-monospace,monospace;fill:#fff}.panel{fill:#132943;stroke:#355574;stroke-width:1.5}.node{fill:#183653;stroke:#62b6ff;stroke-width:1.6}.gold{fill:#41351e;stroke:#ffc857;stroke-width:1.8}.wireB{fill:none;stroke:#62b6ff;stroke-width:2.2;marker-end:url(#blueArrow)}.wireG{fill:none;stroke:#ffc857;stroke-width:2.2;marker-end:url(#goldArrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="720" rx="22" fill="url(#bg)"/>
+  <text x="600" y="44" text-anchor="middle" class="heading">Seleção de direções vs. fluxo métrico único</text>
+  <text x="600" y="71" text-anchor="middle" class="sub">Contraste conceitual; sem claim de superioridade, safety, livre-arbítrio ou causalidade</text>
+  <g filter="url(#shadow)"><rect x="45" y="105" width="505" height="535" rx="20" class="panel"/><rect x="580" y="105" width="575" height="535" rx="20" class="panel"/></g>
+
+  <text x="297" y="145" text-anchor="middle" class="heading">ASM-X · direction selection</text>
+  <rect x="90" y="178" width="180" height="54" rx="12" class="node"/><text x="180" y="201" text-anchor="middle" class="label">estado + entrada</text><text x="180" y="220" text-anchor="middle" class="tiny">z, e</text>
+  <rect x="330" y="178" width="170" height="54" rx="12" class="node"/><text x="415" y="201" text-anchor="middle" class="label">avaliação</text><text x="415" y="220" text-anchor="middle" class="tiny">dependente do contexto</text>
+  <path d="M270 205 H320" class="wireB"/>
+  <text x="85" y="282" class="label">direções candidatas</text>
+  <rect x="85" y="302" width="105" height="44" rx="10" class="node"/><text x="137" y="330" text-anchor="middle" class="label">V₁</text>
+  <rect x="85" y="362" width="105" height="44" rx="10" class="node"/><text x="137" y="390" text-anchor="middle" class="label">V₂</text>
+  <rect x="85" y="422" width="105" height="44" rx="10" class="node"/><text x="137" y="450" text-anchor="middle" class="label">Vᵢ</text>
+  <rect x="285" y="322" width="180" height="124" rx="18" class="gold"/><text x="375" y="356" text-anchor="middle" class="label">seletor / pesos</text><text x="375" y="382" text-anchor="middle" class="eq">aᵢ, cᵢ</text><text x="375" y="412" text-anchor="middle" class="tiny">combina alternativas</text>
+  <path d="M190 324 C235 324 240 344 275 350" class="wireG"/><path d="M190 384 H275" class="wireG"/><path d="M190 444 C235 444 240 424 275 418" class="wireG"/><path d="M415 232 V312" class="wireG"/>
+  <rect x="145" y="494" width="300" height="64" rx="14" class="node"/><text x="295" y="520" text-anchor="middle" class="label">transição composta</text><text x="295" y="544" text-anchor="middle" class="tiny">uma ou mais direções recebem peso</text><path d="M375 446 V484" class="wireG"/>
+  <text x="297" y="603" text-anchor="middle" class="sub">alternativas internas + seleção contextual</text>
+
+  <text x="867" y="145" text-anchor="middle" class="heading">ASM-Z · zero choice</text>
+  <rect x="625" y="178" width="180" height="54" rx="12" class="node"/><text x="715" y="201" text-anchor="middle" class="label">estado + entrada</text><text x="715" y="220" text-anchor="middle" class="tiny">z, e</text>
+  <rect x="855" y="166" width="250" height="78" rx="14" class="node"/><text x="980" y="193" text-anchor="middle" class="label">campo e geometria</text><text x="980" y="217" text-anchor="middle" class="tiny">Φ(z,e) escalar · G(z,e) SPD limitada</text><path d="M805 205 H845" class="wireB"/>
+  <rect x="640" y="300" width="205" height="78" rx="14" class="node"/><text x="742" y="329" text-anchor="middle" class="label">um gradiente</text><text x="742" y="354" text-anchor="middle" class="eq">g = ∇z Φ(z,e)</text>
+  <rect x="900" y="300" width="205" height="78" rx="14" class="gold"/><text x="1002" y="329" text-anchor="middle" class="label">um solve SPD</text><text x="1002" y="354" text-anchor="middle" class="eq">G(z,e) v = g</text>
+  <path d="M930 244 C885 265 815 265 770 290" class="wireB"/><path d="M1030 244 V290" class="wireG"/><path d="M845 339 H890" class="wireG"/>
+  <rect x="700" y="447" width="350" height="90" rx="16" class="node"/><text x="875" y="480" text-anchor="middle" class="label">uma atualização</text><text x="875" y="511" text-anchor="middle" class="eq">z_next = z − η v</text><path d="M1002 378 C1002 412 940 417 905 437" class="wireG"/>
+  <text x="867" y="576" text-anchor="middle" class="sub">sem catálogo · sem candidatos · sem gate · sem bypass</text>
+  <text x="867" y="603" text-anchor="middle" class="sub">η constante · exatamente uma atualização por entrada</text>
+
+  <rect x="155" y="664" width="890" height="34" rx="17" fill="#0c1d32" stroke="#355574"/><text x="600" y="686" text-anchor="middle" class="tiny">“Zero choice” nomeia uma recorrência sem seleção interna; não descreve mente, intenção ou garantia científica.</text>
+</svg>

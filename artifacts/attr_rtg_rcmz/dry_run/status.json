@@ -1,0 +1,18 @@
+{
+  "arm": null,
+  "elapsed_seconds": 0.067,
+  "eta_seconds": 0.0,
+  "heartbeat_unix": 1788376491.234661,
+  "output_paths": [
+    "summary.png",
+    "summary.svg",
+    "summary.html",
+    "manifest.json",
+    "manifest.csv"
+  ],
+  "phase": "completed",
+  "seed": null,
+  "total_updates": 2000,
+  "update": 2000,
+  "vram_bytes": 0
+}

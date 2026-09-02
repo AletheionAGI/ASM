@@ -1,0 +1,12 @@
+# ATTR-RTG-Z-V1 candidate Transformer arm; provisional and not frozen.
+# Provisional filename only; cryptographic RNG namespace/KDF is protocol-defined and OPEN.
+vocab_size: 64
+d_model: 16
+n_heads: 4
+n_layers: 2
+hidden_size: 128
+max_seq_len: 256
+dropout: 0.0
+generation_temperature: 0.9
+top_k: 20
+seed: 73

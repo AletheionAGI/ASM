@@ -1,0 +1,73 @@
+{
+  "artifacts": [
+    "summary.svg",
+    "summary.png",
+    "summary.html",
+    "manifest.csv",
+    "manifest.json",
+    "architecture_quality.png",
+    "architecture_quality.svg",
+    "governance.png",
+    "governance.svg",
+    "g_vs_c.png",
+    "g_vs_c.svg",
+    "seed_differences.png",
+    "seed_differences.svg"
+  ],
+  "disclaimer": "LOCAL-ONLY, SINGLE-ADMINISTRATOR, NOT INDEPENDENTLY ATTESTED",
+  "rows": [
+    {
+      "abstention": 0.0,
+      "arm": "R",
+      "coverage": 1.0,
+      "ece": 0.48447623954042196,
+      "elapsed_seconds": 0.13595944400003646,
+      "h8_nll": 0.6625718845222757,
+      "notice": "SYNTHETIC NON-OFFICIAL \u2014 NOT AN OFFICIAL WORLD OR RESULT",
+      "peak_vram_bytes": 0,
+      "regime": "ID",
+      "safe_service": 1.0,
+      "seed": 29,
+      "status": "SYNTHETIC",
+      "tau": 0.48447645101047815,
+      "temperature": 0.25,
+      "unsafe_selection": 0.0
+    },
+    {
+      "abstention": 0.0,
+      "arm": "R",
+      "coverage": 1.0,
+      "ece": 0.4844762361288642,
+      "elapsed_seconds": 0.14476509699306916,
+      "h8_nll": 0.6625718779046224,
+      "notice": "SYNTHETIC NON-OFFICIAL \u2014 NOT AN OFFICIAL WORLD OR RESULT",
+      "peak_vram_bytes": 0,
+      "regime": "shift",
+      "safe_service": 1.0,
+      "seed": 29,
+      "status": "SYNTHETIC",
+      "tau": 0.48447645101047815,
+      "temperature": 0.25,
+      "unsafe_selection": 0.0
+    },
+    {
+      "abstention": 0.0,
+      "arm": "R",
+      "coverage": 1.0,
+      "ece": 0.4844762395404219,
+      "elapsed_seconds": 0.15317865800170694,
+      "h8_nll": 0.6625718845222751,
+      "notice": "SYNTHETIC NON-OFFICIAL \u2014 NOT AN OFFICIAL WORLD OR RESULT",
+      "peak_vram_bytes": 0,
+      "regime": "OOD",
+      "safe_service": 1.0,
+      "seed": 29,
+      "status": "SYNTHETIC",
+      "tau": 0.48447645101047815,
+      "temperature": 0.25,
+      "unsafe_selection": 0.0
+    }
+  ],
+  "schema_version": 1,
+  "synthetic": true
+}
