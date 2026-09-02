@@ -11,6 +11,8 @@ requires-python = ">=3.10"
 license = { text = "AGPL-3.0-only" }
 authors = [{ name = "Felipe Maya Muniz", email = "contact@aletheionagi.com" }]
 dependencies = [
+  "numpy>=1.24",
+  "pyyaml>=6.0",
   "torch>=2.0",
 ]
 

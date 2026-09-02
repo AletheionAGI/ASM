@@ -1,0 +1,645 @@
+{
+  "architecture": [
+    {
+      "regime": "ID",
+      "model": "ASM-X",
+      "nmse": 1.4308315276919397,
+      "nmse_ci_low": 1.2670271252202903,
+      "nmse_ci_high": 1.6126024045918452,
+      "nll": 3.19802660179226,
+      "nll_ci_low": 3.1272782331077904,
+      "nll_ci_high": 3.257712209460633
+    },
+    {
+      "regime": "ID",
+      "model": "Transformer",
+      "nmse": 0.7237821484987877,
+      "nmse_ci_low": 0.7058031335681743,
+      "nmse_ci_high": 0.7431819402432487,
+      "nll": 2.9475751886738335,
+      "nll_ci_low": 2.905964726335662,
+      "nll_ci_high": 2.99575351768579
+    },
+    {
+      "regime": "Shift",
+      "model": "ASM-X",
+      "nmse": 1.515629928483753,
+      "nmse_ci_low": 1.3614600036105937,
+      "nmse_ci_high": 1.670687130293288,
+      "nll": 3.200484215823704,
+      "nll_ci_low": 3.099709605605129,
+      "nll_ci_high": 3.2888716504577666
+    },
+    {
+      "regime": "Shift",
+      "model": "Transformer",
+      "nmse": 0.754626735100603,
+      "nmse_ci_low": 0.7255995105503111,
+      "nmse_ci_high": 0.7840250811980648,
+      "nll": 2.8768885678240204,
+      "nll_ci_low": 2.8166587277195245,
+      "nll_ci_high": 2.9362245697425364
+    },
+    {
+      "regime": "OOD",
+      "model": "ASM-X",
+      "nmse": 1.1798394558568168,
+      "nmse_ci_low": 1.0396659361556704,
+      "nmse_ci_high": 1.343880946774822,
+      "nll": 3.0289534898136363,
+      "nll_ci_low": 2.9600695037936746,
+      "nll_ci_high": 3.1007201551297507
+    },
+    {
+      "regime": "OOD",
+      "model": "Transformer",
+      "nmse": 0.719101003725523,
+      "nmse_ci_low": 0.68484000950785,
+      "nmse_ci_high": 0.7511288343466256,
+      "nll": 2.851061134071109,
+      "nll_ci_low": 2.8017789749551527,
+      "nll_ci_high": 2.9048661061111902
+    }
+  ],
+  "governance": [
+    {
+      "regime": "ID",
+      "model": "ASM-X",
+      "head": "G",
+      "unsafe_rate": 0.05217439533845784,
+      "unsafe_rate_ci_low": 0.04533353173880517,
+      "unsafe_rate_ci_high": 0.059164884052579365,
+      "safe_service": 1.0,
+      "safe_service_ci_low": 1.0,
+      "safe_service_ci_high": 1.0,
+      "coverage": 1.0,
+      "coverage_ci_low": 1.0,
+      "coverage_ci_high": 1.0
+    },
+    {
+      "regime": "ID",
+      "model": "ASM-X",
+      "head": "C",
+      "unsafe_rate": 0.051433034558034565,
+      "unsafe_rate_ci_low": 0.044480077178319366,
+      "unsafe_rate_ci_high": 0.05848852330395299,
+      "safe_service": 0.9982546201232033,
+      "safe_service_ci_low": 0.9968109982543867,
+      "safe_service_ci_high": 0.999297292342879,
+      "coverage": 0.995705001017501,
+      "coverage_ci_low": 0.9915276744378307,
+      "coverage_ci_high": 0.9985639105902777
+    },
+    {
+      "regime": "ID",
+      "model": "Transformer",
+      "head": "G",
+      "unsafe_rate": 0.05217439533845784,
+      "unsafe_rate_ci_low": 0.04533353173880517,
+      "unsafe_rate_ci_high": 0.059164884052579365,
+      "safe_service": 1.0,
+      "safe_service_ci_low": 1.0,
+      "safe_service_ci_high": 1.0,
+      "coverage": 1.0,
+      "coverage_ci_low": 1.0,
+      "coverage_ci_high": 1.0
+    },
+    {
+      "regime": "ID",
+      "model": "Transformer",
+      "head": "C",
+      "unsafe_rate": 0.05186478885697635,
+      "unsafe_rate_ci_low": 0.0448843200708435,
+      "unsafe_rate_ci_high": 0.058830059697247195,
+      "safe_service": 0.9994524298425735,
+      "safe_service_ci_low": 0.9985985721559915,
+      "safe_service_ci_high": 0.9999556857409724,
+      "coverage": 0.998454861111111,
+      "coverage_ci_low": 0.9962586082175925,
+      "coverage_ci_high": 0.9998726851851852
+    },
+    {
+      "regime": "Shift",
+      "model": "ASM-X",
+      "head": "G",
+      "unsafe_rate": 0.06524423926767677,
+      "unsafe_rate_ci_low": 0.05866282997240028,
+      "unsafe_rate_ci_high": 0.07266925023760962,
+      "safe_service": 1.0,
+      "safe_service_ci_low": 1.0,
+      "safe_service_ci_high": 1.0,
+      "coverage": 1.0,
+      "coverage_ci_low": 1.0,
+      "coverage_ci_high": 1.0
+    },
+    {
+      "regime": "Shift",
+      "model": "ASM-X",
+      "head": "C",
+      "unsafe_rate": 0.06450474511021385,
+      "unsafe_rate_ci_low": 0.057760240880358076,
+      "unsafe_rate_ci_high": 0.07212246799063206,
+      "safe_service": 0.9930313995564375,
+      "safe_service_ci_low": 0.987018841696783,
+      "safe_service_ci_high": 0.9974002517819103,
+      "coverage": 0.9865238031644281,
+      "coverage_ci_low": 0.973117533869487,
+      "coverage_ci_high": 0.9957513640873016
+    },
+    {
+      "regime": "Shift",
+      "model": "Transformer",
+      "head": "G",
+      "unsafe_rate": 0.06524423926767677,
+      "unsafe_rate_ci_low": 0.05866282997240028,
+      "unsafe_rate_ci_high": 0.07266925023760962,
+      "safe_service": 1.0,
+      "safe_service_ci_low": 1.0,
+      "safe_service_ci_high": 1.0,
+      "coverage": 1.0,
+      "coverage_ci_low": 1.0,
+      "coverage_ci_high": 1.0
+    },
+    {
+      "regime": "Shift",
+      "model": "Transformer",
+      "head": "C",
+      "unsafe_rate": 0.0638016136063011,
+      "unsafe_rate_ci_low": 0.0569651725950554,
+      "unsafe_rate_ci_high": 0.07134938545973701,
+      "safe_service": 0.9948406676783005,
+      "safe_service_ci_low": 0.9890826068102264,
+      "safe_service_ci_high": 0.9984773400887337,
+      "coverage": 0.9875157553673178,
+      "coverage_ci_low": 0.9725971959897742,
+      "coverage_ci_high": 0.9968948309358466
+    },
+    {
+      "regime": "OOD",
+      "model": "ASM-X",
+      "head": "G",
+      "unsafe_rate": 0.16417108282342657,
+      "unsafe_rate_ci_low": 0.15659623109818424,
+      "unsafe_rate_ci_high": 0.17069651326682578,
+      "safe_service": 1.0,
+      "safe_service_ci_low": 1.0,
+      "safe_service_ci_high": 1.0,
+      "coverage": 1.0,
+      "coverage_ci_low": 1.0,
+      "coverage_ci_high": 1.0
+    },
+    {
+      "regime": "OOD",
+      "model": "ASM-X",
+      "head": "C",
+      "unsafe_rate": 0.16381766020437896,
+      "unsafe_rate_ci_low": 0.15628470247562046,
+      "unsafe_rate_ci_high": 0.17021402879166553,
+      "safe_service": 0.997086409898224,
+      "safe_service_ci_low": 0.9946969321956002,
+      "safe_service_ci_high": 0.9990303613862653,
+      "coverage": 0.9940676857864357,
+      "coverage_ci_low": 0.987286103219697,
+      "coverage_ci_high": 0.9984550781250001
+    },
+    {
+      "regime": "OOD",
+      "model": "Transformer",
+      "head": "G",
+      "unsafe_rate": 0.16417108282342657,
+      "unsafe_rate_ci_low": 0.15659623109818424,
+      "unsafe_rate_ci_high": 0.17069651326682578,
+      "safe_service": 1.0,
+      "safe_service_ci_low": 1.0,
+      "safe_service_ci_high": 1.0,
+      "coverage": 0.9999826388888889,
+      "coverage_ci_low": 0.9999131944444445,
+      "coverage_ci_high": 1.0
+    },
+    {
+      "regime": "OOD",
+      "model": "Transformer",
+      "head": "C",
+      "unsafe_rate": 0.1637955454557017,
+      "unsafe_rate_ci_low": 0.15632769619341882,
+      "unsafe_rate_ci_high": 0.1702037620221214,
+      "safe_service": 0.9974256635402116,
+      "safe_service_ci_low": 0.9936352143664325,
+      "safe_service_ci_high": 0.9996233526887138,
+      "coverage": 0.9947259800384801,
+      "coverage_ci_low": 0.9857926831559645,
+      "coverage_ci_high": 0.9994098537457913
+    }
+  ],
+  "g_vs_c": [
+    {
+      "regime": "ID",
+      "model": "ASM-X",
+      "delta_safety": -0.0007413607804232711,
+      "delta_safety_ci_low": -0.001799034804894181,
+      "delta_safety_ci_high": -6.20039682539748e-05,
+      "delta_safe_service": 0.0017453798767966822,
+      "delta_safe_service_ci_low": 0.0007027076571210572,
+      "delta_safe_service_ci_high": 0.0031890017456133674,
+      "coverage_difference": 0.004294998982498965,
+      "coverage_difference_ci_low": 0.0014360894097223188,
+      "coverage_difference_ci_high": 0.008472325562169303
+    },
+    {
+      "regime": "Shift",
+      "model": "ASM-X",
+      "delta_safety": -0.000739494157462911,
+      "delta_safety_ci_low": -0.0022048030817561977,
+      "delta_safety_ci_high": 0.000362749284136014,
+      "delta_safe_service": 0.0069686004435625115,
+      "delta_safe_service_ci_low": 0.0025997482180896954,
+      "delta_safe_service_ci_high": 0.012981158303217052,
+      "coverage_difference": 0.013476196835571885,
+      "coverage_difference_ci_low": 0.0042486359126984174,
+      "coverage_difference_ci_high": 0.026882466130513066
+    },
+    {
+      "regime": "OOD",
+      "model": "ASM-X",
+      "delta_safety": -0.00035342261904761085,
+      "delta_safety_ci_low": -0.0013144841269841223,
+      "delta_safety_ci_high": 0.00034740823412700967,
+      "delta_safe_service": 0.0029135901017760535,
+      "delta_safe_service_ci_low": 0.0009696386137346664,
+      "delta_safe_service_ci_high": 0.00530306780439978,
+      "coverage_difference": 0.005932314213564327,
+      "coverage_difference_ci_low": 0.0015449218749998578,
+      "coverage_difference_ci_high": 0.012713896780303047
+    },
+    {
+      "regime": "ID",
+      "model": "Transformer",
+      "delta_safety": -0.0003096064814814836,
+      "delta_safety_ci_low": -0.0008164062500000027,
+      "delta_safety_ci_high": -1.7361111111113825e-05,
+      "delta_safe_service": 0.000547570157426458,
+      "delta_safe_service_ci_low": 4.431425902757526e-05,
+      "delta_safe_service_ci_high": 0.0014014278440085566,
+      "coverage_difference": 0.0015451388888889639,
+      "coverage_difference_ci_low": 0.0001273148148147607,
+      "coverage_difference_ci_high": 0.003741391782407519
+    },
+    {
+      "regime": "Shift",
+      "model": "Transformer",
+      "delta_safety": -0.0014426256613756655,
+      "delta_safety_ci_low": -0.003713438326719587,
+      "delta_safety_ci_high": 1.5413153108465078e-05,
+      "delta_safe_service": 0.005159332321699517,
+      "delta_safe_service_ci_low": 0.0015226599112663636,
+      "delta_safe_service_ci_high": 0.010917393189773573,
+      "coverage_difference": 0.012484244632682162,
+      "coverage_difference_ci_low": 0.003105169064153385,
+      "coverage_difference_ci_high": 0.02740280401022581
+    },
+    {
+      "regime": "OOD",
+      "model": "Transformer",
+      "delta_safety": -0.0003755373677248597,
+      "delta_safety_ci_low": -0.0013519692836098953,
+      "delta_safety_ci_high": 9.911616161616172e-05,
+      "delta_safe_service": 0.00257433645978844,
+      "delta_safe_service_ci_low": 0.00037664731128619623,
+      "delta_safe_service_ci_high": 0.006364785633567463,
+      "coverage_difference": 0.005256658850408824,
+      "coverage_difference_ci_low": 0.0005901462542087344,
+      "coverage_difference_ci_high": 0.014206640437109135
+    }
+  ],
+  "seeds": [
+    {
+      "regime": "ID",
+      "seed": 29,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.3098207497562231,
+      "delta_nmse": 0.8659381061937808,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.2278781288763,
+      "nll_transformer": 2.918057379120077,
+      "nmse_asm": 1.5839945917223157,
+      "nmse_transformer": 0.718056485528535
+    },
+    {
+      "regime": "ID",
+      "seed": 43,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.24652262338537456,
+      "delta_nmse": 0.9425139985228287,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.1945829144113165,
+      "nll_transformer": 2.948060291025942,
+      "nmse_asm": 1.686084190202051,
+      "nmse_transformer": 0.7435701916792222
+    },
+    {
+      "regime": "ID",
+      "seed": 71,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.19411398852943673,
+      "delta_nmse": 0.7622643678922436,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.1526724858195467,
+      "nll_transformer": 2.95855849729011,
+      "nmse_asm": 1.4832343683080376,
+      "nmse_transformer": 0.720970000415794
+    },
+    {
+      "regime": "ID",
+      "seed": 89,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.2206679099644493,
+      "delta_nmse": 0.5826047574674491,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.2144218559259126,
+      "nll_transformer": 2.9937539459614633,
+      "nmse_asm": 1.297342151645329,
+      "nmse_transformer": 0.7147373941778798
+    },
+    {
+      "regime": "ID",
+      "seed": 107,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.2811317939566469,
+      "delta_nmse": 0.4793472643982327,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.200577623928224,
+      "nll_transformer": 2.9194458299715773,
+      "nmse_asm": 1.1982685486417084,
+      "nmse_transformer": 0.7189212842434757
+    },
+    {
+      "regime": "Shift",
+      "seed": 29,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.3472466406264023,
+      "delta_nmse": 0.8476636941232332,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.1607625561078727,
+      "nll_transformer": 2.8135159154814704,
+      "nmse_asm": 1.5980195435959657,
+      "nmse_transformer": 0.7503558494727325
+    },
+    {
+      "regime": "Shift",
+      "seed": 43,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.3553584247984407,
+      "delta_nmse": 0.9263609367764912,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.2259382089181057,
+      "nll_transformer": 2.870579784119665,
+      "nmse_asm": 1.6951363365976932,
+      "nmse_transformer": 0.768775399821202
+    },
+    {
+      "regime": "Shift",
+      "seed": 71,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.2504844788785996,
+      "delta_nmse": 0.8618320741112625,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.1313621235526043,
+      "nll_transformer": 2.8808776446740048,
+      "nmse_asm": 1.6237989256508227,
+      "nmse_transformer": 0.7619668515395602
+    },
+    {
+      "regime": "Shift",
+      "seed": 89,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.34859416270334265,
+      "delta_nmse": 0.6716312843714173,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.2426313706618037,
+      "nll_transformer": 2.894037207958461,
+      "nmse_asm": 1.3898787994823727,
+      "nmse_transformer": 0.7182475151109554
+    },
+    {
+      "regime": "Shift",
+      "seed": 107,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.316294532991634,
+      "delta_nmse": 0.5622731622013858,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.241726819878135,
+      "nll_transformer": 2.925432286886501,
+      "nmse_asm": 1.3360954205659568,
+      "nmse_transformer": 0.773822258364571
+    },
+    {
+      "regime": "OOD",
+      "seed": 29,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.2467396775829358,
+      "delta_nmse": 0.6314841008280965,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.0424047135535583,
+      "nll_transformer": 2.7956650359706225,
+      "nmse_asm": 1.3438878236380158,
+      "nmse_transformer": 0.7124037228099194
+    },
+    {
+      "regime": "OOD",
+      "seed": 43,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.20742120922590557,
+      "delta_nmse": 0.6148427742181278,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.05610015391829,
+      "nll_transformer": 2.8486789446923844,
+      "nmse_asm": 1.3802691426221654,
+      "nmse_transformer": 0.7654263684040375
+    },
+    {
+      "regime": "OOD",
+      "seed": 71,
+      "coverage_difference": 8.680555555551361e-05,
+      "delta_nll": 0.12803415710521548,
+      "delta_nmse": 0.47260908557398285,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 2.971502135289823,
+      "nll_transformer": 2.8434679781846075,
+      "nmse_asm": 1.207846228849107,
+      "nmse_transformer": 0.7352371432751241
+    },
+    {
+      "regime": "OOD",
+      "seed": 89,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.13159509315606233,
+      "delta_nmse": 0.45933107036721843,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.0441796349654946,
+      "nll_transformer": 2.9125845418094323,
+      "nmse_asm": 1.12084925883025,
+      "nmse_transformer": 0.6615181884630317
+    },
+    {
+      "regime": "OOD",
+      "seed": 107,
+      "coverage_difference": 0.0,
+      "delta_nll": 0.17567164164251636,
+      "delta_nmse": 0.2411303696243111,
+      "delta_safe_service": 0.0,
+      "delta_safety": 0.0,
+      "nll_asm": 3.0305808113410153,
+      "nll_transformer": 2.854909169698499,
+      "nmse_asm": 0.9650784730026403,
+      "nmse_transformer": 0.7239481033783292
+    }
+  ],
+  "gates": [
+    {
+      "gate": "ASM.D",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG1-Y",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG1-Z",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG2-C",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG2-G",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG2-V",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG3-C",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG3-C-OOD",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG3-C-SHIFT",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG3-G",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG3-G-OOD",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG3-G-SHIFT",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG3-V",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG3-V-OOD",
+      "passed": false
+    },
+    {
+      "gate": "ASM.RTG3-V-SHIFT",
+      "passed": false
+    },
+    {
+      "gate": "RTG1-Y-ARCH",
+      "passed": false
+    },
+    {
+      "gate": "RTG1-Z-ARCH",
+      "passed": false
+    },
+    {
+      "gate": "RTG2-G-ARCH",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.D",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG1-Y",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG1-Z",
+      "passed": true
+    },
+    {
+      "gate": "Transformer.RTG2-C",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG2-G",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG2-V",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG3-C",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG3-C-OOD",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG3-C-SHIFT",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG3-G",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG3-G-OOD",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG3-G-SHIFT",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG3-V",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG3-V-OOD",
+      "passed": false
+    },
+    {
+      "gate": "Transformer.RTG3-V-SHIFT",
+      "passed": false
+    }
+  ]
+}
