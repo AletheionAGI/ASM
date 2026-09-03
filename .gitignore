@@ -233,3 +233,5 @@ __marimo__/
 # Active official ATTR-RCMZ runtime outputs (mutable and local)
 /artifacts/attr_rtg_rcmz/official/
 /artifacts/attr_rtg_rcmz/official_failed_*/
+# Score-only outputs are tracked, but their mutable process logs remain local.
+/artifacts/attr_rtg_rcmz/**/run.log
