@@ -66,7 +66,14 @@ def _governance(plt: Any, rows: list[dict[str, Any]], title: str) -> Any:
         ("Unsafe selection", "Safe service", "Coverage"),
         (True, False, False),
     ):
-        _regime_errorbars(axis, rows, metric, label, lower_better=lower)
+        diagnostic = metric == "safe_service"
+        _regime_errorbars(
+            axis,
+            rows,
+            "safe_service_eligible_only" if diagnostic else metric,
+            "Safe service (eligible folds; diagnostic)" if diagnostic else label,
+            lower_better=lower,
+        )
     figure.suptitle(title + " · estimate and 95% CI")
     figure.tight_layout()
     return figure
@@ -170,10 +177,10 @@ def _values(
 ) -> list[float]:
     values = []
     for row in rows:
-        if row.get("arm") == arm and str(row.get("regime")) == regime and metric in row:
-            value = float(row[metric])
-            if math.isfinite(value):
-                values.append(value)
+        if row.get("arm") == arm and str(row.get("regime")) == regime:
+            value = row.get(metric)
+            if _finite_number(value):
+                values.append(float(value))
     return values
 
 
@@ -193,8 +200,16 @@ def _delta(
             for row in rows
             if row.get("arm") == arm
             and int(row.get("seed", -1)) == seed
-            and metric in row
+            and _finite_number(row.get(metric))
         ]
         return fmean(values) if values else math.nan
 
     return arm_mean(left) - arm_mean(right)
+
+
+def _finite_number(value: object) -> bool:
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(float(value))
+    )

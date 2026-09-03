@@ -1,0 +1,74 @@
+{
+  "checkpoints_preserved": true,
+  "completed_arms": [
+    "R",
+    "CM",
+    "Z",
+    "T"
+  ],
+  "completed_updates_each": 2000,
+  "error": "isolated scorer failed: TypeError: float() argument must be a string or a real number, not 'list'",
+  "files": [
+    {
+      "archived_path": "artifacts/attr_rtg_rcmz/official_failed_2026-09-03_s29_scorer/TOMBSTONE.json",
+      "bytes": 138,
+      "original_path": "artifacts/attr_rtg_rcmz/official/TOMBSTONE.json",
+      "relative_path": "TOMBSTONE.json",
+      "sha256": "822e682bf0bdcf455f8d3d47a301e9966274d1f5558d641a61422517412c5cbf"
+    },
+    {
+      "archived_path": "artifacts/attr_rtg_rcmz/official_failed_2026-09-03_s29_scorer/checkpoints/seed-29_CM_update-2000.ckpt",
+      "bytes": 648319,
+      "original_path": "artifacts/attr_rtg_rcmz/official/checkpoints/seed-29_CM_update-2000.ckpt",
+      "relative_path": "checkpoints/seed-29_CM_update-2000.ckpt",
+      "sha256": "a42041302e65e4ff81191760962c939211018735f5a6dd172dab781ab96e46d6"
+    },
+    {
+      "archived_path": "artifacts/attr_rtg_rcmz/official_failed_2026-09-03_s29_scorer/checkpoints/seed-29_R_update-2000.ckpt",
+      "bytes": 634967,
+      "original_path": "artifacts/attr_rtg_rcmz/official/checkpoints/seed-29_R_update-2000.ckpt",
+      "relative_path": "checkpoints/seed-29_R_update-2000.ckpt",
+      "sha256": "f23c03a275441b6bb6bf5bd5452ef562edd483c313c3e9e208385c72aba20826"
+    },
+    {
+      "archived_path": "artifacts/attr_rtg_rcmz/official_failed_2026-09-03_s29_scorer/checkpoints/seed-29_T_update-2000.ckpt",
+      "bytes": 644431,
+      "original_path": "artifacts/attr_rtg_rcmz/official/checkpoints/seed-29_T_update-2000.ckpt",
+      "relative_path": "checkpoints/seed-29_T_update-2000.ckpt",
+      "sha256": "ed20db56ca196abef95bfd108095ec561adef27515fd1eb82d6dd95a7105e0c3"
+    },
+    {
+      "archived_path": "artifacts/attr_rtg_rcmz/official_failed_2026-09-03_s29_scorer/checkpoints/seed-29_Z_update-2000.ckpt",
+      "bytes": 627163,
+      "original_path": "artifacts/attr_rtg_rcmz/official/checkpoints/seed-29_Z_update-2000.ckpt",
+      "relative_path": "checkpoints/seed-29_Z_update-2000.ckpt",
+      "sha256": "da591bfe492a589194b582fd22f119c647427a167819ed8ac62ac8ff1eac7110"
+    },
+    {
+      "archived_path": "artifacts/attr_rtg_rcmz/official_failed_2026-09-03_s29_scorer/run.log",
+      "bytes": 34083,
+      "original_path": "artifacts/attr_rtg_rcmz/official/run.log",
+      "relative_path": "run.log",
+      "sha256": "8c2ed17df7b3438880eb99449e3b6885033eb165efefe82d65609abeb023aca9"
+    },
+    {
+      "archived_path": "artifacts/attr_rtg_rcmz/official_failed_2026-09-03_s29_scorer/status.json",
+      "bytes": 344,
+      "original_path": "artifacts/attr_rtg_rcmz/official/status.json",
+      "relative_path": "status.json",
+      "sha256": "3fc07e1227384f56a79dd2ad18e2ac8a10bc139eb461d278267a03943ff99ce6"
+    },
+    {
+      "archived_path": "artifacts/attr_rtg_rcmz/official_failed_2026-09-03_s29_scorer/supervisor.json",
+      "bytes": 180,
+      "original_path": "artifacts/attr_rtg_rcmz/official/supervisor.json",
+      "relative_path": "supervisor.json",
+      "sha256": "4e9bf8a53c2f418cc5f9be31b9ea06f9d8ae385dff211e9bbf385565f904ef17"
+    }
+  ],
+  "old_lock_sha256": "6ed6bd2b39460695a891c27c51cc417453e59eb10ad519660219f84a8cb8950e",
+  "schema": "ATTR-RTG-RCMZ-OFFICIAL-FAILURE-V1",
+  "scientific_result_available": false,
+  "seed": 29,
+  "status": "FAILED_SCORER_SERIALIZATION"
+}

@@ -1,0 +1,164 @@
+{
+  "checkpoint_count": 20,
+  "checkpoint_write_performed": false,
+  "diagnostic_definition": "equal-origin within eligible episode, equal eligible episode within world, equal represented world",
+  "elapsed_seconds": 574.8661323590059,
+  "eligible_folds": {
+    "ID": [
+      [
+        128,
+        128
+      ]
+    ],
+    "OOD": [
+      [
+        71,
+        128
+      ]
+    ],
+    "shift": [
+      [
+        103,
+        128
+      ]
+    ]
+  },
+  "gates_use_diagnostic": false,
+  "lock_sha256": "3c48351f130b2134614c925a1c36bba2a90bdf377355d80cead3874cec434d42",
+  "official_metrics_unchanged": true,
+  "official_safe_service_status": "null and INVALID for shift/OOD",
+  "outputs": [
+    {
+      "bytes": 34348,
+      "path": "artifacts/attr_rtg_rcmz/official/official_rows.json",
+      "sha256": "e341ee5bb7113d29dab90ecd07f52fbad2d504dd28036ea9730fe36c5c8390bc"
+    },
+    {
+      "bytes": 46988,
+      "path": "artifacts/attr_rtg_rcmz/official/manifest.json",
+      "sha256": "378972220d9e21c05a2058354c0dfd35a5f51fbd6c43bb12acde5ee3dfa61bd4"
+    },
+    {
+      "bytes": 18033,
+      "path": "artifacts/attr_rtg_rcmz/official/manifest.csv",
+      "sha256": "cfce6e51786c5ecfbbe737f514b7598079d3f0d7641063a8fdc910959968a48c"
+    },
+    {
+      "bytes": 386149,
+      "path": "artifacts/attr_rtg_rcmz/official/summary.html",
+      "sha256": "d94dbfb29e9fa0b2eede0aa53f1e0ebf9bb4366d340d218c4d64f2c3868acc3c"
+    },
+    {
+      "bytes": 10407,
+      "path": "artifacts/attr_rtg_rcmz/official/summary.png",
+      "sha256": "01f8d8f4dd4d525d4a212c72f4d0d864e9109657f0c2ec16fdbe802e2401c66c"
+    },
+    {
+      "bytes": 9478,
+      "path": "artifacts/attr_rtg_rcmz/official/summary.svg",
+      "sha256": "964159527396a5bacdb6512e6ec088bc9c762e5630bf60760dd2e258ccec69bd"
+    },
+    {
+      "bytes": 72387,
+      "path": "artifacts/attr_rtg_rcmz/official/architecture_quality.png",
+      "sha256": "9238d05844d11d5d0ff1e6a120c514755194cfd9749d4c260890a6ae7e0278e8"
+    },
+    {
+      "bytes": 68449,
+      "path": "artifacts/attr_rtg_rcmz/official/architecture_quality.svg",
+      "sha256": "d6a972627d25d58707534feaa6f181628c211f620f8ff6527d74846d91118ad0"
+    },
+    {
+      "bytes": 106677,
+      "path": "artifacts/attr_rtg_rcmz/official/governance.png",
+      "sha256": "8c25900d2895b9a2ac988f192791e14c92237dcbc23761851a438a6ae0fe8bc0"
+    },
+    {
+      "bytes": 87048,
+      "path": "artifacts/attr_rtg_rcmz/official/governance.svg",
+      "sha256": "ea191dfd78bdcd6ded2ff4286f288ca38ba830dfd64e3301bde73bce3592cf71"
+    },
+    {
+      "bytes": 107624,
+      "path": "artifacts/attr_rtg_rcmz/official/g_vs_c.png",
+      "sha256": "ddd2c5a106493b291ffbbbb20499379337d6dddfae41df68688129459ffb43ae"
+    },
+    {
+      "bytes": 89780,
+      "path": "artifacts/attr_rtg_rcmz/official/g_vs_c.svg",
+      "sha256": "3e0afa3b767dd0900a6a4197f17cb4ed373bbffb8b06433b936b1c2e82562363"
+    },
+    {
+      "bytes": 90797,
+      "path": "artifacts/attr_rtg_rcmz/official/seed_differences.png",
+      "sha256": "37ae737b9f1aa6b809f137f9f1dcfb503eea70abf76a5ff49bbf00356138be44"
+    },
+    {
+      "bytes": 74412,
+      "path": "artifacts/attr_rtg_rcmz/official/seed_differences.svg",
+      "sha256": "7b83ba2e69644fd69b8346c1ad58bc773f1ac45a91318d836d21d61ba6868a1f"
+    }
+  ],
+  "prior_rows_sha256": "50eac02110e7e0af3e12a1bb0d7e9a7da7d1ea7b3b94570e1f2588f5f3dfb3f0",
+  "rows_sha256": "e341ee5bb7113d29dab90ecd07f52fbad2d504dd28036ea9730fe36c5c8390bc",
+  "safe_service_eligible_only_mean_and_seed_ci95": {
+    "ID": {
+      "CM": {
+        "ci95": 0.015729628109033462,
+        "mean": 0.939081101190476
+      },
+      "R": {
+        "ci95": 0.002633790419227599,
+        "mean": 0.9676370287698413
+      },
+      "T": {
+        "ci95": 0.008735561939169124,
+        "mean": 0.973725818452381
+      },
+      "Z": {
+        "ci95": 0.0004423260536321766,
+        "mean": 0.9515718005952382
+      }
+    },
+    "OOD": {
+      "CM": {
+        "ci95": 0.18931772437349828,
+        "mean": 0.5560763888888889
+      },
+      "R": {
+        "ci95": 0.0,
+        "mean": 0.9739583333333334
+      },
+      "T": {
+        "ci95": 0.026502374762567116,
+        "mean": 0.9255208333333333
+      },
+      "Z": {
+        "ci95": 0.13701833072712175,
+        "mean": 0.7291666666666667
+      }
+    },
+    "shift": {
+      "CM": {
+        "ci95": 0.12012588102588334,
+        "mean": 0.7057471264367816
+      },
+      "R": {
+        "ci95": 0.001379597671222721,
+        "mean": 0.967159277504105
+      },
+      "T": {
+        "ci95": 0.024133102965420667,
+        "mean": 0.9264367816091955
+      },
+      "Z": {
+        "ci95": 0.052470073383520034,
+        "mean": 0.894663382594417
+      }
+    }
+  },
+  "schema": "ATTR-RTG-RCMZ-V1-SAFE-SERVICE-ELIGIBLE-ONLY-DIAGNOSTIC",
+  "score_only": true,
+  "status": "COMPLETED",
+  "training_performed": false
+}

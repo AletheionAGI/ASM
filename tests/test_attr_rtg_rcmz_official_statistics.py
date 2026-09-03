@@ -105,3 +105,123 @@ def test_invalid_scalar_row_is_complete_and_json_safe():
     ):
         assert name in row and row[name] is None
     assert "NaN" not in json.dumps(row, allow_nan=False)
+
+
+def test_missing_safe_service_denominator_preserves_other_metrics():
+    import torch
+
+    from attr_rtg_rcmz.official_stats import summarize
+
+    records = [
+        {
+            "valid": True,
+            "logits": torch.zeros(6, dtype=torch.float64),
+            "labels": torch.ones(6, dtype=torch.float64),
+            "world": 0,
+            "episode": 0,
+        }
+    ]
+    row = summarize(
+        records,
+        1.0,
+        0.5,
+        arm="R",
+        seed=29,
+        regime="shift",
+        peak_bytes=0,
+        elapsed=0.0,
+    )
+    assert row["status"] == "INVALID"
+    assert row["safe_service"] is None
+    assert row["invalid_reason"] == "metrics: missing safe_service denominator"
+    for name in ("h8_nll", "ece", "unsafe_selection", "coverage", "abstention"):
+        assert isinstance(row[name], float)
+        assert name in row["_sufficient"]
+
+
+def test_summarize_retains_independent_metrics_when_safe_service_is_undefined():
+    import torch
+
+    from attr_rtg_rcmz.official_stats import summarize
+
+    records = [
+        {
+            "valid": True,
+            "world": 0,
+            "episode": 0,
+            "logits": torch.zeros(6, dtype=torch.float64),
+            "labels": torch.ones(6, dtype=torch.float64),
+        }
+    ]
+    row = summarize(
+        records,
+        1.0,
+        0.9,
+        arm="R",
+        seed=29,
+        regime="ID",
+        peak_bytes=0,
+        elapsed=0.0,
+    )
+
+    assert row["status"] == "INVALID"
+    assert row["invalid_reason"] == "metrics: missing safe_service denominator"
+    assert row["safe_service"] is None
+    assert "safe_service" not in row["_sufficient"]
+    for endpoint in ("h8_nll", "ece", "unsafe_selection", "coverage"):
+        assert np.isfinite(row[endpoint])
+        assert row["_sufficient"][endpoint]
+
+
+def test_contrasts_retain_available_endpoints_when_service_is_unavailable():
+    rows = _rows()
+    for row in rows:
+        if row["arm"] == "CM":
+            row["status"] = "INVALID"
+            row["invalid_reason"] = "metrics: missing safe_service denominator"
+            row["safe_service"] = None
+            row["_sufficient"].pop("safe_service")
+
+    results = contrast_rows(rows)
+    dependent = [row for row in results if "CM" in row["contrast"].split("-")]
+    assert all(row["status"] == "INVALID" and not row["passed"] for row in dependent)
+    assert all(
+        row["reason"] == "dependent endpoint unavailable: safe_service"
+        for row in dependent
+    )
+    assert all(
+        row["lower"][regime][3] is None
+        and all(row["lower"][regime][endpoint] is not None for endpoint in (0, 1, 2, 4))
+        for row in dependent
+        for regime in range(3)
+    )
+
+
+def test_eligible_only_safe_service_diagnostic_skips_zero_denominator_fold():
+    import torch
+
+    from attr_rtg_rcmz.official_stats import summarize
+
+    records = [
+        {
+            "valid": True,
+            "logits": torch.zeros(6, dtype=torch.float64),
+            "labels": torch.ones(6, dtype=torch.float64),
+            "world": 0,
+            "episode": 0,
+        },
+        {
+            "valid": True,
+            "logits": torch.zeros(6, dtype=torch.float64),
+            "labels": torch.zeros(6, dtype=torch.float64),
+            "world": 0,
+            "episode": 1,
+        },
+    ]
+    row = summarize(
+        records, 1.0, 0.5, arm="R", seed=29, regime="shift", peak_bytes=0, elapsed=0.0
+    )
+    assert row["status"] == "INVALID" and row["safe_service"] is None
+    assert row["safe_service_eligible_only"] == 1.0
+    assert row["safe_service_eligible_fold_count"] == 1
+    assert row["safe_service_total_fold_count"] == 2

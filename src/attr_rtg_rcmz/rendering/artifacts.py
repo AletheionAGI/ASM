@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import html
 import json
+import math
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
@@ -31,11 +32,12 @@ def render_summary(
     html_path = output_dir / "summary.html"
     json_path = output_dir / "manifest.json"
     csv_path = output_dir / "manifest.csv"
+    eligible = [row for row in data if _finite_number(row.get("h8_nll"))]
     labels = [
         f"{row.get('arm', index)}/{row.get('seed', '-')}"
-        for index, row in enumerate(data)
+        for index, row in enumerate(eligible)
     ]
-    values = [float(row.get("h8_nll", 0.0)) for row in data]
+    values = [float(row["h8_nll"]) for row in eligible]
     svg_text = _svg(labels, values, synthetic=synthetic)
     svg.write_text(svg_text, encoding="utf-8")
     write_bar_png(png, values, labels)
@@ -106,4 +108,12 @@ def _html(rows: list[dict[str, Any]], svgs: list[str], *, synthetic: bool) -> st
         "<!doctype html><html><head><meta charset='utf-8'><title>ATTR-RTG-RCMZ summary</title>"
         "<style>body{font-family:system-ui;max-width:900px;margin:2rem auto}pre{background:#eee;padding:1rem}</style>"
         f"</head><body><h1>{heading}</h1><p>{DISCLAIMER}</p>{figures}<pre>{payload}</pre></body></html>"
+    )
+
+
+def _finite_number(value: object) -> bool:
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(float(value))
     )

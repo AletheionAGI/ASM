@@ -1,38 +1,48 @@
 {
   "authorization": {
-    "path": "docs/review/attr_rtg_rcmz_v1/user_authorization_status_only_reseal_v3.md",
-    "sha256": "06c9fb584bb149c9f14c51ce3167959b75c0c4694c1f4777e32257f37d7a3cf5"
+    "path": "docs/review/attr_rtg_rcmz_v1/user_authorization_safe_service_diagnostic_v7.md",
+    "sha256": "cd2ff6ec04fd2b806970614cd7a706d0c3ca5688018ab208d2483920e9d02551"
   },
   "candidate_manifest": {
-    "artifact_count": 107,
-    "content_sha256": "ec51589784d8320ad19999eca929aa84f57e56ac5bc47b7de0c7e4e6730614af",
-    "path": "docs/review/attr_rtg_rcmz_v1/local_lock_manifest_v5.json",
-    "sha256": "0edca10830c63363bbfe5dd1253f488b25e961f784610caefa7b017c607551a6"
+    "artifact_count": 116,
+    "content_sha256": "34955553dfcf748971cd98ccbfbf5f35c47d2793f6ad2caa10bc9e160605a075",
+    "path": "docs/review/attr_rtg_rcmz_v1/local_lock_manifest_v9.json",
+    "sha256": "0fcee34c7d5e99d1a151614685817fa32d1136d26758b193f73090c09028ed39"
+  },
+  "diagnostic_amendment": {
+    "path": "docs/review/attr_rtg_rcmz_v1/diagnostic_safe_service_eligible_only_v1.md",
+    "sha256": "03ba97d1309944bf993eab3286adad26dd4c2f1bed8e1db8534077c94a329739"
+  },
+  "diagnostic_result": {
+    "path": "docs/review/attr_rtg_rcmz_v1/official_safe_service_diagnostic_receipt_v3.json",
+    "rows_sha256": "e341ee5bb7113d29dab90ecd07f52fbad2d504dd28036ea9730fe36c5c8390bc",
+    "sha256": "a1d00de2da351a71321440982cd8c134fc5b8b1827eb8b868cf8b6d9f70013e7",
+    "status": "COMPLETED"
   },
   "lock_receipt": {
     "path": "locks/attr_rtg_rcmz_v1/LOCAL_PROTOCOL_LOCK.json",
-    "sha256": "6ed6bd2b39460695a891c27c51cc417453e59eb10ad519660219f84a8cb8950e"
+    "sha256": "3c48351f130b2134614c925a1c36bba2a90bdf377355d80cead3874cec434d42"
   },
+  "official_safe_service_changed": false,
   "predecessor_lock": {
-    "path": "locks/attr_rtg_rcmz_v1/archive/LOCAL_PROTOCOL_LOCK_v4_f3d772784742307f.json",
-    "sha256": "f3d772784742307fe9939000f29e5b0dd09e7f0d82861df4897d0dd3bbb5c661"
-  },
-  "prior_scientific_reviews": {
-    "path": "docs/review/attr_rtg_rcmz_v1/final_review_verdicts_v4.json",
-    "ready": 4,
-    "sha256": "d1f1094b66dd0258b539ab598ebce17dab529f0c38eed172c6daf1b64e5aa67d",
-    "total": 4
+    "path": "locks/attr_rtg_rcmz_v1/archive/LOCAL_PROTOCOL_LOCK_v8.json",
+    "sha256": "611282851b42fad136986ce4f8d50d3541d0540358862a9ed69196f4e55c816d"
   },
   "protocol": {
     "path": "docs/ATTR_RTG_RCMZ_PREREGISTRATION.md",
     "sha256": "c37fa09bdad9715d82d5cb6b6108ce5d2147462c79738674abb75ca50dbc0f84"
   },
-  "reseal_scope": "STATUS_ONLY",
-  "schema": "ATTR-RTG-RCMZ-V1-LOCK-MANIFEST-V5",
+  "recovery_input": {
+    "checkpoint_count": 20,
+    "path": "artifacts/attr_rtg_rcmz/official/recovery_input_all20_v2.json",
+    "sha256": "c82244e0188955412f5ec3cace862d338b89d2ac0256d86b47db8cea49882798"
+  },
+  "reseal_scope": "ELIGIBLE_ONLY_SAFE_SERVICE_DIAGNOSTIC_SCORE_ONLY",
+  "schema": "ATTR-RTG-RCMZ-V1-LOCK-MANIFEST-V9",
   "scientific_content_changed": false,
   "source_anchor": {
     "path": "src/attr_rtg_rcmz/lock_anchor.py",
-    "sha256": "ec9c2a117e8370a65a7858eb6a35a7424a4d14a7f05eac58235c873bead8f0ff"
+    "sha256": "c9ca1ee0b8cfa09551d14db913cfbd9817fac9d265998762fcca6555e7e2aba0"
   },
   "state": "LOCAL PROTOCOL LOCK"
 }

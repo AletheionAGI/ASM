@@ -93,8 +93,13 @@ def supervise(
     return int(child.returncode or 0) if not timed_out else 124
 
 
-def official_command(output_dir: Path, lock_file: Path, lock_sha256: str) -> list[str]:
-    return [
+def official_command(
+    output_dir: Path,
+    lock_file: Path,
+    lock_sha256: str,
+    recovery_manifest: Path | None = None,
+) -> list[str]:
+    command = [
         sys.executable,
         "-m",
         "attr_rtg_rcmz.cli",
@@ -106,6 +111,11 @@ def official_command(output_dir: Path, lock_file: Path, lock_sha256: str) -> lis
         "--lock-sha256",
         lock_sha256,
     ]
+    if recovery_manifest is not None:
+        command.extend(
+            ["--recover-completed", "--recovery-manifest", str(recovery_manifest)]
+        )
+    return command
 
 
 def _read_lines(pipe: TextIO | None, lines: queue.Queue[str | None]) -> None:
@@ -146,8 +156,22 @@ def main() -> int:
     parser.add_argument("--lock-file", type=Path, required=True)
     parser.add_argument("--lock-sha256", required=True)
     parser.add_argument("--receipt", type=Path, required=True)
+    parser.add_argument("--recovery-manifest", type=Path)
     args = parser.parse_args()
-    command = official_command(args.output_dir, args.lock_file, args.lock_sha256)
+    if args.recovery_manifest is not None:
+        from .recovery import archive_previous_run
+
+        if (
+            args.recovery_manifest.resolve()
+            == (args.output_dir / "recovery_manifest.json").resolve()
+        ):
+            parser.error(
+                "recovery input cannot be the generated recovery_manifest.json"
+            )
+        archive_previous_run(args.output_dir, (args.receipt,))
+    command = official_command(
+        args.output_dir, args.lock_file, args.lock_sha256, args.recovery_manifest
+    )
     return supervise(command, args.receipt)
 
 

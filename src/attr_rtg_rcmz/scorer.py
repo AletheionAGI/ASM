@@ -38,9 +38,9 @@ class ScorerRequest:
 
 @dataclass(frozen=True)
 class ScorerResponse:
-    logits: tuple[tuple[float, ...], ...]
-    common24: tuple[tuple[float, ...], ...]
-    native_state: tuple[tuple[float, ...], ...]
+    logits: tuple[Any, ...]
+    common24: tuple[Any, ...]
+    native_state: tuple[Any, ...]
 
 
 def serialize_message(message: Mapping[str, Any]) -> dict[str, Any]:
@@ -81,9 +81,19 @@ def score_in_clean_process(
     return payload
 
 
-def _rows(tensor: Any) -> tuple[tuple[float, ...], ...]:
+def _immutable_floats(tensor: Any) -> tuple[Any, ...]:
+    """Preserve every tensor dimension while freezing leaves as Python floats."""
     values = tensor.detach().to(device="cpu", dtype=None).tolist()
-    return tuple(tuple(float(value) for value in row) for row in values)
+
+    def freeze(value: Any) -> Any:
+        if isinstance(value, list):
+            return tuple(freeze(item) for item in value)
+        return float(value)
+
+    frozen = freeze(values)
+    if not isinstance(frozen, tuple):
+        raise TypeError("scorer output must have at least one dimension")
+    return frozen
 
 
 def _score_worker(
@@ -141,9 +151,9 @@ def _score_worker(
                 result = model(InferenceMessage.from_mapping(message))
                 responses.append(
                     ScorerResponse(
-                        _rows(result.logits),
-                        _rows(result.common24),
-                        _rows(result.native_state),
+                        _immutable_floats(result.logits),
+                        _immutable_floats(result.common24),
+                        _immutable_floats(result.native_state),
                     )
                 )
         if stream is not None:

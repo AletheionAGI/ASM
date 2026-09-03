@@ -47,3 +47,32 @@ def test_supervisor_terminates_and_tombstones_timeout(tmp_path: Path):
     assert payload["status"] == "TIMEOUT"
     assert payload["finish_monotonic"] >= payload["deadline_monotonic"]
     assert payload["returncode"] is not None
+
+
+def test_official_command_forwards_recovery_manifest(tmp_path: Path):
+    from attr_rtg_rcmz.official_supervisor import official_command
+
+    recovery = tmp_path / "official" / "recovery_input_v1.json"
+    command = official_command(
+        tmp_path / "official", tmp_path / "lock.json", "a" * 64, recovery
+    )
+    assert command[-3:] == ["--recover-completed", "--recovery-manifest", str(recovery)]
+
+
+def test_recovery_archives_receipts_but_preserves_checkpoints(tmp_path: Path):
+    from attr_rtg_rcmz.recovery import archive_previous_run
+
+    output = tmp_path / "official"
+    checkpoint = output / "checkpoints" / "seed-29_R_update-2000.ckpt"
+    checkpoint.parent.mkdir(parents=True)
+    checkpoint.write_bytes(b"kept")
+    (output / "TOMBSTONE.json").write_text("old")
+    (output / "status.json").write_text("old-status")
+    receipt = output / "supervisor.json"
+    receipt.write_text("old-supervisor")
+    archived = archive_previous_run(output, (receipt,))
+    assert archived is not None
+    assert checkpoint.read_bytes() == b"kept"
+    assert (archived / "TOMBSTONE.json").read_text() == "old"
+    assert (archived / "status.json").read_text() == "old-status"
+    assert (archived / "supervisor.json").read_text() == "old-supervisor"

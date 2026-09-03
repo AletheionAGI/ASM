@@ -1,0 +1,261 @@
+{
+  "checkpoint_count": 20,
+  "checkpoint_sha256": [
+    {
+      "arm": "R",
+      "path": "checkpoints/seed-29_R_update-2000.ckpt",
+      "seed": 29,
+      "sha256": "f23c03a275441b6bb6bf5bd5452ef562edd483c313c3e9e208385c72aba20826",
+      "update": 2000
+    },
+    {
+      "arm": "CM",
+      "path": "checkpoints/seed-29_CM_update-2000.ckpt",
+      "seed": 29,
+      "sha256": "a42041302e65e4ff81191760962c939211018735f5a6dd172dab781ab96e46d6",
+      "update": 2000
+    },
+    {
+      "arm": "Z",
+      "path": "checkpoints/seed-29_Z_update-2000.ckpt",
+      "seed": 29,
+      "sha256": "da591bfe492a589194b582fd22f119c647427a167819ed8ac62ac8ff1eac7110",
+      "update": 2000
+    },
+    {
+      "arm": "T",
+      "path": "checkpoints/seed-29_T_update-2000.ckpt",
+      "seed": 29,
+      "sha256": "ed20db56ca196abef95bfd108095ec561adef27515fd1eb82d6dd95a7105e0c3",
+      "update": 2000
+    },
+    {
+      "arm": "R",
+      "path": "checkpoints/seed-43_R_update-2000.ckpt",
+      "seed": 43,
+      "sha256": "cdc2e6dd6f35f6a2459efe8562ca7fcbe681f2f96b5fac6947d71d9e46e00fa7",
+      "update": 2000
+    },
+    {
+      "arm": "CM",
+      "path": "checkpoints/seed-43_CM_update-2000.ckpt",
+      "seed": 43,
+      "sha256": "cf1582694db9ed53650b6c8039b3329efe7295a8db953aeb17b3be29d8f6c3f5",
+      "update": 2000
+    },
+    {
+      "arm": "Z",
+      "path": "checkpoints/seed-43_Z_update-2000.ckpt",
+      "seed": 43,
+      "sha256": "9559dff1762bb0f98aa94c5370b6ea48d6f7217dd1da4286c9159037ad9a7514",
+      "update": 2000
+    },
+    {
+      "arm": "T",
+      "path": "checkpoints/seed-43_T_update-2000.ckpt",
+      "seed": 43,
+      "sha256": "35ba0e21e96d6ed71f3f69c8363691c1dd8e71d80416ea2d7b1f402b08ee9803",
+      "update": 2000
+    },
+    {
+      "arm": "R",
+      "path": "checkpoints/seed-71_R_update-2000.ckpt",
+      "seed": 71,
+      "sha256": "82f127be4db4f42f4517b7ec0e0e01aa8474c087a4a96258f3d9b5d23eda13e0",
+      "update": 2000
+    },
+    {
+      "arm": "CM",
+      "path": "checkpoints/seed-71_CM_update-2000.ckpt",
+      "seed": 71,
+      "sha256": "b36b0c74283d784cfef6b919e76a0f625f56f621be61742aeb66a976845cca8c",
+      "update": 2000
+    },
+    {
+      "arm": "Z",
+      "path": "checkpoints/seed-71_Z_update-2000.ckpt",
+      "seed": 71,
+      "sha256": "b693f5a702e8441ac2b5df9cfd12536cc4af1057004d07af049f2791e8a3bf71",
+      "update": 2000
+    },
+    {
+      "arm": "T",
+      "path": "checkpoints/seed-71_T_update-2000.ckpt",
+      "seed": 71,
+      "sha256": "4a6057deb7d2ac65eb1c5a61a433f8c1637c53cd7f41dc785a35904b3f7e5aaa",
+      "update": 2000
+    },
+    {
+      "arm": "R",
+      "path": "checkpoints/seed-89_R_update-2000.ckpt",
+      "seed": 89,
+      "sha256": "4b0c2e09f3967445aef2649738ba71c06642bb17b606f24793f3e9550c85e3e7",
+      "update": 2000
+    },
+    {
+      "arm": "CM",
+      "path": "checkpoints/seed-89_CM_update-2000.ckpt",
+      "seed": 89,
+      "sha256": "3d095baebcaaa0fc9973f6ffb160a8e10d5fdd466bc76af4278cd95bdcb9a8f2",
+      "update": 2000
+    },
+    {
+      "arm": "Z",
+      "path": "checkpoints/seed-89_Z_update-2000.ckpt",
+      "seed": 89,
+      "sha256": "b9d066e1b879ab8c48144ea8cdc32bdc0c59a61676dec8211ec81159c56ceb79",
+      "update": 2000
+    },
+    {
+      "arm": "T",
+      "path": "checkpoints/seed-89_T_update-2000.ckpt",
+      "seed": 89,
+      "sha256": "b3a13c8f072a98f15a66ac7d8eaddde4a3f8a8ff2087d793bef6435b08e9d463",
+      "update": 2000
+    },
+    {
+      "arm": "R",
+      "path": "checkpoints/seed-107_R_update-2000.ckpt",
+      "seed": 107,
+      "sha256": "973e9ca8a4c713faa31ae2dcd268fb6c59e9887206fbc7a673e5509fe0c88aee",
+      "update": 2000
+    },
+    {
+      "arm": "CM",
+      "path": "checkpoints/seed-107_CM_update-2000.ckpt",
+      "seed": 107,
+      "sha256": "dbe5edde4d2ca3809b75b8fd90ff8786385a966e032e333ba0e6ad8773dbd479",
+      "update": 2000
+    },
+    {
+      "arm": "Z",
+      "path": "checkpoints/seed-107_Z_update-2000.ckpt",
+      "seed": 107,
+      "sha256": "96d29735fe77ee2f635f39e2b1f4109e4f9e584bf0353da51ffc15c68c2eb3f4",
+      "update": 2000
+    },
+    {
+      "arm": "T",
+      "path": "checkpoints/seed-107_T_update-2000.ckpt",
+      "seed": 107,
+      "sha256": "70866be6f0ff0391e0dcca7b94964ad4786ff1e8285e3b566b301786e2937fbc",
+      "update": 2000
+    }
+  ],
+  "checkpoint_write_performed": false,
+  "elapsed_seconds": 571.7517933659983,
+  "finite_metric_counts": {
+    "ID": {
+      "abstention": 20,
+      "coverage": 20,
+      "ece": 20,
+      "h8_nll": 20,
+      "safe_service": 20,
+      "unsafe_selection": 20
+    },
+    "OOD": {
+      "abstention": 20,
+      "coverage": 20,
+      "ece": 20,
+      "h8_nll": 20,
+      "safe_service": 0,
+      "unsafe_selection": 20
+    },
+    "shift": {
+      "abstention": 20,
+      "coverage": 20,
+      "ece": 20,
+      "h8_nll": 20,
+      "safe_service": 0,
+      "unsafe_selection": 20
+    }
+  },
+  "id_metrics_unchanged": true,
+  "invalid_rows": 46,
+  "invalid_semantics": {
+    "OOD": "safe_service denominator missing; cell remains INVALID",
+    "contrast_gates": "fail closed",
+    "shift": "safe_service denominator missing; cell remains INVALID"
+  },
+  "outputs": [
+    {
+      "bytes": 27039,
+      "path": "artifacts/attr_rtg_rcmz/official/official_rows.json",
+      "sha256": "50eac02110e7e0af3e12a1bb0d7e9a7da7d1ea7b3b94570e1f2588f5f3dfb3f0"
+    },
+    {
+      "bytes": 38239,
+      "path": "artifacts/attr_rtg_rcmz/official/manifest.json",
+      "sha256": "53470b84325e00081f0061a33f8277b2c8f3912bf68aadb40cd67e7b12579ecf"
+    },
+    {
+      "bytes": 16376,
+      "path": "artifacts/attr_rtg_rcmz/official/manifest.csv",
+      "sha256": "f86a2d8d21372dcbd6e5cc5a168373afcb52c87028a716740be26b365c7f7e21"
+    },
+    {
+      "bytes": 365270,
+      "path": "artifacts/attr_rtg_rcmz/official/summary.html",
+      "sha256": "cca00f5cd1c79551aa2b00b1043ff6aba767281d2e1c734dafbcc7d514118be6"
+    },
+    {
+      "bytes": 10407,
+      "path": "artifacts/attr_rtg_rcmz/official/summary.png",
+      "sha256": "01f8d8f4dd4d525d4a212c72f4d0d864e9109657f0c2ec16fdbe802e2401c66c"
+    },
+    {
+      "bytes": 9478,
+      "path": "artifacts/attr_rtg_rcmz/official/summary.svg",
+      "sha256": "964159527396a5bacdb6512e6ec088bc9c762e5630bf60760dd2e258ccec69bd"
+    },
+    {
+      "bytes": 72387,
+      "path": "artifacts/attr_rtg_rcmz/official/architecture_quality.png",
+      "sha256": "9238d05844d11d5d0ff1e6a120c514755194cfd9749d4c260890a6ae7e0278e8"
+    },
+    {
+      "bytes": 68449,
+      "path": "artifacts/attr_rtg_rcmz/official/architecture_quality.svg",
+      "sha256": "9144b731c2e994e7d9411afa763cbdc89d30f0693cef16c305f9a86cf128d506"
+    },
+    {
+      "bytes": 97139,
+      "path": "artifacts/attr_rtg_rcmz/official/governance.png",
+      "sha256": "27fbc95f187b16400e27c7cdd03898800a4591cb232c90c5456e0d4eccdf6e83"
+    },
+    {
+      "bytes": 81703,
+      "path": "artifacts/attr_rtg_rcmz/official/governance.svg",
+      "sha256": "73daa2475a025c34a4d5001d1061c72ecbab5b99b5cbe8e5aefca69b0e2bd59f"
+    },
+    {
+      "bytes": 98063,
+      "path": "artifacts/attr_rtg_rcmz/official/g_vs_c.png",
+      "sha256": "e42497ceff33bdb099b6c7356a1b19e6e3a8d7b2dfc0a99149446db96356332b"
+    },
+    {
+      "bytes": 84435,
+      "path": "artifacts/attr_rtg_rcmz/official/g_vs_c.svg",
+      "sha256": "9994c565a9ca94c5db3f410c6b2723bf56a66aedca761d42cb659a9eb01caeb4"
+    },
+    {
+      "bytes": 90797,
+      "path": "artifacts/attr_rtg_rcmz/official/seed_differences.png",
+      "sha256": "37ae737b9f1aa6b809f137f9f1dcfb503eea70abf76a5ff49bbf00356138be44"
+    },
+    {
+      "bytes": 74412,
+      "path": "artifacts/attr_rtg_rcmz/official/seed_differences.svg",
+      "sha256": "6a0feb3cb1b9f9734ab2448df6fc2c64ec124ee4c03fd4a313a1bfebfdef0424"
+    }
+  ],
+  "prior_rows_sha256": "d0b7f2611528ffbeb6b150e6f98f4d8c68818fd2582c51a81f30bcd755d69902",
+  "recovered_rows_sha256": "50eac02110e7e0af3e12a1bb0d7e9a7da7d1ea7b3b94570e1f2588f5f3dfb3f0",
+  "recovery_lock_sha256": "611282851b42fad136986ce4f8d50d3541d0540358862a9ed69196f4e55c816d",
+  "rows": 66,
+  "schema": "ATTR-RTG-RCMZ-V1-OFFICIAL-METRIC-RECOVERY-RECEIPT",
+  "score_only": true,
+  "status": "COMPLETED",
+  "training_performed": false,
+  "valid_rows": 20
+}

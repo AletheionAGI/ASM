@@ -9,6 +9,7 @@ from typing import Any
 from .constants import ARMS, TRAINING_SEEDS
 from .evaluation_broker import ScorerRefs, freeze_all_arms_then_join_truth
 from .official_data import Origin, TruthCache, training_order
+from .recovery import training_arms
 
 
 def train_and_score_isolated(
@@ -19,6 +20,7 @@ def train_and_score_isolated(
     updates: int,
     batch_size: int,
     device: str,
+    recovered: dict[int, dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Freeze all R/CM/Z/T scores before any calibration/test truth join."""
     import torch
@@ -35,11 +37,32 @@ def train_and_score_isolated(
 
     rows = []
     truth_cache = TruthCache()
+    recovered = recovered or {}
     for seed in TRAINING_SEEDS:
         order = training_order(data["train"], seed)
         refs: dict[str, ScorerRefs] = {}
         metadata: dict[str, tuple[int, float]] = {}
-        for arm in ARMS:
+        if seed in recovered:
+            started = time.monotonic()
+            for arm in ARMS:
+                item = recovered[seed][arm]
+                config_path = (
+                    Path(__file__).resolve().parents[2]
+                    / "configs"
+                    / "attr_rtg_rcmz_v1"
+                    / f"{arm.lower()}_seed{seed}.yaml"
+                )
+                refs[arm] = ScorerRefs(str(config_path), str(item.path))
+                metadata[arm] = (0, started)
+                progress(
+                    {
+                        "phase": "arm-recovered",
+                        "seed": seed,
+                        "arm": arm,
+                        "update": updates,
+                    }
+                )
+        for arm in training_arms(seed, recovered):
             stream = torch.cuda.Stream()
             with _stream_context(torch, stream):
                 config = _authorized_config(arm, seed)

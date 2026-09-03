@@ -195,3 +195,24 @@ def test_candidate_manifest_rehashes_all_anchored_artifacts(tmp_path, monkeypatc
     (tmp_path / artifacts[-1]["path"]).write_text("tampered")
     with pytest.raises(PermissionError, match="wrong size|digest differs"):
         verify_candidate_manifest(tmp_path)
+
+
+def test_renderer_preserves_invalid_null_rows_without_crashing(tmp_path):
+    from attr_rtg_rcmz.rendering import render_summary
+
+    row = {
+        "status": "INVALID",
+        "arm": "R",
+        "seed": 29,
+        "regime": "OOD",
+        "h8_nll": None,
+        "ece": None,
+        "unsafe_selection": None,
+        "safe_service": None,
+        "coverage": None,
+        "abstention": None,
+        "invalid_reason": "fail-closed",
+    }
+    paths = render_summary([row], tmp_path, synthetic=False)
+    assert len(paths) == 13
+    assert all(path.is_file() for path in paths)

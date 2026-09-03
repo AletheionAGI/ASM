@@ -46,6 +46,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--heartbeat-seconds", type=float, default=10.0)
     parser.add_argument("--lock-file", type=Path)
     parser.add_argument("--lock-sha256")
+    parser.add_argument(
+        "--recover-completed",
+        action="store_true",
+        help="reuse complete terminal seed groups declared by --recovery-manifest",
+    )
+    parser.add_argument(
+        "--recovery-manifest",
+        type=Path,
+        help="trusted manifest containing checkpoint paths and expected SHA-256 values",
+    )
     return parser
 
 
@@ -91,6 +101,7 @@ def run_engine(
     *,
     lock: dict[str, object] | None,
     smoke: bool = False,
+    recovery_manifest: Path | None = None,
     stream: object = None,
 ) -> list[Path]:
     """Run the official engine behind progress and render its scalar rows."""
@@ -107,7 +118,12 @@ def run_engine(
         rows = (
             run_smoke_official(output_dir, callback)
             if smoke
-            else run_official(output_dir, callback, lock=lock or {})
+            else run_official(
+                output_dir,
+                callback,
+                lock=lock or {},
+                recovery_manifest=recovery_manifest,
+            )
         )
         paths = render_summary(rows, output_dir, synthetic=smoke)
         for name in ("official_rows.json", "smoke_official_rows.json"):
@@ -143,6 +159,15 @@ def write_tombstone(output_dir: Path, error: BaseException) -> Path:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if bool(args.recover_completed) != bool(args.recovery_manifest):
+        print(
+            "recovery requires both --recover-completed and --recovery-manifest",
+            file=sys.stderr,
+        )
+        return 2
+    if args.recover_completed and not args.official:
+        print("checkpoint recovery is available only in official mode", file=sys.stderr)
+        return 2
     if args.official:
         if args.lock_file is None or args.lock_sha256 is None:
             print(
@@ -156,7 +181,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 2
         lock = {"verified": True, "state": "LOCAL PROTOCOL LOCK", "sha256": digest}
         try:
-            run_engine(args.output_dir, args.heartbeat_seconds, lock=lock)
+            if args.recovery_manifest is not None:
+                from .recovery import archive_previous_run
+
+                if (
+                    args.recovery_manifest.resolve()
+                    == (args.output_dir / "recovery_manifest.json").resolve()
+                ):
+                    raise ValueError(
+                        "recovery input cannot be the generated recovery_manifest.json"
+                    )
+                archive_previous_run(args.output_dir)
+            engine_options: dict[str, object] = {"lock": lock}
+            if args.recovery_manifest is not None:
+                engine_options["recovery_manifest"] = args.recovery_manifest
+            run_engine(args.output_dir, args.heartbeat_seconds, **engine_options)
         except (
             ImportError,
             MemoryError,

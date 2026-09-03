@@ -95,20 +95,41 @@ def summarize(
         "coverage",
         "abstention",
     )
-    sufficient = {name: _episode_sufficient(grouped, name) for name in names}
-    metrics = {name: _fold_episode_sufficient(sufficient[name]) for name in names}
-    return {
-        "status": "VALID",
+    sufficient: dict[str, list[dict[str, float | int]]] = {}
+    unavailable: list[str] = []
+    for name in names:
+        try:
+            sufficient[name] = _episode_sufficient(grouped, name)
+        except RuntimeError:
+            if name != "safe_service":
+                raise
+            unavailable.append(name)
+
+    metrics = {
+        name: _fold_episode_sufficient(sufficient[name]) if name in sufficient else None
+        for name in names
+    }
+    eligible_service, eligible_count, total_count = _eligible_only_safe_service(grouped)
+    result = {
+        "status": "INVALID" if unavailable else "VALID",
         "arm": arm,
         "seed": seed,
         "regime": regime,
         "temperature": temperature,
         "tau": tau,
         **metrics,
+        "safe_service_eligible_only": eligible_service,
+        "safe_service_eligible_fold_count": eligible_count,
+        "safe_service_total_fold_count": total_count,
         "peak_vram_bytes": peak_bytes,
         "elapsed_seconds": elapsed,
         "_sufficient": sufficient,
     }
+    if unavailable:
+        # This text is a stable machine-readable receipt. Do not include the
+        # first missing world/episode, which would make it ordering-dependent.
+        result["invalid_reason"] = "metrics: missing safe_service denominator"
+    return result
 
 
 def invalid_row(
@@ -151,6 +172,28 @@ def invalid_row(
         "peak_vram_bytes": peak_bytes,
         "elapsed_seconds": elapsed,
     }
+
+
+def _eligible_only_safe_service(
+    groups: dict[tuple[int, int], list[dict[str, float]]],
+) -> tuple[float | None, int, int]:
+    rows = []
+    for (world, episode), group_rows in sorted(groups.items()):
+        values = [
+            row["safe_service"]
+            for row in group_rows
+            if math.isfinite(row["safe_service"])
+        ]
+        if values:
+            rows.append(
+                {
+                    "world": world,
+                    "episode": episode,
+                    "value": sum(values) / len(values),
+                }
+            )
+    value = _fold_episode_sufficient(rows) if rows else None
+    return value, len(rows), len(groups)
 
 
 def _episode_sufficient(groups, name: str) -> list[dict[str, float | int]]:

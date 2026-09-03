@@ -1,12 +1,36 @@
 {
-  "agent_started_official_run": false,
-  "document_status": "LOCAL PROTOCOL LOCK",
-  "lock_sha256": "6ed6bd2b39460695a891c27c51cc417453e59eb10ad519660219f84a8cb8950e",
+  "agent_retrained_models": false,
+  "checkpoint_count": 20,
+  "diagnostic_receipt": "docs/review/attr_rtg_rcmz_v1/official_safe_service_diagnostic_receipt_v3.json",
+  "diagnostic_recovery_status": "COMPLETED",
+  "diagnostic_rows_sha256": "e341ee5bb7113d29dab90ecd07f52fbad2d504dd28036ea9730fe36c5c8390bc",
+  "eligible_fold_counts": {
+    "ID": [
+      [
+        128,
+        128
+      ]
+    ],
+    "OOD": [
+      [
+        71,
+        128
+      ]
+    ],
+    "shift": [
+      [
+        103,
+        128
+      ]
+    ]
+  },
+  "gates_use_diagnostic": false,
+  "lock_sha256": "3c48351f130b2134614c925a1c36bba2a90bdf377355d80cead3874cec434d42",
   "lock_verified": true,
-  "official_execution_owner": "USER_IN_OTHER_TERMINAL",
-  "official_execution_status": "NOT_STARTED",
+  "official_execution_status": "COMPUTE_COMPLETE__SAFE_SERVICE_DIAGNOSTIC_RENDERED",
+  "official_safe_service_changed": false,
   "protocol_status": "LOCAL PROTOCOL LOCK",
-  "reseal_scope": "STATUS_ONLY",
-  "schema": "ATTR-RTG-RCMZ-V1-STATUS-V5",
-  "scientific_content_changed": false
+  "schema": "ATTR-RTG-RCMZ-V1-STATUS-V9",
+  "score_only": true,
+  "training_complete": true
 }

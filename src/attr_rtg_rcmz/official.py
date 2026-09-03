@@ -13,7 +13,10 @@ _LOCKED = "LOCAL PROTOCOL LOCK"
 
 
 def run_official(
-    output_dir: Path, progress_callback: Progress | None, lock: Mapping[str, object]
+    output_dir: Path,
+    progress_callback: Progress | None,
+    lock: Mapping[str, object],
+    recovery_manifest: Path | None = None,
 ) -> list[dict[str, object]]:
     """Run the registered CUDA pipeline after the CLI supplies a verified lock."""
     _require_lock(lock)
@@ -21,13 +24,22 @@ def run_official(
 
     prepare_deterministic_environment()
     callback = progress_callback or (lambda event: None)
+    recovered = None
+    if recovery_manifest is not None:
+        from .recovery import validate_recovery_manifest, write_recovery_record
+
+        recovered = validate_recovery_manifest(recovery_manifest)
+        write_recovery_record(Path(output_dir), recovery_manifest, recovered)
+        callback({"phase": "recovery-validated", "recovered_seeds": sorted(recovered)})
     callback({"phase": "generating-registered-worlds"})
     from .official_data import generate_registered_origins
     from .official_training import train_and_score
 
     data = generate_registered_origins(miniature=False, lock=dict(lock))
     callback({"phase": "training", "total_updates": 2_000})
-    metric_rows = train_and_score(data, Path(output_dir), callback, lock=dict(lock))
+    metric_rows = train_and_score(
+        data, Path(output_dir), callback, lock=dict(lock), recovered=recovered
+    )
     rows = metric_rows + _contrast_rows(metric_rows)
     from .official_contrasts import strip_sufficient
 

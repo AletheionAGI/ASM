@@ -1,0 +1,106 @@
+{
+  "execution_lock_sha256": "3d640d25beba627c21b2088b40e9aa4e650c9fae89d9237f9fe4946f1ddcb6b2",
+  "invalid_contrasts": 6,
+  "invalid_rows": 46,
+  "official_rows_sha256": "d0b7f2611528ffbeb6b150e6f98f4d8c68818fd2582c51a81f30bcd755d69902",
+  "outputs": [
+    {
+      "bytes": 21556,
+      "path": "artifacts/attr_rtg_rcmz/official/official_rows.json",
+      "sha256": "d0b7f2611528ffbeb6b150e6f98f4d8c68818fd2582c51a81f30bcd755d69902"
+    },
+    {
+      "bytes": 29996,
+      "path": "artifacts/attr_rtg_rcmz/official/manifest.json",
+      "sha256": "00a24ec28df386ff6fde885468b9b23796337a88667d21b0412633bd912da372"
+    },
+    {
+      "bytes": 9842,
+      "path": "artifacts/attr_rtg_rcmz/official/manifest.csv",
+      "sha256": "20b154e270ef8690c7b4381a464a8869c6374371333fa20ed7679839d24840c7"
+    },
+    {
+      "bytes": 330112,
+      "path": "artifacts/attr_rtg_rcmz/official/summary.html",
+      "sha256": "6e3ef1cc68489b14c65f4799b067be0cabacf3c9a06b1fd5eccc077c6b4346d8"
+    },
+    {
+      "bytes": 9869,
+      "path": "artifacts/attr_rtg_rcmz/official/summary.png",
+      "sha256": "0dfe2e8a9450a1c7354105e9dfc70121b4afe76435a3cc1633d0ce8212d5c3ac"
+    },
+    {
+      "bytes": 3538,
+      "path": "artifacts/attr_rtg_rcmz/official/summary.svg",
+      "sha256": "5d1b2cdeb223a0da33256c64099b8192b9ae0e2d0196c64b1f5bd37b43ba3048"
+    },
+    {
+      "bytes": 64685,
+      "path": "artifacts/attr_rtg_rcmz/official/architecture_quality.png",
+      "sha256": "8b7c41d77247abb354d26e6b968f40c15f8fa285fac0a8f695d1df8124fdf765"
+    },
+    {
+      "bytes": 59121,
+      "path": "artifacts/attr_rtg_rcmz/official/architecture_quality.svg",
+      "sha256": "6d4b90f610bb9a02a3ce5e6c3ac19171f35261e62f8288b17e43a6af8ab1801b"
+    },
+    {
+      "bytes": 94652,
+      "path": "artifacts/attr_rtg_rcmz/official/governance.png",
+      "sha256": "e25325f98099856cfca2e70bad8191198d36fda907706ed3a00f57ab2ccb3eba"
+    },
+    {
+      "bytes": 76726,
+      "path": "artifacts/attr_rtg_rcmz/official/governance.svg",
+      "sha256": "a70289f6049e27945de20c007a19b8576701584e2b8af2533ff12ec13a018b3c"
+    },
+    {
+      "bytes": 95557,
+      "path": "artifacts/attr_rtg_rcmz/official/g_vs_c.png",
+      "sha256": "41a056374f60f6ae0095bc839efab120dafffe13a08b0116b5140fe622f15752"
+    },
+    {
+      "bytes": 79458,
+      "path": "artifacts/attr_rtg_rcmz/official/g_vs_c.svg",
+      "sha256": "94862a7ae3e8fd825b42542323562cdd1b3751136b10f2758a677e749f4e5818"
+    },
+    {
+      "bytes": 90796,
+      "path": "artifacts/attr_rtg_rcmz/official/seed_differences.png",
+      "sha256": "09795c64033f5ea76233c1131cbb388aa23fdcc21cb47f177c8ef39539a2328b"
+    },
+    {
+      "bytes": 72299,
+      "path": "artifacts/attr_rtg_rcmz/official/seed_differences.svg",
+      "sha256": "7884daaba461244dd9c7ac6e805d6fd04153b47f096f7554cf5ad21e7816fa7e"
+    }
+  ],
+  "postprocessing_lock_sha256": "2af28e2ccf1c8c707e7bd71a9f765efc01232ba4644828466054f0bd116f317d",
+  "rows": 66,
+  "schema": "ATTR-RTG-RCMZ-V1-OFFICIAL-RESULT-RECEIPT",
+  "scientific_content_changed_by_postprocessing": false,
+  "status": "FAIL_CLOSED_RELEASE_RENDERED",
+  "training_completed": {
+    "arms": [
+      "R",
+      "CM",
+      "Z",
+      "T"
+    ],
+    "checkpoint_count": 20,
+    "seeds": [
+      29,
+      43,
+      71,
+      89,
+      107
+    ],
+    "updates_each": 2000
+  },
+  "valid_arm_seed_regimes": {
+    "ID": 20,
+    "OOD": 0,
+    "shift": 0
+  },
+  "valid_rows": 20
+}

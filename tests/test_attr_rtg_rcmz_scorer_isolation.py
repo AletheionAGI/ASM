@@ -10,6 +10,7 @@ from attr_rtg_rcmz.scorer import (
     MESSAGE_KEYS,
     ScorerRequest,
     ScorerResponse,
+    _immutable_floats,
     serialize_message,
 )
 
@@ -69,3 +70,15 @@ def test_broker_freezes_all_four_arm_scores_before_truth(monkeypatch):
     assert events == ["R", "CM", "Z", "T", "truth"]
     assert tuple(item.arm for item in result.scores) == ARMS
     assert result.identities == (origins[0].identity,)
+
+
+def test_scorer_freezes_two_and_three_dimensional_outputs_without_flattening():
+    logits = _immutable_floats(torch.zeros((2, 6)))
+    common = _immutable_floats(torch.zeros((2, 6, 24)))
+    native = _immutable_floats(torch.zeros((2, 6, 28)))
+    assert len(logits) == 2 and len(logits[0]) == 6
+    assert len(common) == 2 and len(common[0]) == 6 and len(common[0][0]) == 24
+    assert len(native) == 2 and len(native[0]) == 6 and len(native[0][0]) == 28
+    assert isinstance(common[0], tuple) and isinstance(common[0][0][0], float)
+    with pytest.raises(TypeError, match="at least one dimension"):
+        _immutable_floats(torch.tensor(1.0))

@@ -32,6 +32,7 @@ def train_and_score(
     batch_size: int = 64,
     miniature: bool = False,
     lock: dict[str, object] | None = None,
+    recovered: dict[int, dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     if not miniature:
         from .lock_guard import verify_runtime_lock
@@ -55,6 +56,7 @@ def train_and_score(
             updates=updates,
             batch_size=batch_size,
             device=device,
+            recovered=recovered,
         )
     rows = []
     truth_cache = TruthCache()
