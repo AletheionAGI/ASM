@@ -1,3 +1,58 @@
+# 🚨 CRITICAL SAFETY WARNING — DO NOT SCALE OR DEPLOY ASM
+
+> [!CAUTION]
+> **DO NOT SCALE THESE MODELS. DO NOT DEPLOY THEM IN PRODUCTION, AUTONOMOUS
+> AGENTS, OR SAFETY-CRITICAL SYSTEMS.** ASM is experimental, unaligned research
+> code. It has not been shown to be safe, governable, controllable, or reliably
+> interpretable. Until independent evidence demonstrates otherwise, every ASM
+> variant must be treated as **difficult to govern and a potential security
+> risk**.
+
+The completed registered [ATTR-RTG result](docs/benchmarks/attr_rtg/README.md)
+did **not** demonstrate effective governance. Only `Transformer.RTG1-Z` passed;
+all registered RTG2 governance gates and RTG3 shift/OOD generalization gates
+failed. The tested generative governor `G` reduced unsafe outcomes by exactly
+**0%** in that benchmark. This result was limited to ASM-X and does not prove
+that every ASM variant is unsafe, but it provides **no basis for claiming that
+ASM is safe to scale or deploy**. The later ATTR-RTG-RCMZ evidence is also
+local-only, single-administrator, and not independently attested. All 40
+shift/OOD governance cells and all six model contrasts are invalid; this is not
+a safety certification.
+
+ASM models compress history into a persistent recurrent state. Some variants
+also use writable selective or fast-weight associative memory. Learned states,
+directions, gates, metrics, and risk scores are not readable intentions, policy
+guarantees, or security boundaries. Persistent state and memory can make
+behavior, retained influence, and failure under distribution shift difficult to
+inspect, remove, contain, or control. Assume unresolved risks including prompt
+injection, state or memory poisoning, unintended retention or cross-session
+influence, unsafe outputs, and unexpected behavior outside the training
+distribution.
+
+**Do not use ASM** for autonomous tool execution, privileged access, processing
+secrets or sensitive personal data, security decisions, critical
+infrastructure, weapons, surveillance, or medical, legal, financial, or other
+high-impact decisions. Research, if undertaken at all, should use isolated
+sandboxes, least privilege, no embedded secrets, strict state reset and
+per-session isolation, input/output controls, resource limits, continuous
+monitoring, adversarial evaluation, human approval for every consequential
+action, and an independent shutdown path. These precautions reduce risk; they
+do not establish safety.
+
+**Downloading, copying, training, fine-tuning, scaling, modifying, distributing,
+integrating, or using any ASM code, weights, checkpoints, derivatives, or
+outputs is entirely at your own decision and risk. You are solely responsible
+for threat modeling, privacy, security, access control, legal and regulatory
+compliance, deployment decisions, monitoring, incident response, harms, and all
+other consequences of such activity.** To the maximum extent permitted by
+applicable law, the author, copyright holder, maintainers, and contributors
+provide no warranty and accept no liability arising from such activity. Nothing
+in this repository is an authorization, recommendation, safety approval, or
+fitness statement. This notice supplements, and does not replace, the warranty
+and liability terms in the [license](LICENSE).
+
+---
+
 # ASM — Aletheion State Models
 
 **An attention-free causal state-model research family, derived from DRM and selected by ablations and scaling evidence.**

@@ -1,3 +1,62 @@
+# 🚨 AVISO CRÍTICO DE SEGURANÇA — NÃO ESCALE NEM IMPLANTE O ASM
+
+> [!CAUTION]
+> **NÃO ESCALE ESTES MODELOS. NÃO OS COLOQUE EM PRODUÇÃO, AGENTES AUTÔNOMOS OU
+> SISTEMAS CRÍTICOS.** O ASM é código experimental de pesquisa, sem alinhamento.
+> Não foi demonstrado que ele seja seguro, governável, controlável ou
+> interpretável de forma confiável. Até que evidência independente demonstre o
+> contrário, toda variante ASM deve ser tratada como **difícil de governar e um
+> possível risco de segurança**.
+
+O [resultado ATTR-RTG registrado](docs/benchmarks/attr_rtg/README.md) e concluído
+**não** demonstrou governança eficaz. Apenas `Transformer.RTG1-Z` passou; todos
+os gates registrados de governança RTG2 e de generalização RTG3 em shift/OOD
+falharam. O governor gerativo `G` testado reduziu outcomes inseguros em
+exatamente **0%** nesse benchmark. O resultado foi limitado ao ASM-X e não prova
+que toda variante ASM seja insegura, mas **não fornece base para afirmar que o ASM é seguro para escalar ou
+implantar**. A evidência ATTR-RTG-RCMZ posterior
+também é local, tem um único administrador e não foi atestada de forma
+independente. Todas as 40 células de governança shift/OOD e todos os seis
+contrastes entre modelos são inválidos; isso não é uma certificação de
+segurança.
+
+Os modelos ASM comprimem o histórico em um estado recorrente persistente.
+Algumas variantes também usam memória associativa gravável, seletiva ou de
+fast weights. Estados, direções, gates, métricas e escores de risco aprendidos
+não são intenções legíveis, garantias de política ou barreiras de segurança. O
+estado e a memória persistentes podem tornar o comportamento, influências
+retidas e falhas sob mudança de distribuição difíceis de inspecionar, remover,
+conter ou controlar. Presuma riscos ainda não resolvidos, incluindo prompt
+injection, envenenamento de estado ou memória, retenção indevida ou influência
+entre sessões, saídas inseguras e comportamento inesperado fora da distribuição
+de treino.
+
+**Não use o ASM** para execução autônoma de ferramentas, acesso privilegiado,
+processamento de segredos ou dados pessoais sensíveis, decisões de segurança,
+infraestrutura crítica, armas, vigilância ou decisões médicas, jurídicas,
+financeiras ou de outro alto impacto. Qualquer pesquisa deve ocorrer, se ocorrer,
+em sandbox isolado, com privilégio mínimo, sem segredos embutidos, reset estrito
+do estado e isolamento por sessão, controles de entrada e saída, limites de
+recursos, monitoramento contínuo, avaliação adversarial, aprovação humana para
+toda ação com consequência e um mecanismo independente de desligamento. Essas
+precauções reduzem riscos; elas não demonstram segurança.
+
+**Baixar, copiar, treinar, fazer fine-tuning, escalar, modificar, distribuir,
+integrar ou usar qualquer código, peso, checkpoint, derivado ou saída do ASM é
+uma decisão tomada inteiramente por conta e risco de quem o fizer. Essa pessoa
+ou entidade assume responsabilidade exclusiva por threat modeling, privacidade,
+segurança, controle de acesso, conformidade legal e regulatória, decisões de
+implantação, monitoramento, resposta a incidentes, danos e todas as demais
+consequências dessas atividades.** No limite máximo permitido pela lei
+aplicável, o autor, titular dos direitos autorais, mantenedores e contribuidores
+não fornecem garantias nem assumem responsabilidade decorrente dessas
+atividades. Nada neste repositório constitui autorização, recomendação,
+aprovação de segurança ou declaração de adequação para qualquer finalidade. Este
+aviso complementa, e não substitui, os termos de garantia e responsabilidade da
+[licença](LICENSE).
+
+---
+
 # ASM — Aletheion State Models
 
 **Uma família experimental de modelos de estado causais sem attention, derivada
